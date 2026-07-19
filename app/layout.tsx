@@ -11,6 +11,7 @@ import './styles/stage-polish.css';
 import './styles/stage-integration.css';
 import './styles/gallery.css';
 import './styles/abyssal-overlays.css';
+import './styles/kelp-palette.css';
 
 export const metadata: Metadata = {
   title: 'Source Vault',
@@ -21,7 +22,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#061827',
+  themeColor: '#0B1F1A',
   colorScheme: 'dark',
 };
 
