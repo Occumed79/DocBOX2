@@ -54,6 +54,24 @@ function addressLine(address?: SubmissionNote['address']) {
   return [address.street1, address.street2, address.city, address.state, address.zip].filter(Boolean).join(', ') || '—';
 }
 
+function handoffPacket(submission: SubmissionNote, services: ServiceRow[]) {
+  return [
+    `Provider: ${submission.providerName || ''}`,
+    `Specialty: ${submission.specialty || ''}`,
+    `Pricing reference: ${submission.reference || ''}`,
+    `Pricing document: ${submission.documentNumber || ''}`,
+    `Contact: ${submission.contactName || ''}`,
+    `Email: ${submission.email || ''}`,
+    `Phone: ${submission.phone || ''}`,
+    `Address: ${addressLine(submission.address)}`,
+    `Billing terms: ${submission.billingTerms || ''}`,
+    '',
+    'SERVICES / AGREED PRICING',
+    ...services.map(row => `${row.component || ''} — ${row.price || ''}`),
+    ...(submission.notes ? ['', 'PROVIDER NOTES', submission.notes] : []),
+  ].join('\n');
+}
+
 export default function ProviderOnboardingReview({ file, onUpdate, onError }: {
   file: VaultFile;
   onUpdate: (file: VaultFile) => void;
@@ -61,6 +79,7 @@ export default function ProviderOnboardingReview({ file, onUpdate, onError }: {
 }) {
   const submission = useMemo(() => parseSubmission(file.notes || ''), [file.notes]);
   const [pending, setPending] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!file.tags?.includes('provider-onboarding') || !submission) return null;
 
@@ -99,6 +118,16 @@ export default function ProviderOnboardingReview({ file, onUpdate, onError }: {
       onError(error instanceof Error ? error.message : 'Could not update the provider review status.');
     } finally {
       setPending(false);
+    }
+  };
+
+  const copyForForms = async () => {
+    try {
+      await navigator.clipboard.writeText(handoffPacket(submission, services));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      onError('Could not copy the provider handoff packet to the clipboard.');
     }
   };
 
@@ -144,7 +173,10 @@ export default function ProviderOnboardingReview({ file, onUpdate, onError }: {
           <span>NEXT ACTION</span>
           <strong>Create the secure Provider Service Agreement invitation in Occu-Med Forms.</strong>
           <p>The pricing response stays in DocBOX as the review record; the binding agreement remains on the Forms audit/signing lifecycle. The Forms admin guard still requires an authorized Occu-Med session.</p>
-          <a href={FORMS_SERVICE_AGREEMENT_URL} target="_blank" rel="noreferrer">Open Service Agreement composer ↗</a>
+          <div className={styles.handoffActions}>
+            <button type="button" onClick={() => void copyForForms()}>{copied ? 'Handoff details copied ✓' : 'Copy provider + pricing details'}</button>
+            <a href={FORMS_SERVICE_AGREEMENT_URL} target="_blank" rel="noreferrer">Open Service Agreement composer ↗</a>
+          </div>
         </div>
       ) : null}
     </section>
