@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } fr
 import ResearchArchive from './ResearchArchive';
 import ProblemScene from './ProblemScene';
 import PricingAgreementBuilder from './PricingAgreementBuilder';
+import morphStyles from './ProviderExperienceMorphs.module.css';
 import styles from './ProviderExperience.module.css';
 
 const PHOTOS = {
@@ -229,7 +230,6 @@ export default function ProviderExperience() {
   const activeSpecialty = SPECIALTIES[specialty];
   const history = HISTORY[activeHistory];
   const process = PROCESS[activeProcess];
-  const clinical = CLINICAL[activeClinical];
 
   return (
     <main ref={rootRef} className={styles.root}>
@@ -320,7 +320,7 @@ export default function ProviderExperience() {
             {PROCESS.map((item, index) => (
               <Image
                 key={item.id}
-                className={`${styles.processImage} ${index === activeProcess ? styles.processImageActive : ''}`}
+                className={`${styles.processImage} ${morphStyles.processLayer} ${index === activeProcess ? morphStyles.processLayerActive : ''}`}
                 src={item.image}
                 alt={item.imageAlt}
                 fill
@@ -349,7 +349,7 @@ export default function ProviderExperience() {
             {CLINICAL.map((item, index) => (
               <Image
                 key={item.label}
-                className={`${styles.clinicalImage} ${index === activeClinical ? styles.clinicalImageActive : ''}`}
+                className={`${styles.clinicalImage} ${morphStyles.clinicalLayer} ${index === activeClinical ? morphStyles.clinicalLayerActive : ''}`}
                 src={item.image}
                 alt={item.alt}
                 fill
