@@ -45,9 +45,24 @@ function escapeHtml(value: string) {
   }[character] ?? character));
 }
 
+function validEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function parseRate(value: string) {
+  const clean = value.trim().replace(/^\$/, '').replace(/,/g, '');
+  if (!/^\d+(?:\.\d{1,2})?$/.test(clean)) return null;
+  const number = Number(clean);
+  return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function validRate(value: string) {
+  return parseRate(value) !== null;
+}
+
 function displayRate(value: string) {
-  const number = Number(value.replace(/[^0-9.-]/g, ''));
-  return Number.isFinite(number) && value.trim() ? `$${number.toFixed(2)}` : value.trim() || '—';
+  const number = parseRate(value);
+  return number !== null ? `$${number.toFixed(2)}` : value.trim() || '—';
 }
 
 export default function PricingAgreementBuilder({ services, specialty }: Props) {
@@ -127,8 +142,8 @@ export default function PricingAgreementBuilder({ services, specialty }: Props) 
   }, [services, locations]);
 
   const completedRateCount = useMemo(() => {
-    if (sameRates) return services.filter(service => sharedRates[service]?.trim()).length;
-    return locations.reduce((count, location) => count + services.filter(service => locationRates[location]?.[service]?.trim()).length, 0);
+    if (sameRates) return services.filter(service => validRate(sharedRates[service] ?? '')).length;
+    return locations.reduce((count, location) => count + services.filter(service => validRate(locationRates[location]?.[service] ?? '')).length, 0);
   }, [sameRates, services, sharedRates, locations, locationRates]);
 
   const completedLocationCount = useMemo(() => locations.filter(location => {
@@ -137,7 +152,9 @@ export default function PricingAgreementBuilder({ services, specialty }: Props) 
   }).length, [locations, locationDetails]);
 
   const requiredRateCount = sameRates ? services.length : services.length * locations.length;
-  const identityComplete = Boolean(facilityName.trim() && contactName.trim() && contactEmail.trim());
+  const contactEmailValid = validEmail(contactEmail);
+  const billingEmailValid = !billingEmail.trim() || validEmail(billingEmail);
+  const identityComplete = Boolean(facilityName.trim() && contactName.trim() && contactEmailValid && billingEmailValid);
   const locationsComplete = completedLocationCount === locations.length;
   const ratesComplete = services.length > 0 && completedRateCount === requiredRateCount;
   const ready = identityComplete && locationsComplete && ratesComplete;
@@ -200,6 +217,7 @@ export default function PricingAgreementBuilder({ services, specialty }: Props) 
   };
 
   const printAgreement = () => {
+    if (!ready) return;
     const popup = window.open('', '_blank', 'width=980,height=900');
     if (!popup) return;
 
@@ -276,9 +294,9 @@ export default function PricingAgreementBuilder({ services, specialty }: Props) 
 
           <div className={styles.contactGrid}>
             <label><span>Primary contact</span><input value={contactName} onChange={event => setContactName(event.target.value)} placeholder="Contact name" /></label>
-            <label><span>Contact email</span><input type="email" value={contactEmail} onChange={event => setContactEmail(event.target.value)} placeholder="name@facility.com" /></label>
+            <label><span>Contact email</span><input type="email" aria-invalid={Boolean(contactEmail.trim() && !contactEmailValid)} value={contactEmail} onChange={event => setContactEmail(event.target.value)} placeholder="name@facility.com" /></label>
             <label><span>Contact phone</span><input type="tel" value={contactPhone} onChange={event => setContactPhone(event.target.value)} placeholder="Phone number" /></label>
-            <label><span>Billing email</span><input type="email" value={billingEmail} onChange={event => setBillingEmail(event.target.value)} placeholder="Optional if same as contact" /></label>
+            <label><span>Billing email</span><input type="email" aria-invalid={Boolean(billingEmail.trim() && !billingEmailValid)} value={billingEmail} onChange={event => setBillingEmail(event.target.value)} placeholder="Optional if same as contact" /></label>
           </div>
 
           <div className={styles.locations}>
@@ -319,24 +337,30 @@ export default function PricingAgreementBuilder({ services, specialty }: Props) 
           {sameRates ? (
             <div className={styles.rateTable}>
               <div className={styles.tableHead}><span>Service</span><span>Self-pay rate</span></div>
-              {services.map(service => (
-                <label key={service}>
-                  <strong>{service}</strong>
-                  <span className={styles.money}><i>$</i><input inputMode="decimal" value={sharedRates[service] ?? ''} onChange={event => updateSharedRate(service, event.target.value)} placeholder="0.00" /></span>
-                </label>
-              ))}
+              {services.map(service => {
+                const value = sharedRates[service] ?? '';
+                return (
+                  <label key={service}>
+                    <strong>{service}</strong>
+                    <span className={styles.money}><i>$</i><input inputMode="decimal" aria-invalid={Boolean(value.trim() && !validRate(value))} value={value} onChange={event => updateSharedRate(service, event.target.value)} placeholder="0.00" /></span>
+                  </label>
+                );
+              })}
             </div>
           ) : (
             <div className={styles.locationTables}>
               {locations.map(location => (
                 <div key={location} className={styles.locationTable}>
                   <div className={styles.locationTitle}><span>LOCATION</span><h4>{location}</h4></div>
-                  {services.map(service => (
-                    <label key={service}>
-                      <strong>{service}</strong>
-                      <span className={styles.money}><i>$</i><input inputMode="decimal" value={locationRates[location]?.[service] ?? ''} onChange={event => updateLocationRate(location, service, event.target.value)} placeholder="0.00" /></span>
-                    </label>
-                  ))}
+                  {services.map(service => {
+                    const value = locationRates[location]?.[service] ?? '';
+                    return (
+                      <label key={service}>
+                        <strong>{service}</strong>
+                        <span className={styles.money}><i>$</i><input inputMode="decimal" aria-invalid={Boolean(value.trim() && !validRate(value))} value={value} onChange={event => updateLocationRate(location, service, event.target.value)} placeholder="0.00" /></span>
+                      </label>
+                    );
+                  })}
                 </div>
               ))}
             </div>
@@ -349,9 +373,9 @@ export default function PricingAgreementBuilder({ services, specialty }: Props) 
           </div>
 
           <div className={styles.readiness}>
-            <span className={identityComplete ? styles.readyItem : ''}>01 Facility &amp; contact</span>
+            <span className={identityComplete ? styles.readyItem : ''}>01 Facility &amp; valid contact</span>
             <span className={locationsComplete ? styles.readyItem : ''}>02 Location addresses {completedLocationCount}/{locations.length}</span>
-            <span className={ratesComplete ? styles.readyItem : ''}>03 Rates {completedRateCount}/{requiredRateCount}</span>
+            <span className={ratesComplete ? styles.readyItem : ''}>03 Valid rates {completedRateCount}/{requiredRateCount}</span>
           </div>
 
           <div className={styles.progressRow}>
