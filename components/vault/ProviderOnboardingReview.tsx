@@ -27,6 +27,8 @@ type SubmissionNote = {
 
 type ReviewStatus = 'submitted' | 'in-review' | 'ready-for-forms' | 'declined';
 
+const FORMS_SERVICE_AGREEMENT_URL = 'https://occu-med-forms.onrender.com/admin/documents/new/service-agreement';
+
 const STATUS_LABELS: Record<ReviewStatus, string> = {
   submitted: 'Submitted',
   'in-review': 'In review',
@@ -138,7 +140,12 @@ export default function ProviderOnboardingReview({ file, onUpdate, onError }: {
       </div>
 
       {status === 'ready-for-forms' ? (
-        <div className={styles.nextStep}><span>NEXT ACTION</span><strong>Create the secure Provider Service Agreement invitation in Occu-Med Forms.</strong><p>The pricing response stays in DocBOX as the review record; the binding agreement remains on the Forms audit/signing lifecycle.</p></div>
+        <div className={styles.nextStep}>
+          <span>NEXT ACTION</span>
+          <strong>Create the secure Provider Service Agreement invitation in Occu-Med Forms.</strong>
+          <p>The pricing response stays in DocBOX as the review record; the binding agreement remains on the Forms audit/signing lifecycle. The Forms admin guard still requires an authorized Occu-Med session.</p>
+          <a href={FORMS_SERVICE_AGREEMENT_URL} target="_blank" rel="noreferrer">Open Service Agreement composer ↗</a>
+        </div>
       ) : null}
     </section>
   );
