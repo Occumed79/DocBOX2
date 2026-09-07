@@ -9,7 +9,7 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,6 +22,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+
+      - name: Install Chromium for browser QA
+        run: npx playwright install --with-deps chromium
 
       - name: Typecheck
         run: npm run typecheck
@@ -60,3 +63,6 @@ jobs:
             http://127.0.0.1:3000/api/provider-onboarding/submit)
           test "$STATUS" = "400"
           grep -q 'pricing proposals only' /tmp/provider-submit-response.json
+
+      - name: Browser-level cinematic and onboarding tests
+        run: npm run test:e2e
