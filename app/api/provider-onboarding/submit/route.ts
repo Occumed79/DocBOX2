@@ -50,6 +50,7 @@ type SubmissionBody = {
 };
 
 type RateEntry = { count: number; resetAt: number };
+type ExistingSubmission = { id: string; notes: string };
 
 declare global {
   // eslint-disable-next-line no-var
@@ -112,6 +113,32 @@ async function onboardingFolderId() {
   );
   if (!created[0]?.id) throw new Error('Could not create the provider onboarding folder.');
   return created[0].id;
+}
+
+function referenceFromNotes(notes: string) {
+  try {
+    const parsed = JSON.parse(notes) as { reference?: unknown };
+    return typeof parsed.reference === 'string' ? parsed.reference : '';
+  } catch {
+    return '';
+  }
+}
+
+async function duplicateSubmission(folderId: string, documentTag: string) {
+  if (!documentTag) return null;
+  const existing = await query<ExistingSubmission>(
+    `SELECT id, notes
+       FROM sv_files
+      WHERE folder_id = $1
+        AND is_archived = FALSE
+        AND tags @> ARRAY['provider-onboarding', $2]::text[]
+      ORDER BY upload_date DESC
+      LIMIT 1`,
+    [folderId, documentTag],
+  );
+  if (!existing[0]) return null;
+  const existingReference = referenceFromNotes(existing[0].notes);
+  return existingReference ? { id: existing[0].id, reference: existingReference } : null;
 }
 
 export async function POST(request: Request) {
@@ -185,10 +212,23 @@ export async function POST(request: Request) {
     return Response.json({ error: 'The generated PDF is invalid or too large.' }, { status: 400 });
   }
 
+  const folderId = await onboardingFolderId();
+  const documentTagValue = safeTag(documentNumber);
+  const documentTag = documentTagValue ? `document-${documentTagValue}` : '';
+  const duplicate = await duplicateSubmission(folderId, documentTag);
+  if (duplicate) {
+    return Response.json({
+      ok: true,
+      duplicate: true,
+      reference: duplicate.reference,
+      fileId: duplicate.id,
+      nextStep: 'This pricing response was already received. Occu-Med will review the existing submission before issuing any final Provider Service Agreement.',
+    });
+  }
+
   const submissionReference = reference();
   const originalName = `${submissionReference}-${providerName.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 80) || 'provider'}.pdf`;
   const storage = await uploadToStorage(pdf, originalName, 'application/pdf');
-  const folderId = await onboardingFolderId();
 
   const sanitized = {
     reference: submissionReference,
@@ -214,6 +254,7 @@ export async function POST(request: Request) {
 
   const extractedText = [
     `Provider onboarding pricing submission ${submissionReference}`,
+    documentNumber ? `Document: ${documentNumber}` : '',
     `Provider: ${providerName}`,
     `Specialty: ${specialty}`,
     `Contact: ${contactName} <${email}> ${phone}`,
@@ -224,7 +265,13 @@ export async function POST(request: Request) {
   ].filter(Boolean).join('\n');
 
   const specialtyTag = safeTag(specialty);
-  const tags = ['provider-onboarding', 'pricing-proposal', 'status-submitted', ...(specialtyTag ? [`specialty-${specialtyTag}`] : [])];
+  const tags = [
+    'provider-onboarding',
+    'pricing-proposal',
+    'status-submitted',
+    ...(specialtyTag ? [`specialty-${specialtyTag}`] : []),
+    ...(documentTag ? [documentTag] : []),
+  ];
 
   const rows = await query<{ id: string }>(
     `INSERT INTO sv_files
@@ -246,6 +293,7 @@ export async function POST(request: Request) {
 
   return Response.json({
     ok: true,
+    duplicate: false,
     reference: submissionReference,
     fileId: rows[0]?.id || null,
     nextStep: 'Occu-Med will review the pricing response before issuing any final Provider Service Agreement.',
