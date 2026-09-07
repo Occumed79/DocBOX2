@@ -37,7 +37,7 @@ function handoffSection() {
 export default function ChapterMorph() {
   const [nextChapter, setNextChapter] = useState('');
   const [morph, setMorph] = useState(0);
-  const [tone, setTone] = useState(TONES[0]);
+  const [tone, setTone] = useState<string>(TONES[0]);
 
   useEffect(() => {
     let frame = 0;
