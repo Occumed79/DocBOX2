@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './CinematicContinuity.module.css';
 
-const CHAPTERS = ['Origin', 'History', 'Method', 'Referral', 'Clinical', 'Work', 'Network'] as const;
+const CHAPTERS = ['Origin', 'History', 'Archive', 'Problem', 'Method', 'Referral', 'Clinical', 'Work', 'Network'] as const;
 
 type AutoKey = 'history' | 'process' | 'clinical' | 'workforce' | 'values';
 
@@ -62,7 +62,7 @@ export default function CinematicContinuity() {
           const image = section.querySelector<HTMLImageElement>('img');
           if (image) {
             const drift = (p - 0.5) * (index === 0 ? 34 : 52);
-            const scale = 1.035 + p * (index === 6 ? 0.13 : 0.075);
+            const scale = 1.035 + p * (index === 8 ? 0.13 : 0.075);
             image.style.animation = 'none';
             image.style.willChange = 'transform, filter';
             image.style.transform = `translate3d(0, ${drift.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
@@ -77,9 +77,9 @@ export default function CinematicContinuity() {
         }
 
         if (index === 1) clickIndexedButton('history', section, Math.min(4, Math.floor(clamp((p - 0.05) / 0.9) * 5)));
-        if (index === 3) clickIndexedButton('process', section, Math.min(6, Math.floor(clamp((p - 0.03) / 0.94) * 7)));
-        if (index === 4) clickIndexedButton('clinical', section, Math.min(4, Math.floor(clamp((p - 0.04) / 0.92) * 5)));
-        if (index === 5) clickIndexedButton('workforce', section, p < 0.52 ? 0 : 1);
+        if (index === 5) clickIndexedButton('process', section, Math.min(6, Math.floor(clamp((p - 0.03) / 0.94) * 7)));
+        if (index === 6) clickIndexedButton('clinical', section, Math.min(4, Math.floor(clamp((p - 0.04) / 0.92) * 5)));
+        if (index === 7) clickIndexedButton('workforce', section, p < 0.52 ? 0 : 1);
       });
 
       const valueSection = Array.from(document.querySelectorAll<HTMLElement>('section')).find(section =>
@@ -115,6 +115,14 @@ export default function CinematicContinuity() {
 
   return (
     <>
+      <style>{`
+        html { scroll-behavior: smooth; }
+        section[data-scrub] { isolation: isolate; }
+        @media (min-width: 901px) {
+          section[data-scrub] { min-height: 112vh; }
+          section[data-scrub] > * { backface-visibility: hidden; }
+        }
+      `}</style>
       <div className={styles.progress} aria-hidden="true"><i style={{ transform: `scaleX(${overallProgress})` }} /></div>
       <nav className={styles.chapterNav} aria-label="Experience chapters">
         {CHAPTERS.map((chapter, index) => (
