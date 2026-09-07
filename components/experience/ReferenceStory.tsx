@@ -129,8 +129,8 @@ export default function ReferenceStory() {
               key={i}
               style={{
                 '--i': i,
-                '--radius': `${120 + (i % 6) * 38}px`,
-                '--alpha': 0.18 + (i % 4) * 0.09,
+                transform: `rotate(${i * 10}deg) translateX(${120 + (i % 6) * 38}px)`,
+                opacity: 0.18 + (i % 4) * 0.09,
               } as React.CSSProperties}
             />
           ))}
