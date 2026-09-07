@@ -1,0 +1,99 @@
+.morph {
+  --morph: 0;
+  --morph-tone: 91 178 221;
+  position: fixed;
+  inset: 0;
+  z-index: 106;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: var(--morph);
+}
+
+.bladeA,
+.bladeB {
+  position: absolute;
+  top: -16vh;
+  bottom: -16vh;
+  width: 64vw;
+  background:
+    linear-gradient(135deg, rgb(var(--morph-tone) / .13), transparent 46%),
+    linear-gradient(180deg, rgba(3,12,18,.76), rgba(5,19,28,.58));
+  backdrop-filter: blur(calc(var(--morph) * 12px));
+  box-shadow: 0 0 80px rgba(0,0,0,.2);
+  will-change: transform;
+}
+
+.bladeA {
+  left: -15vw;
+  clip-path: polygon(0 0, 78% 0, 100% 100%, 0 100%);
+  transform: translate3d(calc((1 - var(--morph)) * -82%), 0, 0) rotate(-2deg);
+}
+
+.bladeB {
+  right: -15vw;
+  clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%);
+  transform: translate3d(calc((1 - var(--morph)) * 82%), 0, 0) rotate(2deg);
+}
+
+.iris {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16vw;
+  height: 16vw;
+  min-width: 150px;
+  min-height: 150px;
+  border-radius: 50%;
+  transform: translate(-50%,-50%) scale(calc(.4 + var(--morph) * 4.6));
+  border: 1px solid rgb(var(--morph-tone) / .18);
+  box-shadow: 0 0 80px rgb(var(--morph-tone) / .08), inset 0 0 70px rgb(var(--morph-tone) / .04);
+  opacity: calc(var(--morph) * .75);
+}
+
+.iris i {
+  position: absolute;
+  border-radius: inherit;
+  border: 1px solid rgb(var(--morph-tone) / .12);
+}
+
+.iris i:first-child { inset: 12%; }
+.iris i:last-child { inset: 31%; }
+
+.label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  transform: translate(-50%,-50%) translateY(calc((1 - var(--morph)) * 26px));
+  color: #fff;
+  mix-blend-mode: difference;
+  white-space: nowrap;
+  opacity: calc((var(--morph) - .38) * 1.62);
+}
+
+.label span {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .22em;
+  color: rgba(255,255,255,.45);
+}
+
+.label strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(28px, 4vw, 58px);
+  font-weight: 500;
+  letter-spacing: -.045em;
+}
+
+@media (max-width: 760px) {
+  .bladeA,
+  .bladeB { width: 76vw; }
+  .label { gap: 8px; }
+  .label strong { font-size: 34px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .morph { display: none; }
+}
