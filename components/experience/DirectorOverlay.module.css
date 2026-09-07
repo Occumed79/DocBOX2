@@ -1,0 +1,135 @@
+.director {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 500;
+  width: min(360px, calc(100vw - 36px));
+  overflow: hidden;
+  color: #eaf4f8;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 18px;
+  background: rgba(4,16,24,.88);
+  box-shadow: 0 24px 80px rgba(0,0,0,.36);
+  backdrop-filter: blur(22px) saturate(1.25);
+  font-family: Arial, sans-serif;
+}
+
+.director header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 15px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.director header div {
+  display: grid;
+  gap: 4px;
+}
+
+.director header span,
+.scrubber span,
+.director footer span {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  color: rgba(255,255,255,.44);
+}
+
+.director header strong {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.director header button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255,255,255,.05);
+  cursor: pointer;
+}
+
+.scrubber {
+  padding: 14px 15px 10px;
+}
+
+.scrubber > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.scrubber b {
+  font-size: 10px;
+  color: #8edbf8;
+}
+
+.scrubber input {
+  width: 100%;
+  margin: 12px 0 0;
+  accent-color: #7ed8fb;
+}
+
+.chapterGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 5px 14px 14px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.chapterGrid button {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 7px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 0;
+  color: rgba(255,255,255,.48);
+  background: rgba(5,20,29,.96);
+  text-align: left;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.chapterGrid button span {
+  color: rgba(255,255,255,.26);
+  font-family: Georgia, serif;
+}
+
+.chapterGrid .active {
+  color: #fff;
+  background: rgba(45,126,163,.32);
+  box-shadow: inset 2px 0 #7ed8fb;
+}
+
+.director footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.director footer code {
+  color: rgba(255,255,255,.58);
+  font-size: 9px;
+}
+
+.collapsed {
+  width: 210px;
+}
+
+.collapsed header {
+  border-bottom: 0;
+}
+
+@media (max-width: 620px) {
+  .director { right: 10px; bottom: 10px; width: calc(100vw - 20px); }
+  .chapterGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .chapterGrid button { grid-template-columns: 1fr; gap: 2px; }
+}
