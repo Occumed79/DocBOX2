@@ -7,6 +7,7 @@ import type { VaultFile } from './file-model';
 import VaultInspector from './VaultInspector';
 import FileGallery from './FileGallery';
 import LuminousBackdrop from './LuminousBackdrop';
+import ProviderOnboardingQueueBar, { providerQueueStatus, type ProviderQueueFilter } from './ProviderOnboardingQueueBar';
 import { ArchiveIcon, CloseIcon, FilesIcon, FolderIcon, PlusIcon, UploadIcon } from './icons';
 
 export interface Folder {
@@ -90,6 +91,7 @@ export default function VaultApp() {
   const [folderMutation, setFolderMutation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [logoAvailable, setLogoAvailable] = useState(true);
+  const [providerQueueFilter, setProviderQueueFilter] = useState<ProviderQueueFilter>('all');
   const activeFileRequest = useRef<AbortController | null>(null);
 
   const reportError = useCallback((message: string) => setError(message), []);
@@ -159,7 +161,7 @@ export default function VaultApp() {
   useEffect(() => { if (!isSearching) void loadFiles(); }, [isSearching, loadFiles]);
   useEffect(() => () => activeFileRequest.current?.abort(), []);
 
-  const displayFiles = isSearching ? searchResults : files;
+  const unfilteredDisplayFiles = isSearching ? searchResults : files;
 
   const navigateTo = useCallback((view: NavView, folderId: string | null = null) => {
     const nextFolder = view === 'archive' ? null : folderId;
@@ -173,6 +175,7 @@ export default function VaultApp() {
     setSearchQuery('');
     setSearchResults([]);
     setSelectedFile(null);
+    setProviderQueueFilter('all');
     setError(null);
   }, []);
 
@@ -181,6 +184,7 @@ export default function VaultApp() {
     setSearchQuery(query);
     setIsSearching(true);
     setSelectedFile(null);
+    setProviderQueueFilter('all');
     setError(null);
   }, []);
 
@@ -189,6 +193,7 @@ export default function VaultApp() {
     setSearchQuery('');
     setSearchResults([]);
     setSelectedFile(null);
+    setProviderQueueFilter('all');
   }, []);
 
   const createFolder = useCallback(async () => {
@@ -245,6 +250,7 @@ export default function VaultApp() {
     setIsSearching(false);
     setSearchQuery('');
     setSearchResults([]);
+    setProviderQueueFilter('all');
 
     const destinationFolder = uploaded.folder_id || null;
     const destinationKey = fileViewKey('all', destinationFolder);
@@ -274,6 +280,10 @@ export default function VaultApp() {
 
   const rootFolders = useMemo(() => folders.filter(folder => !folder.parent_id), [folders]);
   const activeFolderName = activeFolder ? folders.find(folder => folder.id === activeFolder)?.name : null;
+  const providerQueueActive = !isSearching && activeFolderName === 'Provider Onboarding Submissions';
+  const displayFiles = providerQueueActive && providerQueueFilter !== 'all'
+    ? unfilteredDisplayFiles.filter(file => providerQueueStatus(file) === providerQueueFilter)
+    : unfilteredDisplayFiles;
   const viewTitle = isSearching ? `Results for “${searchQuery}”` : activeFolderName || (navView === 'archive' ? 'Archive' : 'All Files');
 
   return (
@@ -344,6 +354,7 @@ export default function VaultApp() {
         <main className={selectedFile && !stagingActive ? 'gallery-workspace has-inspector' : 'gallery-workspace'}>
           <section className="gallery-main-column" aria-labelledby="current-view-title">
             <div className="view-heading"><div><p>Current View</p><h1 id="current-view-title">{viewTitle}</h1></div><span>{displayFiles.length} {displayFiles.length === 1 ? 'file' : 'files'}</span></div>
+            {providerQueueActive ? <ProviderOnboardingQueueBar files={unfilteredDisplayFiles} value={providerQueueFilter} onChange={value => { setProviderQueueFilter(value); setSelectedFile(null); }} /> : null}
             <FileGallery
               files={displayFiles}
               loading={loading}
