@@ -6,14 +6,14 @@ import styles from './ProviderExperience.module.css';
 
 const HISTORY = [
   {
-    year: '1979',
-    title: 'A research-and-consulting company is born in Honolulu.',
-    copy: 'Occu-Med begins with a narrow problem: generic medical exams do not explain whether a person can safely perform a specific job. The early business focuses on research, consulting, and workforce health-and-safety cost reduction.',
+    year: '1976',
+    title: 'The research starts before the company exists.',
+    copy: 'A federally funded project is launched to improve physical and medical standards for employment: connect essential job functions, injury-cost reduction, disability rights, and medically appropriate, legally defensible decision-making.',
   },
   {
-    year: '1980s–1990s',
-    title: 'The methodology becomes an operating system.',
-    copy: 'The work expands beyond research into job analysis, occupational medical clinic management, workers’ compensation cost containment, vocational rehabilitation, and medically appropriate, legally defensible employment evaluations.',
+    year: '1979',
+    title: 'Occu-Med is founded in Honolulu.',
+    copy: 'The research becomes an operating company focused on workforce health-and-safety cost reduction, research, consulting, and a more job-specific approach to employment medical evaluation.',
   },
   {
     year: '2006',
@@ -28,7 +28,7 @@ const HISTORY = [
   {
     year: 'TODAY',
     title: 'A network measured in thousands of locations.',
-    copy: 'Occu-Med now describes a worldwide network of more than 15,000 provider locations supporting more than one million employees across the United States, its territories, and 50+ countries abroad.',
+    copy: 'Occu-Med now describes a worldwide network of more than 15,000 provider locations supporting more than one million employees across all 50 states, U.S. territories, and 50+ countries abroad.',
   },
 ];
 
@@ -42,10 +42,59 @@ const PROCESS = [
   ['07', 'Review', 'Medical findings are interpreted against the applicable job and deployment requirements.'],
 ];
 
+const SPECIALTIES = {
+  occupational: {
+    label: 'Occupational Medicine',
+    intro: 'The broadest fit for recurring exam referrals and multi-component occupational health services.',
+    services: ['Physical examinations', 'Audiometry', 'Spirometry / PFT', 'EKG', 'Respirator fit testing', 'Drug & alcohol testing', 'Vaccinations'],
+    sends: ['Authorization and requested services', 'Exam packet / forms', 'Examinee demographics', 'Scheduling coordination'],
+    returns: ['Completed exam documentation', 'Test results / tracings when applicable', 'Requested supporting records', 'Invoice under the agreed fee schedule'],
+  },
+  cardiology: {
+    label: 'Cardiology',
+    intro: 'Focused specialty referrals for cardiovascular testing, interpretation, and follow-up evaluation.',
+    services: ['Resting 12-lead EKG', 'Treadmill stress testing', 'Cardiology consultation', 'Follow-up evaluation'],
+    sends: ['Specific requested test or consultation', 'Relevant authorization', 'Available occupational context', 'Scheduling coordination'],
+    returns: ['Final report / interpretation', 'Tracing or test output when applicable', 'Requested clinical documentation', 'Invoice under the agreed fee schedule'],
+  },
+  dental: {
+    label: 'Dental',
+    intro: 'Dental-readiness referrals with clear requested imaging and examination components.',
+    services: ['Comprehensive dental evaluation', 'Bitewing radiographs', 'Panoramic imaging', 'Full-mouth series when requested', 'Dental readiness documentation'],
+    sends: ['Authorized dental scope', 'Required dental forms', 'Examinee demographics', 'Scheduling coordination'],
+    returns: ['Completed dental evaluation', 'Requested imaging / findings', 'Required dental documentation', 'Invoice under the agreed fee schedule'],
+  },
+  laboratory: {
+    label: 'Laboratory',
+    intro: 'Collection and testing support for employment and deployment medical requirements.',
+    services: ['Routine bloodwork', 'Urinalysis', 'QuantiFERON-TB', 'Specimen collection', 'Specialty laboratory panels'],
+    sends: ['Requested tests / panel', 'Collection instructions when applicable', 'Examinee demographics', 'Billing authorization'],
+    returns: ['Final laboratory results', 'Collection documentation if required', 'Reference / accession information when applicable', 'Invoice under the agreed fee schedule'],
+  },
+  pharmacy: {
+    label: 'Pharmacy / Vaccination',
+    intro: 'Vaccination referrals for routine occupational needs, travel, and deployment readiness.',
+    services: ['Routine immunizations', 'Travel vaccines', 'Deployment vaccines', 'Vaccine administration records'],
+    sends: ['Requested vaccine(s)', 'Authorization', 'Examinee demographics', 'Destination / program context when relevant'],
+    returns: ['Administration record', 'Lot / manufacturer documentation when required', 'Updated vaccine record', 'Invoice under the agreed fee schedule'],
+  },
+  imaging: {
+    label: 'Imaging / Diagnostics',
+    intro: 'Direct diagnostic referrals for requested imaging and testing that support the larger evaluation.',
+    services: ['Chest X-ray', 'Diagnostic radiography', 'Ultrasound when requested', 'Other authorized diagnostic studies'],
+    sends: ['Requested study', 'Order / authorization', 'Available clinical context', 'Scheduling coordination'],
+    returns: ['Final report', 'Images or access instructions when requested', 'Supporting documentation', 'Invoice under the agreed fee schedule'],
+  },
+} as const;
+
+type SpecialtyKey = keyof typeof SPECIALTIES;
+
 export default function ProviderExperience() {
   const rootRef = useRef<HTMLElement | null>(null);
   const [activeHistory, setActiveHistory] = useState(0);
   const [activeProcess, setActiveProcess] = useState(0);
+  const [specialty, setSpecialty] = useState<SpecialtyKey>('occupational');
+  const [selectedServices, setSelectedServices] = useState<string[]>([...SPECIALTIES.occupational.services]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -78,6 +127,19 @@ export default function ProviderExperience() {
     event.currentTarget.style.setProperty('--ry', '0deg');
   };
 
+  const chooseSpecialty = (next: SpecialtyKey) => {
+    setSpecialty(next);
+    setSelectedServices([...SPECIALTIES[next].services]);
+  };
+
+  const toggleService = (service: string) => {
+    setSelectedServices(previous => previous.includes(service)
+      ? previous.filter(item => item !== service)
+      : [...previous, service]);
+  };
+
+  const activeSpecialty = SPECIALTIES[specialty];
+
   return (
     <main ref={rootRef} className={styles.root}>
       <section className={styles.threshold} data-reveal>
@@ -95,18 +157,13 @@ export default function ProviderExperience() {
         <div className={styles.historyIntro}>
           <span>COMPANY HISTORY</span>
           <h2>Not a timeline.<br /><em>An evolution.</em></h2>
-          <p>The company story is built around how the system changed: research became methodology, methodology became operations, and operations became a global network.</p>
+          <p>The company story begins with research before Occu-Med existed: research became methodology, methodology became operations, and operations became a global network.</p>
         </div>
 
         <div className={styles.historyStage}>
           <div className={styles.historyYears}>
             {HISTORY.map((item, index) => (
-              <button
-                type="button"
-                key={item.year}
-                onClick={() => setActiveHistory(index)}
-                className={index === activeHistory ? styles.activeYear : ''}
-              >
+              <button type="button" key={item.year} onClick={() => setActiveHistory(index)} className={index === activeHistory ? styles.activeYear : ''}>
                 <span>{item.year}</span>
                 <small>{String(index + 1).padStart(2, '0')}</small>
               </button>
@@ -149,12 +206,7 @@ export default function ProviderExperience() {
         <div className={styles.processStage}>
           <div className={styles.processRail}>
             {PROCESS.map((item, index) => (
-              <button
-                type="button"
-                key={item[0]}
-                onClick={() => setActiveProcess(index)}
-                className={index === activeProcess ? styles.processActive : ''}
-              >
+              <button type="button" key={item[0]} onClick={() => setActiveProcess(index)} className={index === activeProcess ? styles.processActive : ''}>
                 <span>{item[0]}</span>
                 <strong>{item[1]}</strong>
               </button>
@@ -190,7 +242,64 @@ export default function ProviderExperience() {
         <span>YOUR FACILITY</span>
         <h2>The spectacle ends here.<br /><em>The useful part begins.</em></h2>
         <p>From this point forward, the site becomes quieter and specific to the provider: specialty, services, documentation, payment terms, FAQs, locations, and the pricing agreement.</p>
-        <button type="button">Begin provider onboarding →</button>
+        <a className={styles.handoffButton} href="#provider-details">Begin provider onboarding →</a>
+      </section>
+
+      <section id="provider-details" className={styles.providerStatic} data-reveal>
+        <div className={styles.providerIntro}>
+          <span>PROVIDER INFORMATION</span>
+          <h2>Show us what your facility does.</h2>
+          <p>The content below changes with the provider. The goal is to answer the questions that matter to that specialty before asking for pricing.</p>
+        </div>
+
+        <div className={styles.specialtyGrid}>
+          {(Object.keys(SPECIALTIES) as SpecialtyKey[]).map(key => (
+            <button key={key} type="button" onClick={() => chooseSpecialty(key)} className={key === specialty ? styles.specialtyActive : ''}>
+              <strong>{SPECIALTIES[key].label}</strong>
+              <span>{SPECIALTIES[key].intro}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.providerPanel}>
+          <div className={styles.providerPanelLead}>
+            <span>YOUR CAPABILITIES</span>
+            <h3>{activeSpecialty.label}</h3>
+            <p>{activeSpecialty.intro}</p>
+          </div>
+          <div className={styles.capabilityCloud}>
+            {activeSpecialty.services.map(service => (
+              <button key={service} type="button" onClick={() => toggleService(service)} className={selectedServices.includes(service) ? styles.capabilitySelected : ''}>
+                <i>{selectedServices.includes(service) ? '✓' : '+'}</i>{service}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.exchangeGrid}>
+          <article>
+            <span>WHAT OCCU-MED SENDS</span>
+            <h3>A clear authorization.</h3>
+            <ul>{activeSpecialty.sends.map(item => <li key={item}>{item}</li>)}</ul>
+          </article>
+          <article>
+            <span>WHAT COMES BACK</span>
+            <h3>Exactly what the case needs.</h3>
+            <ul>{activeSpecialty.returns.map(item => <li key={item}>{item}</li>)}</ul>
+          </article>
+        </div>
+
+        <div className={styles.agreementPreview}>
+          <div>
+            <span>PRICING AGREEMENT</span>
+            <h3>Your selected services become the fee schedule.</h3>
+            <p>{selectedServices.length} service{selectedServices.length === 1 ? '' : 's'} currently selected. The next build step is the editable rate table, location handling, business terms, review, and submission.</p>
+          </div>
+          <div className={styles.agreementServices}>
+            {selectedServices.length ? selectedServices.map(service => <span key={service}>{service}</span>) : <em>Select at least one service above.</em>}
+          </div>
+          <button type="button" disabled={!selectedServices.length}>Build pricing agreement →</button>
+        </div>
       </section>
     </main>
   );
