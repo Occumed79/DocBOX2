@@ -72,9 +72,10 @@ export default function OpenProviderSubmission({ specialty }: Props) {
     setBusy(true);
     setError('');
     try {
-      // The Forms editor autosaves after 300 ms. A short wait ensures the
-      // submission captures the exact values visible when the provider clicks.
-      await wait(360);
+      // The Forms editor autosaves after 300 ms and may stamp the signing date
+      // in a follow-up render. Wait through both cycles so the submitted JSON
+      // and the visible PDF represent the same provider response.
+      await wait(720);
       const raw = window.localStorage.getItem(DRAFT_KEY);
       if (!raw) throw new Error('Open the agreement workspace and complete the pricing proposal before submitting.');
 
