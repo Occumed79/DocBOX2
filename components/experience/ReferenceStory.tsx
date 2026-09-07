@@ -3,9 +3,11 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import CasePassport from './CasePassport';
+import CaseTunnel from './CaseTunnel';
 import ClinicalDatabase from './ClinicalDatabase';
 import GlobalCoverageExplorer from './GlobalCoverageExplorer';
 import ImmersiveArchive from './ImmersiveArchive';
+import MethodAssembler from './MethodAssembler';
 import OperationsAtlas from './OperationsAtlas';
 import ValuesPlayground from './ValuesPlayground';
 import styles from './ReferenceStory.module.css';
@@ -99,30 +101,9 @@ export default function ReferenceStory() {
       </section>
 
       <div id="archive-world" className={styles.worldWrap}><ImmersiveArchive /></div>
-
-      <section className={styles.methodBridge} aria-label="Research becomes methodology">
-        <div className={styles.bridgeCopy}>
-          <span>RESEARCH → OPERATING MODEL</span>
-          <h2>The archive does not end.<br />It assembles into a method.</h2>
-          <p>Three bodies of information are forced into the same decision space: what the job requires, what the medical evidence shows, and whether the two are compatible.</p>
-        </div>
-        <div className={styles.methodMachine} aria-hidden="true">
-          <div className={styles.axisA}><span>VALID JOB INFORMATION</span></div>
-          <div className={styles.axisB}><span>JOB-RELATED MEDICAL EXAM</span></div>
-          <div className={styles.axisC}><span>COMPATIBILITY ASSESSMENT</span></div>
-          <div className={styles.core}>EXAMQA</div>
-          <div className={styles.packet}><Image src="/photos/EXAM%20REPORT.png" alt="" fill sizes="220px" /></div>
-          <div className={styles.identity}><Image src="/photos/EMPLOYEE%20ID.png" alt="" fill sizes="180px" /></div>
-        </div>
-      </section>
-
+      <MethodAssembler />
       <div id="operations-world" className={styles.worldWrap}><OperationsAtlas /></div>
-
-      <section className={styles.caseTransition}>
-        <div className={styles.caseBeam} aria-hidden="true" />
-        <div className={styles.caseTransitionCopy}><span>ONE CASE / MANY CLINICAL FORMS</span><h2>The route stays consistent.<br />The medicine changes.</h2><button type="button" onClick={() => jump('clinical-world-v2')}>OPEN CLINICAL DATABASE →</button></div>
-      </section>
-
+      <CaseTunnel />
       <div id="clinical-world-v2" className={styles.worldWrap}><ClinicalDatabase /></div>
       <div id="network-world-v2" className={styles.worldWrap}><GlobalCoverageExplorer /></div>
       <div id="values-world-v2" className={styles.worldWrap}><ValuesPlayground /></div>
