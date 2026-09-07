@@ -32,6 +32,14 @@ Sources:
 - https://www.occu-med.com/who-we-are/
 - https://thebusinessjournal.com/occu-med-globe-trotting-rising-star/
 
+### 1980 — Medical standards are already operational
+
+An official civil-rights findings document states that in **1980** a municipal civil-service system contracted with Occu-Med Corporate Health Services to develop comprehensive pre-employment medical standards for its civil-service positions. The findings say those standards were used together with **position physical-effort analyses** and were applied to post-offer medical examinations from 1980 through 1992.
+
+For the public experience, the customer identity is unnecessary. The company-level historical point is stronger: within roughly a year of founding, Occu-Med's medical standards were already being operationalized alongside formal analysis of a job's physical work.
+
+Source: https://labor.hawaii.gov/hcrc/files/2013/01/DOCAho_HE_Findings.pdf
+
 ### Research matures — Compendium of Medical Standards → Medical Guidelines
 
 A public 2013 Occu-Med proposal states that the company's medical research involved specialists and subspecialists representing **12 separate body systems** who initially formulated Occu-Med's **Compendium of Medical Standards**. The same record says continuing medical-research meetings reviewed the effectiveness and appropriateness of that Compendium and describes the later body of work as the company's **Medical Guidelines**.
@@ -105,16 +113,17 @@ Sources:
 ## Visual-story implications
 
 1. **History should begin in 1976, not 1979.** The research question is the opening historical beat; the company is the result.
-2. The history chapter should visualize the evolution **research → methodology → operating company → distributed U.S. system → international system → global network**.
+2. The history chapter should visualize the evolution **research → operating medical standards → methodology → distributed U.S. system → international system → global network**.
 3. Historical records should be treated like archival evidence in the experience, inspired by the Nasdaq 50th-anniversary approach, rather than shown as ordinary citations or document screenshots.
 4. The 1976 research record supports a dedicated archival scene built around the three research objectives and the scale of the project, without turning the scene into a founder biography.
-5. The archive should then **morph**, rather than cut, into the later specialist-research story: 12 abstract body-system research nodes converge into the Compendium of Medical Standards, which resolves into Medical Guidelines. Do not label the individual body systems unless an authoritative source enumerating them is found.
-6. The injury-risk scene should use independently verified workforce data and then transition directly into why job-specific context matters.
-7. The proprietary-methodology section should make the three dimensions spatial and interactive rather than presenting three ordinary cards.
-8. The 2013 distributed-office footprint can be used as a quiet scale transition between methodology and global expansion: Fresno → multiple U.S. offices → 36+ countries → 15,000+ locations.
-9. The global-network scene should function as both spectacle and information visualization, drawing conceptually from WWF Blue Corridors and Climate TRACE.
-10. The immersive story should gradually settle into a much quieter, provider-specific onboarding interface.
-11. The provider section should be functional, not decorative: specialty selection, capability selection, location handling, rate entry, and review should work before any submission backend is added.
+5. The **1980** evidence is especially valuable because it shows the research becoming operational almost immediately: comprehensive medical standards are paired with position physical-effort analysis. This can appear as an archival marker inside the research sequence rather than another standalone webpage section.
+6. The archive should then **morph**, rather than cut, into the later specialist-research story: 12 abstract body-system research nodes converge into the Compendium of Medical Standards, which resolves into Medical Guidelines. Do not label the individual body systems unless an authoritative source enumerating them is found.
+7. The injury-risk scene should use independently verified workforce data and then transition directly into why job-specific context matters.
+8. The proprietary-methodology section should make the three dimensions spatial and interactive rather than presenting three ordinary cards.
+9. The 2013 distributed-office footprint can be used as a quiet scale transition between methodology and global expansion: Fresno → multiple U.S. offices → 36+ countries → 15,000+ locations.
+10. The global-network scene should function as both spectacle and information visualization, drawing conceptually from WWF Blue Corridors and Climate TRACE.
+11. The immersive story should gradually settle into a much quieter, provider-specific onboarding interface.
+12. The provider section should be functional, not decorative: specialty selection, capability selection, location handling, rate entry, and review should work before any submission backend is added.
 
 ## Founder-name note
 
