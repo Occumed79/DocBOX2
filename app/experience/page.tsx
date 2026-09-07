@@ -10,6 +10,7 @@ import ProviderFAQ from '@/components/experience/ProviderFAQ';
 import SpatialArchiveField from '@/components/experience/SpatialArchiveField';
 import SpatialCaseMorphField from '@/components/experience/SpatialCaseMorphField';
 import SpatialNetworkField from '@/components/experience/SpatialNetworkField';
+import SpatialValuesPartnerField from '@/components/experience/SpatialValuesPartnerField';
 import polish from './ProviderStaticPolish.module.css';
 
 export default function ProviderExperiencePage() {
@@ -19,6 +20,7 @@ export default function ProviderExperiencePage() {
       <SpatialArchiveField />
       <SpatialCaseMorphField />
       <SpatialNetworkField />
+      <SpatialValuesPartnerField />
       <NarrativeThread />
       <ChapterMorph />
       <CinematicHandoff />
