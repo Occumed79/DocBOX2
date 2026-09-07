@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import CasePassport from './CasePassport';
 import CaseTunnel from './CaseTunnel';
 import ClinicalDatabase from './ClinicalDatabase';
+import ClinicalToNetworkBridge from './ClinicalToNetworkBridge';
 import GlobalCoverageExplorer from './GlobalCoverageExplorer';
 import ImmersiveArchive from './ImmersiveArchive';
 import MethodAssembler from './MethodAssembler';
@@ -105,6 +106,7 @@ export default function ReferenceStory() {
       <div id="operations-world" className={styles.worldWrap}><OperationsAtlas /></div>
       <CaseTunnel />
       <div id="clinical-world-v2" className={styles.worldWrap}><ClinicalDatabase /></div>
+      <ClinicalToNetworkBridge />
       <div id="network-world-v2" className={styles.worldWrap}><GlobalCoverageExplorer /></div>
       <div id="values-world-v2" className={styles.worldWrap}><ValuesPlayground /></div>
 
