@@ -1,5 +1,6 @@
 import CinematicContinuity from '@/components/experience/CinematicContinuity';
 import CinematicHandoff from '@/components/experience/CinematicHandoff';
+import ProviderCompass from '@/components/experience/ProviderCompass';
 import ProviderExperience from '@/components/experience/ProviderExperience';
 
 export default function ProviderExperiencePage() {
@@ -7,6 +8,7 @@ export default function ProviderExperiencePage() {
     <>
       <CinematicContinuity />
       <CinematicHandoff />
+      <ProviderCompass />
       <ProviderExperience />
     </>
   );
