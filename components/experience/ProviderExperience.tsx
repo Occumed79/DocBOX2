@@ -264,8 +264,17 @@ export default function ProviderExperience() {
           </div>
 
           <div className={styles.historyContent}>
-            <div className={styles.historyVisual} key={history.year}>
-              <Image src={history.image} alt={history.imageAlt} fill sizes="(max-width: 900px) 100vw, 58vw" />
+            <div className={styles.historyVisual}>
+              {HISTORY.map((item, index) => (
+                <Image
+                  key={item.year}
+                  className={`${morphStyles.historyLayer} ${index === activeHistory ? morphStyles.historyLayerActive : ''}`}
+                  src={item.image}
+                  alt={index === activeHistory ? item.imageAlt : ''}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 58vw"
+                />
+              ))}
               <div className={styles.historyVisualShade} />
               <span>{history.cue}</span>
             </div>
@@ -322,7 +331,7 @@ export default function ProviderExperience() {
                 key={item.id}
                 className={`${styles.processImage} ${morphStyles.processLayer} ${index === activeProcess ? morphStyles.processLayerActive : ''}`}
                 src={item.image}
-                alt={item.imageAlt}
+                alt={index === activeProcess ? item.imageAlt : ''}
                 fill
                 sizes="(max-width: 900px) 100vw, 65vw"
               />
@@ -351,7 +360,7 @@ export default function ProviderExperience() {
                 key={item.label}
                 className={`${styles.clinicalImage} ${morphStyles.clinicalLayer} ${index === activeClinical ? morphStyles.clinicalLayerActive : ''}`}
                 src={item.image}
-                alt={item.alt}
+                alt={index === activeClinical ? item.alt : ''}
                 fill
                 sizes="(max-width: 900px) 100vw, 68vw"
               />
@@ -372,7 +381,20 @@ export default function ProviderExperience() {
 
       <section className={styles.workforce} data-reveal data-scrub>
         <div className={styles.workforceImage}>
-          <Image src={workforceView === 0 ? PHOTOS.workforce : PHOTOS.workforce2} alt={workforceView === 0 ? 'Diverse industrial workforce illustration' : 'Public safety and military workforce illustration'} fill sizes="100vw" />
+          <Image
+            className={`${morphStyles.workforceLayer} ${workforceView === 0 ? morphStyles.workforceLayerActive : ''}`}
+            src={PHOTOS.workforce}
+            alt={workforceView === 0 ? 'Diverse industrial workforce illustration' : ''}
+            fill
+            sizes="100vw"
+          />
+          <Image
+            className={`${morphStyles.workforceLayer} ${workforceView === 1 ? morphStyles.workforceLayerActive : ''}`}
+            src={PHOTOS.workforce2}
+            alt={workforceView === 1 ? 'Public safety and military workforce illustration' : ''}
+            fill
+            sizes="100vw"
+          />
           <div className={styles.workforceShade} />
         </div>
         <div className={styles.workforceCopy}>
@@ -408,7 +430,16 @@ export default function ProviderExperience() {
         </div>
         <div className={styles.valuesStage}>
           <div className={styles.valuePoster}>
-            <Image key={VALUES[activeValue].label} src={VALUES[activeValue].image} alt={`${VALUES[activeValue].label} core value`} fill sizes="(max-width: 700px) 75vw, 380px" />
+            {VALUES.map((value, index) => (
+              <Image
+                key={value.label}
+                className={`${morphStyles.valueLayer} ${index === activeValue ? morphStyles.valueLayerActive : ''}`}
+                src={value.image}
+                alt={index === activeValue ? `${value.label} core value` : ''}
+                fill
+                sizes="(max-width: 700px) 75vw, 380px"
+              />
+            ))}
           </div>
           <div className={styles.valueIndex}>
             {VALUES.map((value, index) => (
