@@ -151,6 +151,16 @@ Sources:
 12. The immersive story should gradually settle into a much quieter, provider-specific onboarding interface.
 13. The provider section should be functional, not decorative: specialty selection, capability selection, location handling, rate entry, and review should work before any submission backend is added.
 
+## Current implementation notes
+
+- The middle cinematic sequence now carries a **single persistent case object** across Method → Referral → Clinical → Work → Network → Values → Partner. It changes physical form by chapter rather than behaving like an unrelated decorative puck: compatibility object → authorization card → clinical object → role badge → network node → values seal → **Your Facility** destination.
+- Referral and Clinical keep their artwork mounted as layered scenes and transition between states through masks / reveals rather than hard image replacement.
+- Director Mode can hold exact internal states while the surrounding scene is scrubbed, which is the preferred way to tune the object morph and image choreography.
+- The provider fee-schedule workspace now captures primary and billing contacts, physical addresses for each enrolled location, shared or location-specific rates, and readiness status.
+- Provider agreement drafts autosave locally in the browser and restore on return. This is deliberately local-only until authenticated server persistence is introduced.
+- A completed agreement can be rendered as a clean review copy and printed / saved as PDF through the browser print flow; electronic submission and signature are still intentionally disabled.
+- The practical provider experience now ends with an editorial FAQ explaining provider role, referral scope, records return, authorization boundaries, payment, and multi-location enrollment.
+
 ## Founder-name note
 
 Current public records located for this project identify James / Jim Johnson as the founder and identify Devonna Kaji as deeply involved in the company's medical research. No reliable public record located in this research pass identifies a founder named Ken. Because the public experience is company-centric anyway, do not build a founder-biography scene around this discrepancy. If internal archival material later establishes another founding role, add it here with the source and adjust only the historically necessary public copy.
