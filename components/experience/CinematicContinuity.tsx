@@ -4,6 +4,19 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './CinematicContinuity.module.css';
 
 const CHAPTERS = ['Origin', 'History', 'Archive', 'Problem', 'Method', 'Referral', 'Clinical', 'Work', 'Network', 'Values', 'Partner'] as const;
+const PALETTES = [
+  '91 178 221',
+  '78 135 176',
+  '196 157 101',
+  '120 173 203',
+  '74 132 168',
+  '67 164 197',
+  '57 153 184',
+  '173 122 76',
+  '56 214 211',
+  '238 187 86',
+  '109 169 190',
+] as const;
 
 type AutoKey = 'history' | 'process' | 'clinical' | 'workforce' | 'values';
 
@@ -65,6 +78,7 @@ export default function CinematicContinuity() {
       document.documentElement.style.setProperty('--experience-progress', global.toFixed(4));
 
       let nearest = 0;
+      let nearestProgress = 0;
       let nearestDistance = Number.POSITIVE_INFINITY;
 
       allSections.forEach((section, index) => {
@@ -74,6 +88,7 @@ export default function CinematicContinuity() {
         if (centerDistance < nearestDistance) {
           nearestDistance = centerDistance;
           nearest = index;
+          nearestProgress = p;
         }
 
         section.style.setProperty('--story', p.toFixed(4));
@@ -81,20 +96,22 @@ export default function CinematicContinuity() {
         section.style.setProperty('--story-out', clamp((p - 0.58) * 2.38).toFixed(4));
 
         if (!reducedMotion) {
-          const image = section.querySelector<HTMLImageElement>('img');
-          if (image) {
-            const drift = (p - 0.5) * (index === 0 ? 34 : 52);
-            const scale = 1.035 + p * (index === 8 ? 0.13 : 0.075);
+          const images = Array.from(section.querySelectorAll<HTMLImageElement>('img')).slice(0, 3);
+          images.forEach((image, imageIndex) => {
+            const direction = imageIndex % 2 === 0 ? 1 : -1;
+            const yDrift = (p - 0.5) * (index === 0 ? 34 : 44 + imageIndex * 12);
+            const xDrift = (p - 0.5) * direction * imageIndex * 16;
+            const scale = 1.025 + p * (index === 8 ? 0.12 : 0.055 + imageIndex * 0.012);
             image.style.animation = 'none';
             image.style.willChange = 'transform, filter';
-            image.style.transform = `translate3d(0, ${drift.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
-          }
+            image.style.transform = `translate3d(${xDrift.toFixed(2)}px, ${yDrift.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
+          });
 
           const heading = section.querySelector<HTMLElement>('h1, h2');
           if (heading) {
             heading.style.willChange = 'transform, opacity';
-            heading.style.transform = `translate3d(0, ${((0.5 - p) * 22).toFixed(2)}px, 0)`;
-            heading.style.opacity = String(0.62 + clamp(1 - Math.abs(p - 0.5) * 1.4) * 0.38);
+            heading.style.transform = `translate3d(0, ${((0.5 - p) * 24).toFixed(2)}px, 0)`;
+            heading.style.opacity = String(0.58 + clamp(1 - Math.abs(p - 0.5) * 1.45) * 0.42);
           }
         }
       });
@@ -112,6 +129,12 @@ export default function CinematicContinuity() {
         clickIndexedButton('values', values, Math.min(5, Math.floor(clamp((p - 0.05) / 0.9) * 6)));
       }
 
+      const provider = document.getElementById('provider-details');
+      const providerTop = provider?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
+      const cinema = clamp((providerTop - vh * 0.12) / (vh * 0.72));
+      document.documentElement.style.setProperty('--cinema', cinema.toFixed(4));
+      document.documentElement.style.setProperty('--chapter-progress', nearestProgress.toFixed(4));
+      document.documentElement.style.setProperty('--continuity-tone', PALETTES[nearest] ?? PALETTES[0]);
       setActiveChapter(Math.min(CHAPTERS.length - 1, nearest));
     };
 
@@ -139,11 +162,33 @@ export default function CinematicContinuity() {
         html { scroll-behavior: smooth; }
         section[data-scrub] { isolation: isolate; }
         @media (min-width: 901px) {
-          section[data-scrub] { min-height: 112vh; }
-          section[data-scrub] > * { backface-visibility: hidden; }
+          main > section:nth-of-type(1) { min-height: 118vh; }
+          main > section:nth-of-type(2) { min-height: 235vh !important; }
+          main > section:nth-of-type(2) > div:last-child { position: sticky; top: 5vh; }
+          main > section:nth-of-type(3) { min-height: 205vh !important; }
+          main > section:nth-of-type(3) > div:last-child { position: sticky; top: 4vh; }
+          main > section:nth-of-type(4) { min-height: 165vh !important; }
+          main > section:nth-of-type(5) { min-height: 150vh !important; }
+          main > section:nth-of-type(6) { min-height: 300vh !important; }
+          main > section:nth-of-type(6) > div:last-child { position: sticky; top: 5vh; }
+          main > section:nth-of-type(7) { min-height: 250vh !important; }
+          main > section:nth-of-type(7) > div:last-child { position: sticky; top: 5vh; }
+          main > section:nth-of-type(8) { min-height: 185vh !important; }
+          main > section:nth-of-type(8) > div:last-child { position: sticky; top: 20vh; }
+          main > section:nth-of-type(9) { min-height: 185vh !important; }
+          main > section:nth-of-type(9) > div:nth-child(3) { position: sticky; top: 24vh; }
+          main > section:nth-of-type(10) { min-height: 235vh !important; }
+          main > section:nth-of-type(10) > div:last-child { position: sticky; top: 7vh; }
+          main > section:nth-of-type(11) { min-height: 128vh !important; }
+          main > section:nth-of-type(-n+11) > * { backface-visibility: hidden; }
         }
       `}</style>
+      <div className={styles.atmosphere} aria-hidden="true"><i /><i /><i /></div>
       <div className={styles.progress} aria-hidden="true"><i style={{ transform: `scaleX(${overallProgress})` }} /></div>
+      <div className={styles.chapterStamp} aria-hidden="true">
+        <span>{String(activeChapter + 1).padStart(2, '0')}</span>
+        <strong>{CHAPTERS[activeChapter]}</strong>
+      </div>
       <nav className={styles.chapterNav} aria-label="Experience chapters">
         {CHAPTERS.map((chapter, index) => (
           <button key={chapter} type="button" className={index === activeChapter ? styles.active : ''} onClick={() => jumpTo(index)}>
