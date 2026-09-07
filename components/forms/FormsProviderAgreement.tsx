@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject, type PointerEvent } from 'react';
 import { downloadPdf, providerDocumentPdf } from './documentCapture';
 import styles from './FormsProviderAgreement.module.css';
 
@@ -226,7 +226,7 @@ function SignaturePad({ value, onChange }: { value: string; onChange: (value: st
   );
 }
 
-function ProviderDocumentPreview({ data, previewRef }: { data: ProviderDocumentData; previewRef: React.RefObject<HTMLDivElement | null> }) {
+function ProviderDocumentPreview({ data, previewRef }: { data: ProviderDocumentData; previewRef: MutableRefObject<HTMLDivElement | null> }) {
   const address = [data.address.street1, data.address.street2, [data.address.city, data.address.state, data.address.zip].filter(Boolean).join(', ')].filter(Boolean);
   const services = data.services.filter(row => row.component.trim() || row.price.trim());
   const capacity = data.documentType === 'service-agreement' ? 7 : 14;
@@ -244,7 +244,7 @@ function ProviderDocumentPreview({ data, previewRef }: { data: ProviderDocumentD
   }, [services, capacity]);
 
   return (
-    <div ref={previewRef} className={styles.preview} aria-label={`${documentTitle(data.documentType)} PDF preview`}>
+    <div ref={node => { previewRef.current = node; }} className={styles.preview} aria-label={`${documentTitle(data.documentType)} PDF preview`}>
       {pages.map((pageServices, pageIndex) => {
         const firstPage = pageIndex === 0;
         const finalPage = pageIndex === pages.length - 1;
