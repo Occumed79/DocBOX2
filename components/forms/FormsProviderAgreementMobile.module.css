@@ -1,0 +1,9 @@
+@media (max-width: 850px) {
+  .mobilePreview {
+    display: grid !important;
+    justify-content: start !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 28px !important;
+  }
+}
