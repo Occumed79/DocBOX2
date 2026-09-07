@@ -28,3 +28,33 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Production route smoke tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          PORT=3000 npm start > /tmp/provider-experience-next.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true; cat /tmp/provider-experience-next.log' EXIT
+
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:3000/ > /dev/null; then
+              break
+            fi
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "Next.js exited before becoming ready."
+              exit 1
+            fi
+            sleep 1
+          done
+
+          curl --silent --fail http://127.0.0.1:3000/experience > /dev/null
+          curl --silent --fail http://127.0.0.1:3000/provider/ci-invalid-token > /dev/null
+
+          STATUS=$(curl --silent --output /tmp/provider-submit-response.json --write-out '%{http_code}' \
+            --request POST \
+            --header 'Content-Type: application/json' \
+            --data '{}' \
+            http://127.0.0.1:3000/api/provider-onboarding/submit)
+          test "$STATUS" = "400"
+          grep -q 'pricing proposals only' /tmp/provider-submit-response.json
