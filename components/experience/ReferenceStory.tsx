@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+import CasePassport from './CasePassport';
 import ClinicalDatabase from './ClinicalDatabase';
 import GlobalCoverageExplorer from './GlobalCoverageExplorer';
 import ImmersiveArchive from './ImmersiveArchive';
@@ -79,6 +80,7 @@ export default function ReferenceStory() {
         <div>{CHAPTERS.map((item,index) => <button type="button" key={item.id} data-active={chapter===index} onClick={() => jump(item.id)}><i />{item.label}</button>)}</div>
         <b>{String(chapter+1).padStart(2,'0')} / {String(CHAPTERS.length).padStart(2,'0')}</b>
       </nav>
+      <CasePassport />
 
       <section id="origin" className={styles.origin}>
         <Image className={styles.originImage} src="/photos/ChatGPT%20Image%20Sep%206%2C%202026%2C%2010_15_00%20PM.png" alt="Illustrated Occu-Med headquarters" fill priority sizes="100vw" />
