@@ -20,13 +20,34 @@ Source behaviors adopted into the provider experience:
 
 The old standalone `PricingAgreementBuilder` implementation has been retired; its component name remains only as a compatibility wrapper so the larger provider experience does not need to know which agreement engine renders below it.
 
+## Open provider onboarding mode
+
+The public onboarding path is now deliberately a **Provider Fee Proposal** workflow rather than an unauthenticated Provider Service Agreement.
+
+A provider can:
+
+- select its specialty/capabilities earlier in the onboarding experience;
+- review the resulting service list in the embedded Forms document engine;
+- remove services it does not provide;
+- add relevant services;
+- enter proposed self-pay fees and billing terms;
+- complete provider/facility/contact/address information;
+- sign the pricing response and provide electronic-record consent;
+- download the exact A4 pricing-proposal PDF; and
+- submit that exact PDF to Occu-Med for Network Management review.
+
+Public pricing submissions do **not** create an authoritative Forms invitation or bypass Forms admin authentication. Instead, `POST /api/provider-onboarding/submit` validates the pricing response, stores the exact submitted PDF through DocBOX2's existing storage layer, and creates a searchable file inside the existing **Provider Onboarding Submissions** folder in the DocBOX vault. The stored vault record includes the provider, specialty, contact/address data, proposed services/fees, billing terms, notes, reference number, and the exact submitted PDF.
+
+This gives the open onboarding path a real operational destination without weakening the Forms signing/audit boundary. Network Management can review the incoming pricing response in the existing DocBOX environment, then issue the final secure Provider Service Agreement through Occu-Med Forms if the proposal is accepted.
+
+The public submission route includes basic payload validation, PDF signature checking, size limits, a bot-trap field, and a server-side per-client rate limit.
+
 ## Authoritative invitation mode
 
-DocBOX2 now also understands the existing Occu-Med Forms provider invitation lifecycle instead of limiting the integration to a local PDF copy.
+DocBOX2 also understands the existing Occu-Med Forms provider invitation lifecycle instead of limiting the integration to a local PDF copy.
 
-- `/provider/[token]` routes an existing Forms invitation into the integrated provider experience.
-- The experience detects the invitation token and switches the agreement area from the self-onboarding draft into an **authoritative Forms invitation**.
-- Same-origin Next.js proxy routes forward provider-safe invitation actions to the existing Forms backend, avoiding browser CORS coupling while keeping the Forms backend authoritative.
+- `/provider/[token]` renders an existing Forms invitation directly in DocBOX2.
+- Provider-safe same-origin Next.js proxy routes forward invitation actions to the existing Forms backend, avoiding browser CORS coupling while keeping the Forms backend authoritative.
 - Supported provider operations are:
   - load/review the invitation;
   - edit available services and returned fees while the invitation is open;
@@ -48,11 +69,11 @@ The production Occu-Med Forms backend remains the authoritative implementation f
 
 Current Render backend: `https://occu-med-forms.onrender.com`
 
-This means there are now two deliberate entry modes rather than two competing agreement systems:
+There are now two deliberate entry modes rather than two competing agreement systems:
 
-1. **Open provider onboarding:** specialty/capability selection flows into the Forms document engine, with local draft persistence and exact PDF generation.
+1. **Open provider onboarding:** specialty/capability selection → Forms-based Fee Proposal → exact PDF → DocBOX internal review queue → secure Forms Service Agreement invitation if approved.
 2. **Existing secure Forms invitation:** `/provider/[token]` uses the authoritative Forms token/audit lifecycle and returns the signed document to the existing backend.
 
-Creating invitations remains an authenticated Occu-Med/admin action in the Forms system. DocBOX2 does not expose a second unauthenticated invitation-creation endpoint.
+Creating authoritative invitations remains an authenticated Occu-Med/admin action in the Forms system. DocBOX2 does not expose a second unauthenticated invitation-creation endpoint.
 
 Do not re-create a second signing/audit backend in DocBOX2 unless the Forms backend is intentionally retired and its lifecycle is migrated wholesale.
