@@ -6,6 +6,7 @@ import ClinicalDatabase from './ClinicalDatabase';
 import GlobalCoverageExplorer from './GlobalCoverageExplorer';
 import ImmersiveArchive from './ImmersiveArchive';
 import OperationsAtlas from './OperationsAtlas';
+import ValuesPlayground from './ValuesPlayground';
 import styles from './ReferenceStory.module.css';
 
 const CHAPTERS = [
@@ -14,6 +15,7 @@ const CHAPTERS = [
   { id: 'operations-world', label: 'Operations' },
   { id: 'clinical-world-v2', label: 'Clinical' },
   { id: 'network-world-v2', label: 'Network' },
+  { id: 'values-world-v2', label: 'Values' },
   { id: 'partner-gateway', label: 'Partner' },
 ] as const;
 
@@ -121,6 +123,7 @@ export default function ReferenceStory() {
 
       <div id="clinical-world-v2" className={styles.worldWrap}><ClinicalDatabase /></div>
       <div id="network-world-v2" className={styles.worldWrap}><GlobalCoverageExplorer /></div>
+      <div id="values-world-v2" className={styles.worldWrap}><ValuesPlayground /></div>
 
       <section id="partner-gateway" className={styles.gateway}>
         <div className={styles.gatewayNetwork} aria-hidden="true">
