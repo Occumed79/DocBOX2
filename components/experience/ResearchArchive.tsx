@@ -9,52 +9,92 @@ const GOALS = [
   ['03', 'Defensible accommodation', 'Create a medically appropriate and legally defensible framework for reasonable accommodation decisions.'],
 ] as const;
 
+const SYSTEMS = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, '0'));
+
 export default function ResearchArchive() {
   return (
     <section className={styles.archive} data-reveal data-scrub>
       <div className={styles.ambient} aria-hidden="true" />
       <div className={styles.frame}>
-        <div className={styles.kicker}>ARCHIVAL RECORD / 1976</div>
-        <div className={styles.year} aria-hidden="true">1976</div>
+        <div className={styles.originLayer}>
+          <div className={styles.kicker}>ARCHIVAL RECORD / 1976</div>
+          <div className={styles.year} aria-hidden="true">1976</div>
 
-        <div className={styles.copy}>
-          <h2>The company starts<br /><em>before the company.</em></h2>
-          <p>
-            A federally funded research project set out to improve physical and medical standards for employment.
-            The work centered on a problem Occu-Med would keep refining for decades: a medical finding only becomes useful
-            when it is interpreted against the actual job.
-          </p>
-          <div className={styles.evidenceLine}>
-            <span>$2M+</span>
-            <small>cash and in-kind support described in the public archival record</small>
+          <div className={styles.copy}>
+            <h2>The company starts<br /><em>before the company.</em></h2>
+            <p>
+              A federally funded research project set out to improve physical and medical standards for employment.
+              The work centered on a problem Occu-Med would keep refining for decades: a medical finding only becomes useful
+              when it is interpreted against the actual job.
+            </p>
+            <div className={styles.evidenceLine}>
+              <span>$2M+</span>
+              <small>cash and in-kind support described in the public archival record</small>
+            </div>
+          </div>
+
+          <div className={styles.document} aria-label="Research objectives">
+            <div className={styles.paperTop}>
+              <span>RESEARCH OBJECTIVES</span>
+              <b>Improved physical &amp; medical standards for employment</b>
+            </div>
+            <div className={styles.goalList}>
+              {GOALS.map(([id, title, copy]) => (
+                <article key={id}>
+                  <span>{id}</span>
+                  <div>
+                    <h3>{title}</h3>
+                    <p>{copy}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className={styles.scan} aria-hidden="true" />
+          </div>
+
+          <div className={styles.mapFloat} aria-hidden="true">
+            <Image src="/photos/California%20-%20Hawaii%20Map.png" alt="" fill sizes="360px" />
+          </div>
+
+          <div className={styles.footerNote}>
+            Public archival records describe the later Occu-Med methodology as growing from this research and a broader California advisory effort.
           </div>
         </div>
 
-        <div className={styles.document} aria-label="Research objectives">
-          <div className={styles.paperTop}>
-            <span>RESEARCH OBJECTIVES</span>
-            <b>Improved physical &amp; medical standards for employment</b>
+        <div className={styles.guidelinesLayer}>
+          <div className={styles.guidelinesCopy}>
+            <span>THE RESEARCH MATURES</span>
+            <h2>One research program becomes<br /><em>a living medical framework.</em></h2>
+            <p>
+              Later public records describe specialists and subspecialists representing <strong>12 separate body systems</strong>
+              helping formulate Occu-Med&apos;s Compendium of Medical Standards. Continuing research meetings reviewed and revised
+              that body of work as it evolved into what the company termed its Medical Guidelines.
+            </p>
           </div>
-          <div className={styles.goalList}>
-            {GOALS.map(([id, title, copy]) => (
-              <article key={id}>
-                <span>{id}</span>
-                <div>
-                  <h3>{title}</h3>
-                  <p>{copy}</p>
-                </div>
-              </article>
+
+          <div className={styles.systemField} aria-label="Twelve body-system research groups converging into the Medical Guidelines">
+            <div className={styles.systemOrbit} aria-hidden="true" />
+            {SYSTEMS.map((system, index) => (
+              <span key={system} className={styles.systemNode} style={{ '--system-index': index } as React.CSSProperties}>
+                <i>{system}</i>
+              </span>
             ))}
+            <div className={styles.compendium}>
+              <small>RESEARCH-BASED / PROPRIETARY</small>
+              <b>COMPENDIUM<br />OF MEDICAL<br />STANDARDS</b>
+              <span>↓</span>
+              <strong>MEDICAL GUIDELINES</strong>
+            </div>
           </div>
-          <div className={styles.scan} aria-hidden="true" />
-        </div>
 
-        <div className={styles.mapFloat} aria-hidden="true">
-          <Image src="/photos/California%20-%20Hawaii%20Map.png" alt="" fill sizes="360px" />
-        </div>
+          <div className={styles.guidelinesEvidence}>
+            <span>12</span>
+            <p><b>separate body systems</b><br />specialist and subspecialist research described in public Occu-Med records</p>
+          </div>
 
-        <div className={styles.footerNote}>
-          Public archival source describes the methodology as originating in this research and later expanding through a broader California public-sector advisory effort.
+          <div className={styles.guidelinesFoot}>
+            No patent claim is implied. Public records describe a proprietary, research-based methodology and an evolving body of medical guidance.
+          </div>
         </div>
       </div>
     </section>
