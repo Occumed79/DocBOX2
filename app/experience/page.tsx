@@ -7,6 +7,7 @@ import NarrativeThread from '@/components/experience/NarrativeThread';
 import ProviderCompass from '@/components/experience/ProviderCompass';
 import ProviderExperience from '@/components/experience/ProviderExperience';
 import ProviderFAQ from '@/components/experience/ProviderFAQ';
+import SpatialArchiveField from '@/components/experience/SpatialArchiveField';
 import SpatialCaseMorphField from '@/components/experience/SpatialCaseMorphField';
 import SpatialNetworkField from '@/components/experience/SpatialNetworkField';
 import polish from './ProviderStaticPolish.module.css';
@@ -15,6 +16,7 @@ export default function ProviderExperiencePage() {
   return (
     <>
       <CinematicContinuity />
+      <SpatialArchiveField />
       <SpatialCaseMorphField />
       <SpatialNetworkField />
       <NarrativeThread />
