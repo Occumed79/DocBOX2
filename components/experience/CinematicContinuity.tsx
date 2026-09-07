@@ -190,6 +190,8 @@ export default function CinematicContinuity() {
     storySections()[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const effectChapter = CHAPTERS[activeChapter].toLowerCase();
+
   return (
     <>
       <style>{`
@@ -218,6 +220,10 @@ export default function CinematicContinuity() {
         }
       `}</style>
       <div className={styles.atmosphere} aria-hidden="true"><i /><i /><i /></div>
+      <div className={styles.effectField} data-chapter={effectChapter} aria-hidden="true">
+        {Array.from({ length: 8 }, (_, index) => <i key={index} />)}
+        <b /><b /><b />
+      </div>
       <div className={styles.progress} aria-hidden="true"><i style={{ transform: `scaleX(${overallProgress})` }} /></div>
       <div className={styles.chapterStamp} aria-hidden="true">
         <span>{String(activeChapter + 1).padStart(2, '0')}</span>
