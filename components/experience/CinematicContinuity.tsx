@@ -21,6 +21,11 @@ const PALETTES = [
 
 type AutoKey = 'history' | 'process' | 'clinical' | 'workforce' | 'values';
 
+type DirectorStageDetail = {
+  chapter?: string;
+  index?: number;
+};
+
 function clamp(value: number) {
   return Math.max(0, Math.min(1, value));
 }
@@ -72,6 +77,13 @@ export default function CinematicContinuity() {
       if (!buttons[index]) return;
       lastAuto.current[key] = index;
       buttons[index].click();
+    };
+
+    const onDirectorStage = (event: Event) => {
+      const detail = (event as CustomEvent<DirectorStageDetail>).detail;
+      if (detail?.chapter === 'Values' && typeof detail.index === 'number') {
+        setActiveValueEffect(Math.max(0, Math.min(VALUE_EFFECTS.length - 1, detail.index)));
+      }
     };
 
     const update = () => {
@@ -134,20 +146,26 @@ export default function CinematicContinuity() {
         }
       });
 
-      baseSections.forEach((section, index) => {
-        const p = sceneProgress(section, vh);
-        if (index === 1) clickIndexedButton('history', section, Math.min(4, Math.floor(clamp((p - 0.05) / 0.9) * 5)));
-        if (index === 5) clickIndexedButton('process', section, Math.min(6, Math.floor(clamp((p - 0.03) / 0.94) * 7)));
-        if (index === 6) clickIndexedButton('clinical', section, Math.min(4, Math.floor(clamp((p - 0.04) / 0.92) * 5)));
-        if (index === 7) clickIndexedButton('workforce', section, p < 0.52 ? 0 : 1);
-      });
+      const manualDirectorStages = root.dataset.directorManualStages === 'true';
+
+      if (!manualDirectorStages) {
+        baseSections.forEach((section, index) => {
+          const p = sceneProgress(section, vh);
+          if (index === 1) clickIndexedButton('history', section, Math.min(4, Math.floor(clamp((p - 0.05) / 0.9) * 5)));
+          if (index === 5) clickIndexedButton('process', section, Math.min(6, Math.floor(clamp((p - 0.03) / 0.94) * 7)));
+          if (index === 6) clickIndexedButton('clinical', section, Math.min(4, Math.floor(clamp((p - 0.04) / 0.92) * 5)));
+          if (index === 7) clickIndexedButton('workforce', section, p < 0.52 ? 0 : 1);
+        });
+      }
 
       if (values) {
         const p = sceneProgress(values, vh);
-        const valueIndex = Math.min(5, Math.floor(clamp((p - 0.05) / 0.9) * 6));
-        clickIndexedButton('values', values, valueIndex);
-        setActiveValueEffect(valueIndex);
         root.style.setProperty('--value-progress', clamp((p * 6) % 1).toFixed(4));
+        if (!manualDirectorStages) {
+          const valueIndex = Math.min(5, Math.floor(clamp((p - 0.05) / 0.9) * 6));
+          clickIndexedButton('values', values, valueIndex);
+          setActiveValueEffect(valueIndex);
+        }
       }
 
       const provider = document.getElementById('provider-details');
@@ -182,10 +200,12 @@ export default function CinematicContinuity() {
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', queue);
     window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('occumed:director-stage', onDirectorStage);
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', queue);
       window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('occumed:director-stage', onDirectorStage);
       window.clearTimeout(settleTimer);
       if (frame) window.cancelAnimationFrame(frame);
     };
