@@ -4,8 +4,9 @@ import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import styles from './GlobalCoverageExplorer.module.css';
 
-type Layer = 'coverage' | 'services' | 'standards';
-type Service = 'Medical' | 'Dental' | 'Vaccination' | 'Laboratory' | 'Diagnostics';
+type Layer = 'coverage' | 'services' | 'programs' | 'standards';
+type Service = 'Medical' | 'Dental' | 'Vaccination' | 'Laboratory' | 'Diagnostics' | 'Specialist';
+type Program = 'Pre-placement' | 'Deployment' | 'Fitness / RTW' | 'Periodic / surveillance';
 
 type Marker = {
   id: string;
@@ -30,20 +31,38 @@ const SERVICES: Record<Service, { copy: string; image: string; examples: string[
   Vaccination: { copy: 'Routine, travel, and deployment vaccination coordination.', image: '/photos/Pharmacist%20Administering%20a%20Vaccine(1)%20(1).png', examples: ['Routine immunizations', 'Travel vaccines', 'Deployment vaccines', 'Administration records'] },
   Laboratory: { copy: 'Collection and laboratory testing support tied to the evaluation program.', image: '/photos/Calm%20Clinic%20Blood%20Draw%20(1).png', examples: ['Routine panels', 'Urinalysis', 'TB testing', 'Specimen collection'] },
   Diagnostics: { copy: 'Diagnostic studies and specialty testing coordinated into the larger case.', image: '/photos/Audiometry.png', examples: ['Chest imaging', 'Audiometry', 'Cardiovascular testing', 'Other authorized studies'] },
+  Specialist: { copy: 'Specialist and subspecialist referrals extend the network beyond general occupational medicine.', image: '/photos/Diverse%20Healthcare%20Team%20Portrait%20(1).png', examples: ['Specialist evaluation', 'Subspecialist review', 'Focused diagnostics', 'Follow-up consultation'] },
+};
+
+const PROGRAMS: Record<Program, { headline: string; facts: string[] }> = {
+  'Pre-placement': { headline: 'Job-related medical evaluation before placement.', facts: ['Medical history and physical examination', 'Vision / hearing when required', 'Drug / alcohol testing when required', 'Pulmonary, cardiovascular, and laboratory components as authorized'] },
+  Deployment: { headline: 'Medical-readiness coordination for deployment programs.', facts: ['Deployment-specific medical scope', 'Vaccination and laboratory support', 'Job / destination requirements', 'Centralized results and review workflow'] },
+  'Fitness / RTW': { headline: 'Fitness-for-duty and return-to-work evaluation support.', facts: ['Job-specific question', 'Targeted medical evaluation', 'Relevant records and testing', 'Compatibility-focused medical review'] },
+  'Periodic / surveillance': { headline: 'Recurring medical surveillance across distributed workforces.', facts: ['Periodic examinations', 'Program-specific testing', 'Centralized consistency', 'Multi-location coordination'] },
 };
 
 export default function GlobalCoverageExplorer() {
   const [layer, setLayer] = useState<Layer>('coverage');
   const [service, setService] = useState<Service>('Medical');
+  const [program, setProgram] = useState<Program>('Pre-placement');
   const [marker, setMarker] = useState('us');
   const selectedMarker = MARKERS.find(item => item.id === marker) ?? MARKERS[2];
   const selectedService = SERVICES[service];
+  const selectedProgram = PROGRAMS[program];
+
+  const reset = () => {
+    setLayer('coverage');
+    setService('Medical');
+    setProgram('Pre-placement');
+    setMarker('us');
+  };
 
   const scopeCopy = useMemo(() => {
     if (layer === 'coverage') return selectedMarker.sub;
     if (layer === 'services') return `${service}: ${selectedService.copy}`;
+    if (layer === 'programs') return selectedProgram.headline;
     return 'A single operating model connects authorization, provider documentation, quality assurance, and medical review across geography.';
-  }, [layer, selectedMarker.sub, selectedService.copy, service]);
+  }, [layer, selectedMarker.sub, selectedService.copy, selectedProgram.headline, service]);
 
   return (
     <section className={styles.explorer} aria-label="Occu-Med global network explorer">
@@ -60,11 +79,12 @@ export default function GlobalCoverageExplorer() {
       </div>
 
       <div className={styles.layerBar}>
-        {(['coverage','services','standards'] as Layer[]).map(item => <button type="button" key={item} data-active={layer===item} onClick={() => setLayer(item)}>{item}</button>)}
+        {(['coverage','services','programs','standards'] as Layer[]).map(item => <button type="button" key={item} data-active={layer===item} onClick={() => setLayer(item)}>{item}</button>)}
+        <button type="button" onClick={reset}>reset view</button>
       </div>
 
       <div className={styles.workspace}>
-        <div className={styles.map}>
+        <div className={styles.map} data-layer={layer}>
           <div className={styles.mapImage} aria-hidden="true"><Image src="/photos/International%20Network.png" alt="" fill sizes="70vw" /></div>
           <svg className={styles.graticule} viewBox="0 0 100 70" preserveAspectRatio="none" aria-hidden="true">
             {Array.from({length:8},(_,i)=><line key={`v${i}`} x1={(i+1)*11.1} y1="0" x2={(i+1)*11.1} y2="70" />)}
@@ -81,7 +101,7 @@ export default function GlobalCoverageExplorer() {
             </button>
           ))}
 
-          <div className={styles.mapNote}>Coverage visualization / verified scope layer</div>
+          <div className={styles.mapNote}>{layer === 'coverage' ? 'Verified coverage scope' : layer === 'services' ? `${service} provider-category layer` : layer === 'programs' ? `${program} program layer` : 'Operating-standard layer'} / illustrative pathways</div>
         </div>
 
         <aside className={styles.panel}>
@@ -101,13 +121,18 @@ export default function GlobalCoverageExplorer() {
             <div className={styles.factList}>{selectedService.examples.map(item => <span key={item}>{item}</span>)}</div>
           </>}
 
+          {layer === 'programs' && <>
+            <div className={styles.serviceTabs}>{(Object.keys(PROGRAMS) as Program[]).map(item => <button type="button" key={item} data-active={program===item} onClick={() => setProgram(item)}>{item}</button>)}</div>
+            <div className={styles.factList}>{selectedProgram.facts.map(item => <span key={item}>{item}</span>)}</div>
+          </>}
+
           {layer === 'standards' && <div className={styles.standardFlow}>
             <span>01 <b>Valid job information</b></span><i>→</i><span>02 <b>Job-related medical exam</b></span><i>→</i><span>03 <b>Compatibility assessment</b></span>
           </div>}
         </aside>
       </div>
 
-      <div className={styles.disclaimer}><b>Data rule:</b> exact anchors are labeled as anchors. Geographic scope is shown as scope. The interface does not invent provider counts for regions that Occu-Med has not publicly quantified.</div>
+      <div className={styles.disclaimer}><b>Data rule:</b> exact anchors are labeled as anchors. Geographic scope is shown as scope. The animated pathways are illustrative network connections, not claims about specific provider routes or regional provider counts.</div>
     </section>
   );
 }
