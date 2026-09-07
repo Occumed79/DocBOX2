@@ -35,6 +35,14 @@ function collectSections() {
   return [...base, ...(values ? [values] : []), ...(handoff ? [handoff] : [])];
 }
 
+function applyStage(section: HTMLElement | undefined, chapter: (typeof CHAPTERS)[number], index: number) {
+  if (!section || !(STAGES[chapter]?.length)) return;
+  const buttons = Array.from(section.querySelectorAll<HTMLButtonElement>('button'));
+  if (!buttons[index]) return;
+  buttons[index].click();
+  window.dispatchEvent(new CustomEvent('occumed:director-stage', { detail: { chapter, index } }));
+}
+
 export default function DirectorOverlay() {
   const [enabled, setEnabled] = useState(false);
   const [chapter, setChapter] = useState(0);
@@ -77,12 +85,19 @@ export default function DirectorOverlay() {
         }
       });
 
+      const resolvedChapter = Math.min(CHAPTERS.length - 1, index);
+      const chapterName = CHAPTERS[resolvedChapter];
       setChapter(previous => {
-        const next = Math.min(CHAPTERS.length - 1, index);
-        if (next !== previous) setStageIndex(0);
-        return next;
+        if (resolvedChapter !== previous) setStageIndex(0);
+        return resolvedChapter;
       });
       setProgress(local);
+
+      // Director Mode is mounted after the cinematic controller. Re-applying the selected
+      // stage here means manual staging wins after any scroll-driven automatic update.
+      if (manualStages && resolvedChapter === chapter) {
+        applyStage(sections[resolvedChapter], chapterName, stageIndex);
+      }
     };
 
     const queue = () => {
@@ -97,7 +112,7 @@ export default function DirectorOverlay() {
       window.removeEventListener('resize', queue);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [enabled]);
+  }, [enabled, manualStages, stageIndex, chapter]);
 
   const percent = useMemo(() => Math.round(progress * 100), [progress]);
   const currentChapter = CHAPTERS[chapter];
@@ -124,12 +139,9 @@ export default function DirectorOverlay() {
   const chooseStage = (index: number) => {
     const section = collectSections()[chapter];
     if (!section) return;
-    const buttons = Array.from(section.querySelectorAll<HTMLButtonElement>('button'));
-    if (!buttons[index]) return;
     setManualStages(true);
     setStageIndex(index);
-    buttons[index].click();
-    window.dispatchEvent(new CustomEvent('occumed:director-stage', { detail: { chapter: currentChapter, index } }));
+    applyStage(section, currentChapter, index);
   };
 
   return (
