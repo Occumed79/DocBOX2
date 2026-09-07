@@ -16,7 +16,7 @@ test.describe('provider experience', () => {
     const provider = page.locator('#provider-details');
     await provider.scrollIntoViewIfNeeded();
     await expect(page.getByRole('heading', { name: 'Show us what your facility does.' })).toBeVisible();
-    await page.getByRole('button', { name: 'Dental' }).click();
+    await page.getByRole('button', { name: 'Dental', exact: true }).click();
     await expect(page.getByText('Comprehensive dental evaluation')).toBeVisible();
     await expect(page.getByText('Provider Fee Proposal').first()).toBeVisible();
 
