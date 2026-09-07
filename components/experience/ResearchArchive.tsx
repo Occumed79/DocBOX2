@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import type { CSSProperties } from 'react';
+import milestoneStyles from './ResearchArchiveMilestones.module.css';
 import styles from './ResearchArchive.module.css';
 
 const GOALS = [
@@ -88,7 +89,7 @@ export default function ResearchArchive() {
             </div>
           </div>
 
-          <div className={styles.growthMarkers}>
+          <div className={`${styles.growthMarkers} ${milestoneStyles.three}`}>
             <article>
               <span>1980</span>
               <p>Comprehensive employment medical standards are already being used alongside formal position physical-effort analyses.</p>
