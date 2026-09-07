@@ -1,0 +1,250 @@
+.surface {
+  display: contents;
+}
+
+.surface :global(#provider-details) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 8%, rgba(94,171,214,.09), transparent 24%),
+    linear-gradient(180deg, #ffffff 0%, #fbfcfd 64%, #f7fafc 100%);
+}
+
+.surface :global(#provider-details)::before {
+  content: 'PROVIDER PARTNER';
+  position: absolute;
+  right: -1vw;
+  top: 36px;
+  z-index: -1;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(84px, 14vw, 220px);
+  line-height: .72;
+  letter-spacing: -.08em;
+  color: rgba(16,55,78,.028);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.surface :global(#provider-details) > div:nth-child(1) {
+  position: relative;
+  z-index: 2;
+  padding-bottom: 36px;
+  border-bottom: 1px solid rgba(17,57,80,.1);
+}
+
+.surface :global(#provider-details) > div:nth-child(1) h2 {
+  max-width: 760px;
+  font-size: clamp(62px, 7vw, 112px) !important;
+  line-height: .88 !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(1) p {
+  max-width: 520px;
+  padding-left: 20px;
+  border-left: 1px solid rgba(57,125,169,.18);
+}
+
+.surface :global(#provider-details) > div:nth-child(2) {
+  margin-top: 24px !important;
+  padding: 0 0 18px !important;
+  gap: 24px !important;
+  border-bottom: 1px solid rgba(17,57,80,.1) !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(2) button {
+  position: relative;
+  padding: 16px 0 12px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #7a858d !important;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .045em;
+}
+
+.surface :global(#provider-details) > div:nth-child(2) button::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -19px;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, #245d80, #74b9de);
+  transition: transform .24s ease;
+}
+
+.surface :global(#provider-details) > div:nth-child(2) button:hover {
+  color: #174866 !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(2) button[class]:not([class='']) {
+  color: #123d57 !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(2) button[class]:not([class=''])::after {
+  transform: scaleX(1);
+}
+
+.surface :global(#provider-details) > div:nth-child(3) {
+  position: relative;
+  margin-top: 64px !important;
+  padding: 58px 0 !important;
+  grid-template-columns: minmax(280px,.72fr) minmax(0,1.28fr) !important;
+  gap: 72px !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(17,57,80,.1) !important;
+  border-bottom: 1px solid rgba(17,57,80,.1) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(3)::before {
+  content: 'CAPABILITIES';
+  position: absolute;
+  right: 0;
+  top: 18px;
+  color: rgba(20,67,95,.16);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .2em;
+}
+
+.surface :global(#provider-details) > div:nth-child(3) > div:first-child h3 {
+  margin-top: 12px;
+  font-size: clamp(42px, 4vw, 64px) !important;
+  letter-spacing: -.04em;
+}
+
+.surface :global(#provider-details) > div:nth-child(3) > div:last-child {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 0 22px !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(3) > div:last-child button {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 62px;
+  padding: 14px 4px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(17,57,80,.11) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #52636d !important;
+  text-align: left;
+  transition: color .2s ease, padding-left .2s ease, background .2s ease;
+}
+
+.surface :global(#provider-details) > div:nth-child(3) > div:last-child button:hover {
+  padding-left: 10px !important;
+  color: #1f597b !important;
+  background: linear-gradient(90deg, rgba(99,173,214,.055), transparent) !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(3) > div:last-child button[class]:not([class='']) {
+  color: #164f72 !important;
+  background: linear-gradient(90deg, rgba(85,164,208,.08), transparent 74%) !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(3) > div:last-child button i {
+  flex: 0 0 auto;
+}
+
+.surface :global(#provider-details) > div:nth-child(4) {
+  position: relative;
+  margin-top: 72px !important;
+  gap: 0 !important;
+  border-top: 1px solid rgba(17,57,80,.1);
+  border-bottom: 1px solid rgba(17,57,80,.1);
+}
+
+.surface :global(#provider-details) > div:nth-child(4) article {
+  position: relative;
+  min-height: 310px;
+  padding: 48px 44px 42px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(4) article + article {
+  padding-left: 44px !important;
+  border-left: 1px solid rgba(17,57,80,.1) !important;
+}
+
+.surface :global(#provider-details) > div:nth-child(4) article::before {
+  position: absolute;
+  right: 26px;
+  top: 30px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 86px;
+  line-height: 1;
+  color: rgba(17,65,94,.045);
+}
+
+.surface :global(#provider-details) > div:nth-child(4) article:first-child::before { content: '01'; }
+.surface :global(#provider-details) > div:nth-child(4) article:last-child::before { content: '02'; }
+
+.surface :global(#provider-details) > div:nth-child(4) article h3 {
+  max-width: 440px;
+  font-size: clamp(34px, 3.6vw, 54px) !important;
+  letter-spacing: -.035em;
+}
+
+.surface :global(#provider-details) > div:nth-child(5) {
+  position: relative;
+  margin-top: 96px !important;
+  padding-top: 42px;
+  border-top: 1px solid rgba(17,57,80,.11);
+}
+
+.surface :global(#provider-details) > div:nth-child(5)::before {
+  content: 'COMMERCIAL TERMS';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  color: rgba(18,66,95,.2);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .2em;
+}
+
+@media (max-width: 900px) {
+  .surface :global(#provider-details) > div:nth-child(1) h2 {
+    font-size: clamp(54px, 12vw, 82px) !important;
+  }
+  .surface :global(#provider-details) > div:nth-child(1) p {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .surface :global(#provider-details) > div:nth-child(2) {
+    gap: 14px !important;
+  }
+  .surface :global(#provider-details) > div:nth-child(3) {
+    grid-template-columns: 1fr !important;
+    gap: 34px !important;
+  }
+  .surface :global(#provider-details) > div:nth-child(4) {
+    grid-template-columns: 1fr !important;
+  }
+  .surface :global(#provider-details) > div:nth-child(4) article,
+  .surface :global(#provider-details) > div:nth-child(4) article + article {
+    padding: 36px 0 !important;
+    border-left: 0 !important;
+  }
+  .surface :global(#provider-details) > div:nth-child(4) article + article {
+    border-top: 1px solid rgba(17,57,80,.1) !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .surface :global(#provider-details) > div:nth-child(3) > div:last-child {
+    grid-template-columns: 1fr;
+  }
+  .surface :global(#provider-details) > div:nth-child(2) button {
+    font-size: 10px;
+  }
+}
