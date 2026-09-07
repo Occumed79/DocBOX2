@@ -180,22 +180,6 @@
 .cornerLeft { left: 28px; }
 .cornerRight { right: 28px; }
 
-:global(#provider-details) {
-  scroll-margin-top: 0;
-  isolation: isolate;
-}
-
-:global(#provider-details)::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: min(1120px, calc(100% - 48px));
-  height: 1px;
-  transform: translateX(-50%);
-  background: linear-gradient(90deg, transparent, rgba(18,76,110,.25), transparent);
-}
-
 @media (max-width: 760px) {
   .transitionLabel {
     grid-template-columns: 1fr;
