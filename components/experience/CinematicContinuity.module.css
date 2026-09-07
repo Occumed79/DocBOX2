@@ -6,7 +6,9 @@
   z-index: 120;
   height: 2px;
   pointer-events: none;
+  opacity: var(--cinema, 1);
   background: rgba(255,255,255,.06);
+  transition: opacity .5s ease;
 }
 
 .progress i {
@@ -16,6 +18,87 @@
   transform-origin: left center;
   background: linear-gradient(90deg, rgba(119,205,247,.25), rgba(154,226,255,.96));
   box-shadow: 0 0 18px rgba(119,205,247,.5);
+}
+
+.atmosphere {
+  position: fixed;
+  inset: -12vh -10vw;
+  z-index: 102;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: var(--cinema, 1);
+  mix-blend-mode: screen;
+  transition: opacity .55s ease;
+}
+
+.atmosphere::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at calc(12% + var(--experience-progress, 0) * 72%) calc(18% + var(--chapter-progress, 0) * 54%), rgb(var(--continuity-tone, 91 178 221) / .11), transparent 29%),
+    radial-gradient(circle at calc(88% - var(--experience-progress, 0) * 52%) 74%, rgb(var(--continuity-tone, 91 178 221) / .07), transparent 27%);
+  filter: blur(34px) saturate(1.2);
+}
+
+.atmosphere i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--continuity-tone, 91 178 221) / .12);
+  box-shadow: inset 0 0 60px rgb(var(--continuity-tone, 91 178 221) / .025), 0 0 50px rgb(var(--continuity-tone, 91 178 221) / .04);
+  transform: translate3d(0, calc((var(--chapter-progress, 0) - .5) * 80px), 0) rotate(calc(var(--experience-progress, 0) * 80deg));
+  transition: border-color .55s ease, box-shadow .55s ease;
+}
+
+.atmosphere i:nth-child(1) {
+  width: 42vw;
+  height: 42vw;
+  left: -12vw;
+  top: 7vh;
+}
+
+.atmosphere i:nth-child(2) {
+  width: 31vw;
+  height: 31vw;
+  right: 4vw;
+  top: 20vh;
+  transform: translate3d(0, calc((.5 - var(--chapter-progress, 0)) * 95px), 0) rotate(calc(var(--experience-progress, 0) * -110deg));
+}
+
+.atmosphere i:nth-child(3) {
+  width: 18vw;
+  height: 18vw;
+  left: 47vw;
+  bottom: 2vh;
+  opacity: .7;
+}
+
+.chapterStamp {
+  position: fixed;
+  right: 24px;
+  top: 22px;
+  z-index: 111;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  pointer-events: none;
+  color: rgba(255,255,255,.72);
+  mix-blend-mode: difference;
+  opacity: var(--cinema, 1);
+  transition: opacity .45s ease;
+}
+
+.chapterStamp span {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  color: rgba(255,255,255,.38);
+}
+
+.chapterStamp strong {
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
 }
 
 .chapterNav {
@@ -28,6 +111,8 @@
   gap: 10px;
   transform: translateY(-50%);
   mix-blend-mode: difference;
+  opacity: var(--cinema, 1);
+  transition: opacity .45s ease;
 }
 
 .chapterNav button {
@@ -87,18 +172,22 @@
   inset: 0;
   z-index: 105;
   pointer-events: none;
-  opacity: .16;
+  opacity: var(--cinema, 1);
   background:
     radial-gradient(circle at center, transparent 58%, rgba(0,0,0,.22) 100%),
     linear-gradient(90deg, rgba(0,0,0,.08), transparent 10%, transparent 90%, rgba(0,0,0,.08));
+  transition: opacity .5s ease;
 }
 
 @media (max-width: 900px) {
   .chapterNav { left: 12px; }
   .chapterNav button span { display: none; }
-  .vignette { opacity: .08; }
+  .chapterStamp { right: 12px; top: 14px; }
+  .atmosphere { opacity: .45; }
+  .vignette { opacity: .35; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chapterNav *, .progress * { transition: none !important; }
+  .chapterNav *, .progress *, .atmosphere *, .chapterStamp { transition: none !important; }
+  .atmosphere i { transform: none !important; }
 }
