@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import ChapterMorph from '@/components/experience/ChapterMorph';
 import CinematicContinuity from '@/components/experience/CinematicContinuity';
 import CinematicHandoff from '@/components/experience/CinematicHandoff';
@@ -18,7 +19,9 @@ export default function ProviderExperiencePage() {
       <ProviderCompass />
       <DirectorOverlay />
       <div className={polish.surface}>
-        <ProviderExperience />
+        <Suspense fallback={<div aria-hidden="true" style={{ minHeight: '100vh', background: '#071923' }} />}>
+          <ProviderExperience />
+        </Suspense>
         <ProviderFAQ />
       </div>
     </>
