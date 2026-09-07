@@ -1,9 +1,11 @@
-import { formsBackendFetch, proxyBinaryResponse } from '@/lib/forms-backend';
+import { formsBackendFetch, formsProviderHeaders, proxyBinaryResponse } from '@/lib/forms-backend';
 
 type Context = { params: Promise<{ token: string }> };
 
-export async function GET(_request: Request, context: Context) {
+export async function GET(request: Request, context: Context) {
   const { token } = await context.params;
-  const response = await formsBackendFetch(`/api/provider-invitations/${encodeURIComponent(token)}/certificate`);
+  const response = await formsBackendFetch(`/api/provider-invitations/${encodeURIComponent(token)}/certificate`, {
+    headers: formsProviderHeaders(request),
+  });
   return proxyBinaryResponse(response);
 }
