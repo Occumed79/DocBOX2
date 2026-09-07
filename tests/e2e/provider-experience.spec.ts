@@ -13,6 +13,7 @@ test.describe('provider experience', () => {
     await expect(archive.getByRole('heading', { name: /Walk through the research/i })).toBeVisible();
     await archive.getByRole('button', { name: 'Method', exact: true }).click();
     await expect(archive.getByText('EXAMQA', { exact: true }).first()).toBeVisible();
+    await archive.getByRole('button', { name: 'All', exact: true }).click();
     await archive.getByPlaceholder(/1976, Honolulu/i).fill('Honolulu');
     await expect(archive.getByText('1979', { exact: true }).first()).toBeVisible();
     await archive.getByRole('button', { name: 'Clear archive search' }).click();
@@ -37,6 +38,17 @@ test.describe('provider experience', () => {
     await network.getByRole('button', { name: 'services', exact: true }).click();
     await network.getByRole('button', { name: 'Dental', exact: true }).click();
     await expect(network.getByText(/Dental-readiness examinations/i)).toBeVisible();
+    await network.getByRole('button', { name: 'programs', exact: true }).click();
+    await network.getByRole('button', { name: 'Deployment', exact: true }).click();
+    await expect(network.getByText(/Medical-readiness coordination/i)).toBeVisible();
+
+    const values = page.getByRole('region', { name: 'Occu-Med values interaction playground' });
+    await values.scrollIntoViewIfNeeded();
+    await values.getByRole('button', { name: /Quality$/ }).click();
+    await expect(values.getByText('MOVE THE INSPECTION LENS')).toBeVisible();
+    await values.getByRole('button', { name: /Diligence$/ }).click();
+    await values.getByRole('button', { name: /01 REPORT/ }).click();
+    await expect(values.getByText('3 REQUIRED PIECES REMAIN')).toBeVisible();
 
     const provider = page.locator('#provider-details');
     await provider.scrollIntoViewIfNeeded();
