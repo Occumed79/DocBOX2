@@ -22,7 +22,7 @@ The old standalone `PricingAgreementBuilder` implementation has been retired; it
 
 ## Open provider onboarding mode
 
-The public onboarding path is now deliberately a **Provider Fee Proposal** workflow rather than an unauthenticated Provider Service Agreement.
+The public onboarding path is deliberately a **Provider Fee Proposal** workflow rather than an unauthenticated Provider Service Agreement.
 
 A provider can:
 
@@ -36,9 +36,19 @@ A provider can:
 - download the exact A4 pricing-proposal PDF; and
 - submit that exact PDF to Occu-Med for Network Management review.
 
-Public pricing submissions do **not** create an authoritative Forms invitation or bypass Forms admin authentication. Instead, `POST /api/provider-onboarding/submit` validates the pricing response, stores the exact submitted PDF through DocBOX2's existing storage layer, and creates a searchable file inside the existing **Provider Onboarding Submissions** folder in the DocBOX vault. The stored vault record includes the provider, specialty, contact/address data, proposed services/fees, billing terms, notes, reference number, and the exact submitted PDF.
+Public pricing submissions do **not** create an authoritative Forms invitation or bypass Forms admin authentication. Instead, `POST /api/provider-onboarding/submit` validates the pricing response, stores the exact submitted PDF through DocBOX2's existing storage layer, and creates a searchable file inside the **Provider Onboarding Submissions** folder in the DocBOX vault. The stored vault record includes the provider, specialty, contact/address data, proposed services/fees, billing terms, notes, reference number, and the exact submitted PDF.
 
-This gives the open onboarding path a real operational destination without weakening the Forms signing/audit boundary. Network Management can review the incoming pricing response in the existing DocBOX environment, then issue the final secure Provider Service Agreement through Occu-Med Forms if the proposal is accepted.
+The DocBOX folder is now an operational review queue rather than just a storage destination:
+
+- a dedicated queue header appears when Network Management opens **Provider Onboarding Submissions**;
+- submissions can be filtered by **New**, **In review**, **Ready for Forms**, and **Declined**;
+- opening Details renders the stored provider/contact/address/service/fee information as a structured review panel instead of exposing raw JSON notes;
+- reviewers can open the exact submitted PDF from the panel;
+- status changes update both the structured metadata and the file tags so the queue/filter state stays searchable;
+- **Ready for Forms** explicitly means pricing has been reviewed and the next action is to create the secure Provider Service Agreement invitation in Occu-Med Forms; and
+- the system-generated Provider Onboarding Submissions folder is protected from accidental deletion in the DocBOX UI.
+
+This gives the open onboarding path a real operational destination without weakening the Forms signing/audit boundary. Network Management reviews the pricing response in DocBOX, then deliberately issues the final secure Provider Service Agreement through Occu-Med Forms if the proposal is accepted.
 
 The public submission route includes basic payload validation, PDF signature checking, size limits, a bot-trap field, and a server-side per-client rate limit.
 
@@ -69,7 +79,7 @@ The production Occu-Med Forms backend remains the authoritative implementation f
 
 Current Render backend: `https://occu-med-forms.onrender.com`
 
-There are now two deliberate entry modes rather than two competing agreement systems:
+There are two deliberate entry modes rather than two competing agreement systems:
 
 1. **Open provider onboarding:** specialty/capability selection → Forms-based Fee Proposal → exact PDF → DocBOX internal review queue → secure Forms Service Agreement invitation if approved.
 2. **Existing secure Forms invitation:** `/provider/[token]` uses the authoritative Forms token/audit lifecycle and returns the signed document to the existing backend.
