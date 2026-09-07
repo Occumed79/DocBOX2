@@ -11,6 +11,7 @@ const VERTEX = `
 attribute vec3 a_archive;
 attribute vec3 a_research;
 attribute vec3 a_guidelines;
+attribute vec3 a_method;
 uniform float u_stage;
 uniform vec2 u_rotation;
 uniform float u_aspect;
@@ -31,8 +32,10 @@ vec3 rotateX(vec3 p, float a) {
 void main() {
   float first = smoothstep(0.0, 1.0, min(u_stage, 1.0));
   float second = smoothstep(1.0, 2.0, u_stage);
+  float third = smoothstep(2.0, 3.0, u_stage);
   vec3 p = mix(a_archive, a_research, first);
   p = mix(p, a_guidelines, second);
+  p = mix(p, a_method, third);
   p = rotateX(rotateY(p, u_rotation.x), u_rotation.y);
 
   float depth = 3.15 - p.z * 0.72;
@@ -42,7 +45,7 @@ void main() {
   clip.x += .19;
   gl_Position = vec4(clip, 0.0, 1.0);
   gl_PointSize = u_size * (.72 + perspective * 2.0);
-  v_mix = clamp(u_stage * .5, 0.0, 1.0);
+  v_mix = clamp(u_stage / 2.6, 0.0, 1.0);
   v_alpha = u_opacity * (.42 + (p.z + 1.0) * .18);
 }
 `;
@@ -67,6 +70,11 @@ void main() {
 
 function clamp(value: number, min = 0, max = 1) {
   return Math.max(min, Math.min(max, value));
+}
+
+function smoothstep(edge0: number, edge1: number, value: number) {
+  const x = clamp((value - edge0) / Math.max(.0001, edge1 - edge0));
+  return x * x * (3 - 2 * x);
 }
 
 function hash(index: number, salt: number) {
@@ -116,6 +124,17 @@ function guidelinesShape(): Vec3[] {
   });
 }
 
+function methodSeedShape(): Vec3[] {
+  return Array.from({ length: COUNT }, (_, index) => {
+    const x = hash(index, 7) * 2 - 1;
+    const y = hash(index, 8) * 2 - 1;
+    const z = hash(index, 9) * 2 - 1;
+    const norm = Math.max(.001, Math.abs(x) + Math.abs(y) + Math.abs(z));
+    const radius = .72 + hash(index, 10) * .23;
+    return [x / norm * radius, y / norm * radius, z / norm * radius];
+  });
+}
+
 function flatten(points: Vec3[]) {
   return new Float32Array(points.flatMap(point => point));
 }
@@ -158,6 +177,14 @@ function archiveProgress(section: HTMLElement) {
   return clamp(raw);
 }
 
+function proximity(section: HTMLElement | undefined, vh: number) {
+  if (!section) return 0;
+  const rect = section.getBoundingClientRect();
+  const distance = Math.abs(rect.top + rect.height * .5 - vh * .5);
+  const reach = Math.max(vh * .95, rect.height * .68);
+  return clamp(1 - distance / reach);
+}
+
 export default function SpatialArchiveField() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -175,7 +202,7 @@ export default function SpatialArchiveField() {
       return;
     }
 
-    const shapes = [archiveShape(), researchShape(), guidelinesShape()];
+    const shapes = [archiveShape(), researchShape(), guidelinesShape(), methodSeedShape()];
     const buffers = shapes.map(shape => {
       const buffer = gl.createBuffer();
       if (!buffer) return null;
@@ -185,7 +212,7 @@ export default function SpatialArchiveField() {
     });
     if (buffers.some(buffer => !buffer)) return;
 
-    const attributeNames = ['a_archive', 'a_research', 'a_guidelines'] as const;
+    const attributeNames = ['a_archive', 'a_research', 'a_guidelines', 'a_method'] as const;
     const attributes = attributeNames.map(name => gl.getAttribLocation(program, name));
     const uniforms = {
       stage: gl.getUniformLocation(program, 'u_stage'),
@@ -218,19 +245,31 @@ export default function SpatialArchiveField() {
     };
 
     const updateTarget = () => {
-      const section = document.querySelector<HTMLElement>('[data-spatial-archive]');
-      if (!section) {
+      const archive = document.querySelector<HTMLElement>('[data-spatial-archive]');
+      if (!archive) {
         targetOpacity = 0;
         return;
       }
-      const rect = section.getBoundingClientRect();
+
       const vh = window.innerHeight || 1;
-      const distance = Math.abs(rect.top + rect.height * .5 - vh * .5);
-      const reach = rect.height * .72 + vh * .45;
-      const progress = archiveProgress(section);
-      targetStage = progress * 2;
-      targetOpacity = clamp(1 - distance / Math.max(vh, reach)) * .56;
-      if (rect.bottom < vh * .06 || rect.top > vh * .95) targetOpacity *= .35;
+      const archiveRect = archive.getBoundingClientRect();
+      const archiveDistance = Math.abs(archiveRect.top + archiveRect.height * .5 - vh * .5);
+      const archiveReach = archiveRect.height * .72 + vh * .45;
+      const progress = archiveProgress(archive);
+      const archiveOpacity = clamp(1 - archiveDistance / Math.max(vh, archiveReach)) * .56;
+
+      const sections = Array.from(document.querySelectorAll<HTMLElement>('section[data-scrub]'));
+      const method = sections[4];
+      const methodNear = proximity(method, vh);
+      let bridge = 0;
+      if (method && methodNear > .035) {
+        const methodRect = method.getBoundingClientRect();
+        bridge = smoothstep(-.12, .86, (vh * .94 - methodRect.top) / Math.max(1, vh * 1.48));
+      }
+
+      targetStage = methodNear > .035 ? Math.max(progress * 2, 2 + bridge) : progress * 2;
+      targetOpacity = Math.max(archiveOpacity, methodNear * .34);
+      if (archiveRect.bottom < vh * .06 && methodNear < .035) targetOpacity *= .22;
     };
 
     const draw = (now: number) => {
