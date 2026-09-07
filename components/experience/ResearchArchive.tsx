@@ -15,7 +15,7 @@ const SYSTEMS = Array.from({ length: 12 }, (_, index) => String(index + 1).padSt
 
 export default function ResearchArchive() {
   return (
-    <section className={styles.archive} data-reveal data-scrub>
+    <section className={styles.archive} data-reveal data-scrub data-spatial-archive>
       <div className={styles.ambient} aria-hidden="true" />
       <div className={styles.frame}>
         <div className={styles.originLayer}>
