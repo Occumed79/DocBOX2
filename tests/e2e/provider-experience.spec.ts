@@ -8,10 +8,17 @@ test.describe('provider experience', () => {
     await page.goto('/experience');
     await expect(page.getByRole('heading', { name: /Before the network/i })).toBeVisible();
     await expect(page.locator('[data-spatial-archive-canvas]')).toHaveCount(1);
+    await expect(page.locator('[data-spatial-values-canvas]')).toHaveCount(1);
 
     const archive = page.locator('[data-spatial-archive]');
     await archive.scrollIntoViewIfNeeded();
     await expect(page.getByRole('heading', { name: /The company starts/i })).toBeVisible();
+
+    const valuesHeading = page.getByRole('heading', { name: /Six values/i });
+    await valuesHeading.scrollIntoViewIfNeeded();
+    await expect(valuesHeading).toBeVisible();
+    await page.getByRole('button', { name: 'Integrity', exact: true }).click();
+    await expect(page.locator('[data-spatial-values-canvas]')).toBeVisible();
 
     const provider = page.locator('#provider-details');
     await provider.scrollIntoViewIfNeeded();
@@ -33,6 +40,9 @@ test.describe('provider experience', () => {
     await director.getByRole('button', { name: 'Archive' }).click();
     await expect(page.getByRole('heading', { name: /The company starts/i })).toBeVisible();
     await expect(director.getByText('Archive', { exact: true }).first()).toBeVisible();
+    await director.getByRole('button', { name: 'Values' }).click();
+    await director.getByRole('button', { name: 'Integrity', exact: true }).click();
+    await expect(page.locator('[data-spatial-values-canvas]')).toBeVisible();
   });
 
   test('reduced motion removes spatial canvases without removing the story or provider flow', async ({ page }) => {
@@ -41,6 +51,7 @@ test.describe('provider experience', () => {
 
     await expect(page.getByRole('heading', { name: /Before the network/i })).toBeVisible();
     await expect(page.locator('[data-spatial-archive-canvas]')).toBeHidden();
+    await expect(page.locator('[data-spatial-values-canvas]')).toBeHidden();
 
     const archive = page.locator('[data-spatial-archive]');
     await archive.scrollIntoViewIfNeeded();
