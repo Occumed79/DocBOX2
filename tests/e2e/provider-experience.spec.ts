@@ -37,9 +37,14 @@ test.describe('provider experience', () => {
     const director = page.getByRole('complementary', { name: 'Experience director mode' });
     await expect(director).toBeVisible();
     await expect(director.getByText('DIRECTOR MODE')).toBeVisible();
+
     await director.getByRole('button', { name: 'Archive' }).click();
     await expect(page.getByRole('heading', { name: /The company starts/i })).toBeVisible();
     await expect(director.getByText('Archive', { exact: true }).first()).toBeVisible();
+    await expect(director.getByRole('button', { name: 'Method seed', exact: true })).toBeVisible();
+    await director.getByRole('button', { name: 'Method seed', exact: true }).click();
+    await expect(page.locator('[data-spatial-archive-canvas]')).toBeVisible();
+
     await director.getByRole('button', { name: 'Values' }).click();
     await director.getByRole('button', { name: 'Integrity', exact: true }).click();
     await expect(page.locator('[data-spatial-values-canvas]')).toBeVisible();
