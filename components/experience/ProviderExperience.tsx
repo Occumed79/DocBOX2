@@ -317,7 +317,16 @@ export default function ProviderExperience() {
             ))}
           </div>
           <div className={styles.processVisual}>
-            <Image key={process.id} className={styles.processImage} src={process.image} alt={process.imageAlt} fill sizes="(max-width: 900px) 100vw, 65vw" />
+            {PROCESS.map((item, index) => (
+              <Image
+                key={item.id}
+                className={`${styles.processImage} ${index === activeProcess ? styles.processImageActive : ''}`}
+                src={item.image}
+                alt={item.imageAlt}
+                fill
+                sizes="(max-width: 900px) 100vw, 65vw"
+              />
+            ))}
             <div className={styles.processImageShade} />
             <div className={styles.processPacket}>
               <small>OCCU-MED / CASE FLOW</small>
@@ -337,7 +346,16 @@ export default function ProviderExperience() {
         </div>
         <div className={styles.clinicalStage}>
           <div className={styles.clinicalImageWrap}>
-            <Image key={clinical.label} className={styles.clinicalImage} src={clinical.image} alt={clinical.alt} fill sizes="(max-width: 900px) 100vw, 68vw" />
+            {CLINICAL.map((item, index) => (
+              <Image
+                key={item.label}
+                className={`${styles.clinicalImage} ${index === activeClinical ? styles.clinicalImageActive : ''}`}
+                src={item.image}
+                alt={item.alt}
+                fill
+                sizes="(max-width: 900px) 100vw, 68vw"
+              />
+            ))}
             <div className={styles.clinicalImageShade} />
             <div className={styles.clinicalCounter}>{String(activeClinical + 1).padStart(2, '0')} / {String(CLINICAL.length).padStart(2, '0')}</div>
             {activeClinical === 4 && <div className={styles.vaccineSchedule}><Image src={PHOTOS.vaccineSchedule} alt="Vaccine schedule icon" fill sizes="150px" /></div>}
