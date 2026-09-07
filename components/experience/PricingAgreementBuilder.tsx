@@ -18,8 +18,22 @@ type LocationDetail = {
   country: string;
 };
 
+type AgreementDraft = {
+  facilityName: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  billingEmail: string;
+  sameRates: boolean;
+  locations: string[];
+  locationDetails: Record<string, LocationDetail>;
+  sharedRates: RateMap;
+  locationRates: LocationRates;
+};
+
 const DEFAULT_LOCATION = 'Primary facility';
 const EMPTY_LOCATION: LocationDetail = { address: '', city: '', region: '', postalCode: '', country: 'United States' };
+const DRAFT_KEY = 'occumed-provider-agreement-draft-v1';
 
 function normalizeRates(services: string[], previous: RateMap): RateMap {
   return Object.fromEntries(services.map(service => [service, previous[service] ?? '']));
@@ -50,6 +64,56 @@ export default function PricingAgreementBuilder({ services, specialty }: Props) 
   const [sharedRates, setSharedRates] = useState<RateMap>({});
   const [locationRates, setLocationRates] = useState<LocationRates>({});
   const [reviewing, setReviewing] = useState(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const draft = JSON.parse(raw) as Partial<AgreementDraft>;
+        if (typeof draft.facilityName === 'string') setFacilityName(draft.facilityName);
+        if (typeof draft.contactName === 'string') setContactName(draft.contactName);
+        if (typeof draft.contactEmail === 'string') setContactEmail(draft.contactEmail);
+        if (typeof draft.contactPhone === 'string') setContactPhone(draft.contactPhone);
+        if (typeof draft.billingEmail === 'string') setBillingEmail(draft.billingEmail);
+        if (typeof draft.sameRates === 'boolean') setSameRates(draft.sameRates);
+        if (Array.isArray(draft.locations) && draft.locations.length) setLocations(draft.locations.filter(item => typeof item === 'string'));
+        if (draft.locationDetails && typeof draft.locationDetails === 'object') setLocationDetails(draft.locationDetails);
+        if (draft.sharedRates && typeof draft.sharedRates === 'object') setSharedRates(draft.sharedRates);
+        if (draft.locationRates && typeof draft.locationRates === 'object') setLocationRates(draft.locationRates);
+      }
+    } catch {
+      // A malformed or unavailable browser draft should never block the provider flow.
+    } finally {
+      setDraftLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!draftLoaded) return;
+    const timer = window.setTimeout(() => {
+      try {
+        const draft: AgreementDraft = {
+          facilityName,
+          contactName,
+          contactEmail,
+          contactPhone,
+          billingEmail,
+          sameRates,
+          locations,
+          locationDetails,
+          sharedRates,
+          locationRates,
+        };
+        window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        setLastSaved(new Date());
+      } catch {
+        // Local draft persistence is an enhancement, not a blocker.
+      }
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [draftLoaded, facilityName, contactName, contactEmail, contactPhone, billingEmail, sameRates, locations, locationDetails, sharedRates, locationRates]);
 
   useEffect(() => {
     setSharedRates(previous => normalizeRates(services, previous));
@@ -119,6 +183,22 @@ export default function PricingAgreementBuilder({ services, specialty }: Props) 
     }));
   };
 
+  const clearDraft = () => {
+    try { window.localStorage.removeItem(DRAFT_KEY); } catch { /* no-op */ }
+    setFacilityName('');
+    setContactName('');
+    setContactEmail('');
+    setContactPhone('');
+    setBillingEmail('');
+    setSameRates(true);
+    setLocations([DEFAULT_LOCATION]);
+    setLocationDetails({ [DEFAULT_LOCATION]: { ...EMPTY_LOCATION } });
+    setSharedRates({});
+    setLocationRates({});
+    setReviewing(false);
+    setLastSaved(null);
+  };
+
   const printAgreement = () => {
     const popup = window.open('', '_blank', 'width=980,height=900');
     if (!popup) return;
@@ -176,6 +256,10 @@ export default function PricingAgreementBuilder({ services, specialty }: Props) 
             <span>FEE SCHEDULE BUILDER</span>
             <h3>Turn capability into an executable provider profile.</h3>
             <p>Facility identity, contacts, physical locations, and self-pay rates now stay together in one reviewable agreement workspace.</p>
+            <div className={styles.draftStatus}>
+              <span>{draftLoaded ? (lastSaved ? `Draft saved locally · ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Local draft ready') : 'Loading local draft…'}</span>
+              <button type="button" onClick={clearDraft}>Clear draft</button>
+            </div>
           </div>
 
           <div className={styles.identityRow}>
