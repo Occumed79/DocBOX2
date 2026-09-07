@@ -1,6 +1,6 @@
 'use client';
 
-import FormsProviderAgreement from '@/components/forms/FormsProviderAgreement';
+import FormsAgreementRouter from '@/components/forms/FormsAgreementRouter';
 
 type Props = {
   services: string[];
@@ -9,8 +9,9 @@ type Props = {
 
 /**
  * Compatibility wrapper retained so the cinematic/provider experience does not
- * need to know that the agreement implementation now comes from Occu-Med Forms.
+ * need to know whether the provider is self-onboarding or opening an
+ * authoritative Occu-Med Forms invitation.
  */
 export default function PricingAgreementBuilder({ services, specialty }: Props) {
-  return <FormsProviderAgreement services={services} specialty={specialty} />;
+  return <FormsAgreementRouter services={services} specialty={specialty} />;
 }
