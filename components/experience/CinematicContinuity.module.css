@@ -103,7 +103,7 @@
   background: rgb(var(--continuity-tone, 91 178 221) / .62);
   box-shadow: 0 0 18px rgb(var(--continuity-tone, 91 178 221) / .46);
   opacity: .12;
-  transition: left .8s cubic-bezier(.2,.75,.2,1), top .8s cubic-bezier(.2,.75,.2,1), opacity .55s ease, transform .8s cubic-bezier(.2,.75,.2,1);
+  transition: left .8s cubic-bezier(.2,.75,.2,1), top .8s cubic-bezier(.2,.75,.2,1), opacity .55s ease, transform .8s cubic-bezier(.2,.75,.2,1), border-radius .55s ease;
 }
 
 .effectField > i:nth-child(1){left:8%;top:24%}.effectField > i:nth-child(2){left:21%;top:65%}.effectField > i:nth-child(3){left:37%;top:38%}.effectField > i:nth-child(4){left:49%;top:73%}.effectField > i:nth-child(5){left:63%;top:27%}.effectField > i:nth-child(6){left:74%;top:59%}.effectField > i:nth-child(7){left:87%;top:34%}.effectField > i:nth-child(8){left:93%;top:78%}
@@ -117,7 +117,7 @@
   transform-origin: left center;
   background: linear-gradient(90deg,transparent,rgb(var(--continuity-tone,91 178 221) / .2),transparent);
   opacity: 0;
-  transition: opacity .5s ease, transform .8s cubic-bezier(.2,.75,.2,1);
+  transition: opacity .5s ease, transform .8s cubic-bezier(.2,.75,.2,1), left .8s ease, top .8s ease, width .8s ease;
 }
 .effectField > b:nth-of-type(2){top:35%;transform:rotate(8deg)}
 .effectField > b:nth-of-type(3){top:66%;transform:rotate(-9deg)}
@@ -155,6 +155,35 @@
 .effectField[data-chapter='network'] > b:nth-of-type(3){transform:rotate(-14deg) scaleX(var(--chapter-progress,0))}
 
 .effectField[data-chapter='values'] > i {opacity:.22;transform:scale(calc(.7 + var(--chapter-progress,0)*.7))}
+.effectField[data-chapter='values'] > b {opacity:.12}
+
+/* Humility: everything lowers, gathers, and quiets. */
+.effectField[data-chapter='values'][data-value='humility'] > i {top:72%;opacity:.16;transform:scale(.72)}
+.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(1){left:37%}.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(2){left:43%}.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(3){left:49%}.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(4){left:55%}.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(5){left:61%}
+.effectField[data-chapter='values'][data-value='humility'] > b:first-of-type{left:34%;top:76%;width:32%;opacity:.16}
+
+/* Positivity: a restrained light burst rather than confetti. */
+.effectField[data-chapter='values'][data-value='positivity'] > i {left:74%;top:36%;opacity:.64;transform:scale(calc(.8 + var(--value-progress,0)*1.1))}
+.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(1){transform:translate(-90px,-65px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(2){transform:translate(0,-105px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(3){transform:translate(92px,-52px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(4){transform:translate(112px,30px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(5){transform:translate(45px,96px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(6){transform:translate(-52px,92px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(7){transform:translate(-112px,24px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(8){transform:scale(2.4)}
+.effectField[data-chapter='values'][data-value='positivity'] > b{left:64%;top:36%;width:20%;opacity:.26}.effectField[data-chapter='values'][data-value='positivity'] > b:nth-of-type(2){transform:rotate(60deg)}.effectField[data-chapter='values'][data-value='positivity'] > b:nth-of-type(3){transform:rotate(-60deg)}
+
+/* Customer service: two sides stay connected through a live communication path. */
+.effectField[data-chapter='values'][data-value='customer-service'] > i{opacity:.42;top:54%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(-n+4){left:25%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(n+5){left:75%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(1),.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(5){top:40%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(2),.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(6){top:49%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(3),.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(7){top:58%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(4),.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(8){top:67%}
+.effectField[data-chapter='values'][data-value='customer-service'] > b{left:25%;top:49%;width:50%;opacity:.34}.effectField[data-chapter='values'][data-value='customer-service'] > b:nth-of-type(2){top:58%;transform:none}.effectField[data-chapter='values'][data-value='customer-service'] > b:nth-of-type(3){top:40%;transform:none}
+
+/* Quality: elements snap to an inspection grid / target. */
+.effectField[data-chapter='values'][data-value='quality'] > i{border-radius:2px;opacity:.48;transform:scale(1)}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(1){left:63%;top:30%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(2){left:72%;top:30%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(3){left:81%;top:30%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(4){left:63%;top:48%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(5){left:72%;top:48%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(6){left:81%;top:48%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(7){left:67%;top:66%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(8){left:77%;top:66%}
+.effectField[data-chapter='values'][data-value='quality'] > b{left:60%;width:25%;opacity:.22}.effectField[data-chapter='values'][data-value='quality'] > b:first-of-type{top:39%}.effectField[data-chapter='values'][data-value='quality'] > b:nth-of-type(2){top:57%;transform:none}.effectField[data-chapter='values'][data-value='quality'] > b:nth-of-type(3){left:72%;top:25%;width:1px;height:47%;transform:none;background:rgb(var(--continuity-tone,91 178 221) / .22)}
+
+/* Integrity: a symmetrical balance around a center line. */
+.effectField[data-chapter='values'][data-value='integrity'] > i{opacity:.5}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(1){left:31%;top:38%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(2){left:36%;top:51%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(3){left:41%;top:64%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(4){left:49%;top:51%;transform:scale(1.8)}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(5){left:57%;top:64%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(6){left:62%;top:51%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(7){left:67%;top:38%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(8){left:49%;top:74%}
+.effectField[data-chapter='values'][data-value='integrity'] > b{opacity:.3}.effectField[data-chapter='values'][data-value='integrity'] > b:first-of-type{left:31%;top:51%;width:36%}.effectField[data-chapter='values'][data-value='integrity'] > b:nth-of-type(2){left:49%;top:31%;width:1px;height:46%;transform:none;background:rgb(var(--continuity-tone,91 178 221) / .25)}.effectField[data-chapter='values'][data-value='integrity'] > b:nth-of-type(3){left:31%;top:38%;width:36%;transform:rotate(0)}
+
+/* Diligence: a deliberate scanning path moves through checkpoints. */
+.effectField[data-chapter='values'][data-value='diligence'] > i{opacity:.52;left:72%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(1){top:19%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(2){top:28%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(3){top:37%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(4){top:46%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(5){top:55%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(6){top:64%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(7){top:73%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(8){top:82%;transform:scale(1.8)}
+.effectField[data-chapter='values'][data-value='diligence']::after{content:'';position:absolute;left:58%;right:13%;top:calc(18% + var(--value-progress,0)*64%);height:1px;background:linear-gradient(90deg,transparent,rgb(var(--continuity-tone,91 178 221) / .62),transparent);box-shadow:0 0 20px rgb(var(--continuity-tone,91 178 221) / .28);opacity:.56}
+.effectField[data-chapter='values'][data-value='diligence'] > b:first-of-type{left:72%;top:19%;width:1px;height:63%;opacity:.25;background:rgb(var(--continuity-tone,91 178 221) / .22)}
+
 .effectField[data-chapter='partner'] {opacity:calc(var(--cinema,1)*.35)}
 
 .chapterStamp {
