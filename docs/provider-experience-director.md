@@ -72,8 +72,9 @@ For each release candidate, run the following checks before moving the PR out of
 5. **Mobile:** verify specialty selection, capability rows, address inputs, rate tables, agreement review, and FAQ do not overflow the viewport.
 6. **Draft recovery:** enter provider/contact/location/rate data, reload, and confirm the local draft restores. Then clear the draft and confirm the reset persists.
 7. **Agreement review:** test both shared pricing and location-specific pricing with multiple facilities. Print the review copy and verify addresses, contacts, terms, and every selected service rate are present.
-8. **No customer names:** scan all public-facing history copy before release. Source records can identify customers internally; the experience must not.
-9. **Historical wording:** preserve the distinction between proprietary methodology and patent protection, and do not turn contested archival records into testimonials.
-10. **CI:** require install, TypeScript, and production build to pass on the exact release-candidate head.
+8. **Provider FAQ:** step through all six FAQ states and confirm the provider-role wording stays aligned with the actual referral workflow.
+9. **No customer names:** scan all public-facing history copy before release. Source records can identify customers internally; the experience must not.
+10. **Historical wording:** preserve the distinction between proprietary methodology and patent protection, and do not turn contested archival records into testimonials.
+11. **CI:** require install, TypeScript, and production build to pass on the exact release-candidate head.
 
 Director Mode is a tuning tool, not part of the provider-facing product UI.
