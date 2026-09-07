@@ -85,6 +85,78 @@
   opacity: .7;
 }
 
+.effectField {
+  position: fixed;
+  inset: 0;
+  z-index: 103;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: var(--cinema, 1);
+  transition: opacity .5s ease;
+}
+
+.effectField > i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--continuity-tone, 91 178 221) / .62);
+  box-shadow: 0 0 18px rgb(var(--continuity-tone, 91 178 221) / .46);
+  opacity: .12;
+  transition: left .8s cubic-bezier(.2,.75,.2,1), top .8s cubic-bezier(.2,.75,.2,1), opacity .55s ease, transform .8s cubic-bezier(.2,.75,.2,1);
+}
+
+.effectField > i:nth-child(1){left:8%;top:24%}.effectField > i:nth-child(2){left:21%;top:65%}.effectField > i:nth-child(3){left:37%;top:38%}.effectField > i:nth-child(4){left:49%;top:73%}.effectField > i:nth-child(5){left:63%;top:27%}.effectField > i:nth-child(6){left:74%;top:59%}.effectField > i:nth-child(7){left:87%;top:34%}.effectField > i:nth-child(8){left:93%;top:78%}
+
+.effectField > b {
+  position: absolute;
+  left: 12%;
+  top: 50%;
+  width: 76%;
+  height: 1px;
+  transform-origin: left center;
+  background: linear-gradient(90deg,transparent,rgb(var(--continuity-tone,91 178 221) / .2),transparent);
+  opacity: 0;
+  transition: opacity .5s ease, transform .8s cubic-bezier(.2,.75,.2,1);
+}
+.effectField > b:nth-of-type(2){top:35%;transform:rotate(8deg)}
+.effectField > b:nth-of-type(3){top:66%;transform:rotate(-9deg)}
+
+.effectField[data-chapter='archive'] > i {opacity:.22;transform:scale(.7)}
+.effectField[data-chapter='archive'] > i:nth-child(odd){left:83%}
+.effectField[data-chapter='archive'] > i:nth-child(even){left:74%}
+.effectField[data-chapter='archive'] > b{opacity:.18;left:68%;width:24%;transform:rotate(90deg)}
+
+.effectField[data-chapter='method'] > i {opacity:.3;transform:scale(1.15)}
+.effectField[data-chapter='method'] > i:nth-child(1){left:65%;top:22%}.effectField[data-chapter='method'] > i:nth-child(2){left:84%;top:48%}.effectField[data-chapter='method'] > i:nth-child(3){left:60%;top:74%}.effectField[data-chapter='method'] > i:nth-child(n+4){opacity:.06}
+.effectField[data-chapter='method'] > b{left:59%;width:26%;opacity:.2}.effectField[data-chapter='method'] > b:nth-of-type(2){top:35%;transform:rotate(54deg)}.effectField[data-chapter='method'] > b:nth-of-type(3){top:63%;transform:rotate(-52deg)}
+
+.effectField[data-chapter='referral'] > i {opacity:.33;top:70%;transform:scale(.9)}
+.effectField[data-chapter='referral'] > i:nth-child(1){left:12%}.effectField[data-chapter='referral'] > i:nth-child(2){left:24%}.effectField[data-chapter='referral'] > i:nth-child(3){left:36%}.effectField[data-chapter='referral'] > i:nth-child(4){left:48%}.effectField[data-chapter='referral'] > i:nth-child(5){left:60%}.effectField[data-chapter='referral'] > i:nth-child(6){left:72%}.effectField[data-chapter='referral'] > i:nth-child(7){left:84%}.effectField[data-chapter='referral'] > i:nth-child(8){left:93%}
+.effectField[data-chapter='referral'] > b:first-of-type{top:70%;left:12%;width:82%;opacity:.28;transform:scaleX(var(--chapter-progress,0))}
+
+.effectField[data-chapter='clinical']::after {
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  top:var(--chapter-y,50%);
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgb(var(--continuity-tone,91 178 221) / .42),transparent);
+  box-shadow:0 0 24px rgb(var(--continuity-tone,91 178 221) / .22);
+  opacity:.42;
+}
+.effectField[data-chapter='clinical'] > i{opacity:.08}
+
+.effectField[data-chapter='network'] > i {opacity:.74;transform:scale(1.35)}
+.effectField[data-chapter='network'] > b {opacity:.4}
+.effectField[data-chapter='network'] > b:first-of-type{transform:rotate(5deg) scaleX(var(--chapter-progress,0))}
+.effectField[data-chapter='network'] > b:nth-of-type(2){transform:rotate(16deg) scaleX(var(--chapter-progress,0))}
+.effectField[data-chapter='network'] > b:nth-of-type(3){transform:rotate(-14deg) scaleX(var(--chapter-progress,0))}
+
+.effectField[data-chapter='values'] > i {opacity:.22;transform:scale(calc(.7 + var(--chapter-progress,0)*.7))}
+.effectField[data-chapter='partner'] {opacity:calc(var(--cinema,1)*.35)}
+
 .chapterStamp {
   position: fixed;
   right: 24px;
@@ -195,11 +267,12 @@
   .chapterNav button span { display: none; }
   .chapterStamp { right: 12px; top: 14px; }
   .atmosphere { opacity: .45; }
+  .effectField { opacity: .35; }
   .vignette { opacity: .35; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chapterNav *, .progress *, .atmosphere *, .chapterStamp { transition: none !important; }
+  .chapterNav *, .progress *, .atmosphere *, .chapterStamp, .effectField * { transition: none !important; }
   .atmosphere i { transform: none !important; filter: none !important; }
-  .atmosphere::after { display: none; }
+  .atmosphere::after, .effectField { display: none; }
 }
