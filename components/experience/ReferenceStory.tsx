@@ -124,7 +124,16 @@ export default function ReferenceStory() {
 
       <section id="partner-gateway" className={styles.gateway}>
         <div className={styles.gatewayNetwork} aria-hidden="true">
-          {Array.from({ length: 36 },(_,i)=><i key={i} style={{ '--i': i } as React.CSSProperties} />)}
+          {Array.from({ length: 36 },(_,i) => (
+            <i
+              key={i}
+              style={{
+                '--i': i,
+                '--radius': `${120 + (i % 6) * 38}px`,
+                '--alpha': 0.18 + (i % 4) * 0.09,
+              } as React.CSSProperties}
+            />
+          ))}
         </div>
         <div className={styles.gatewayImage} aria-hidden="true"><Image src="/photos/Diverse%20Healthcare%20Team%20Portrait%20(1).png" alt="" fill sizes="55vw" /></div>
         <div className={styles.gatewayCopy}>
