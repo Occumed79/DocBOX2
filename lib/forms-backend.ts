@@ -5,6 +5,15 @@ export function formsBackendUrl(path: string) {
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
+export function formsProviderHeaders(request: Request) {
+  const headers = new Headers();
+  const forwardedFor = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
+  const userAgent = request.headers.get('user-agent');
+  if (forwardedFor) headers.set('X-Forwarded-For', forwardedFor);
+  if (userAgent) headers.set('User-Agent', userAgent);
+  return headers;
+}
+
 export async function formsBackendFetch(path: string, init?: RequestInit) {
   return fetch(formsBackendUrl(path), {
     ...init,
@@ -23,6 +32,7 @@ export async function proxyJsonResponse(response: Response) {
     headers: {
       'Content-Type': response.headers.get('content-type') || 'application/json',
       'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
     },
   });
 }
@@ -32,6 +42,7 @@ export async function proxyBinaryResponse(response: Response) {
   const headers = new Headers({
     'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
     'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
   });
   const disposition = response.headers.get('content-disposition');
   if (disposition) headers.set('Content-Disposition', disposition);
