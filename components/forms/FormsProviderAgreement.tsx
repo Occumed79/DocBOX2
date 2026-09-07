@@ -263,18 +263,18 @@ function ProviderDocumentPreview({ data, previewRef }: { data: ProviderDocumentD
                   <dl><div><dt>Issued</dt><dd>{formatDate(data.issuedDate)}</dd></div><div><dt>Valid through</dt><dd>{formatDate(data.expiresDate)}</dd></div><div><dt>Billing terms</dt><dd>{data.billingTerms || '—'}</dd></div><div><dt>Prepared by</dt><dd>{data.preparedBy}{data.preparedByTitle ? `, ${data.preparedByTitle}` : ''}</dd></div></dl>
                 </div>
 
-                <div className={styles.intro}>{data.documentType === 'fee-proposal' ? 'Occu-Med proposes the following fees for the occupational health services listed below. The provider may review the proposal, remove services that are not available, and add services it would like Occu-Med to consider.' : 'This agreement records the services, fees, and operating terms accepted by Occu-Med and the provider. Only services authorized by Occu-Med for a specific referral may be performed and invoiced.'}</div>
+                <div className={styles.intro}>{data.documentType === 'fee-proposal' ? 'Submit the following fees for Occu-Med review. The provider may remove services that are not available, add relevant services, and return its proposed self-pay rates. A final Provider Service Agreement is issued separately through the secure Occu-Med Forms invitation workflow after review.' : 'This agreement records the services, fees, and operating terms accepted by Occu-Med and the provider. Only services authorized by Occu-Med for a specific referral may be performed and invoiced.'}</div>
 
                 {data.documentType === 'service-agreement' && <div className={styles.terms}>{SERVICE_AGREEMENT_SECTIONS.map((section, index) => <div key={section.title}><span>{index + 1}</span><strong>{section.title}</strong><p>{section.body}</p></div>)}</div>}
               </>
             )}
 
-            <div className={styles.sectionHeading}><span>{firstPage ? 'Services and agreed fees' : 'Services and agreed fees — continued'}</span><span>{pageIndex + 1} / {pages.length}</span></div>
+            <div className={styles.sectionHeading}><span>{firstPage ? 'Services and proposed fees' : 'Services and proposed fees — continued'}</span><span>{pageIndex + 1} / {pages.length}</span></div>
             <table className={styles.servicesTable}><thead><tr><th>Service / Exam Component</th><th>Fee</th><th>Added by</th></tr></thead><tbody>{pageServices.length ? pageServices.map(row => <tr key={row.id}><td>{row.component || '—'}</td><td>{row.price || '—'}</td><td>{row.source === 'provider' ? 'Provider' : 'Occu-Med'}</td></tr>) : <tr><td colSpan={3} className={styles.empty}>No services have been added.</td></tr>}</tbody></table>
 
             {finalPage && data.notes && <div className={styles.notes}><strong>Notes</strong><p>{data.notes}</p></div>}
 
-            {finalPage && <div className={styles.signatures}><div><span>For Occu-Med</span><OccuMedSignature /><strong>{data.preparedBy}</strong><p>{data.preparedByTitle}</p><p>{formatDate(data.issuedDate)}</p></div><div><span>Provider acceptance</span>{data.providerSignatureType === 'drawn' && data.providerSignatureData ? <img className={styles.drawnSignature} src={data.providerSignatureData} alt={`Signature of ${data.providerSignerName}`} /> : <strong className={data.providerSignerName ? styles.typedSignature : ''}>{data.providerSignerName || 'Pending provider signature'}</strong>}{data.providerSignatureType === 'drawn' && data.providerSignerName && <p>{data.providerSignerName}</p>}<p>{data.providerSignerTitle || 'Title'}</p><p>{formatDate(data.providerSignedDate)}</p></div></div>}
+            {finalPage && <div className={styles.signatures}><div><span>Prepared by Occu-Med</span><OccuMedSignature /><strong>{data.preparedBy}</strong><p>{data.preparedByTitle}</p><p>{formatDate(data.issuedDate)}</p></div><div><span>Provider pricing response</span>{data.providerSignatureType === 'drawn' && data.providerSignatureData ? <img className={styles.drawnSignature} src={data.providerSignatureData} alt={`Signature of ${data.providerSignerName}`} /> : <strong className={data.providerSignerName ? styles.typedSignature : ''}>{data.providerSignerName || 'Pending provider signature'}</strong>}{data.providerSignatureType === 'drawn' && data.providerSignerName && <p>{data.providerSignerName}</p>}<p>{data.providerSignerTitle || 'Title'}</p><p>{formatDate(data.providerSignedDate)}</p></div></div>}
 
             <footer><span>Occu-Med · Provider Network Management</span><span>{data.documentNumber || 'Draft'}</span></footer>
           </section>
@@ -299,7 +299,13 @@ export default function FormsProviderAgreement({ services, specialty }: Props) {
       const raw = window.localStorage.getItem(DRAFT_KEY);
       if (raw) {
         const draft = JSON.parse(raw) as ProviderDocumentData;
-        if (draft && draft.documentNumber && Array.isArray(draft.services)) setData(draft);
+        if (draft && draft.documentNumber && Array.isArray(draft.services)) {
+          setData({
+            ...draft,
+            documentType: 'fee-proposal',
+            documentNumber: draft.documentType === 'fee-proposal' ? draft.documentNumber : `OM-FP-${Date.now().toString(36).toUpperCase()}`,
+          });
+        }
       }
     } catch {
       // A malformed browser draft should not block the agreement workflow.
@@ -313,9 +319,14 @@ export default function FormsProviderAgreement({ services, specialty }: Props) {
       const byName = new Map(current.services.map(row => [row.component, row]));
       const selected = services.map(service => byName.get(service) || createProviderServiceRow(service));
       const providerAdded = current.services.filter(row => row.source === 'provider' && !services.includes(row.component));
-      return { ...current, services: [...selected, ...providerAdded] };
+      return { ...current, documentType: 'fee-proposal', services: [...selected, ...providerAdded] };
     });
   }, [services]);
+
+  useEffect(() => {
+    if (!data.agreedElectronic || !data.providerSignerName.trim() || data.providerSignedDate) return;
+    setData(current => ({ ...current, providerSignedDate: today() }));
+  }, [data.agreedElectronic, data.providerSignerName, data.providerSignedDate]);
 
   useEffect(() => {
     if (!draftLoaded) return;
@@ -342,17 +353,10 @@ export default function FormsProviderAgreement({ services, specialty }: Props) {
     setNewService('');
   };
 
-  const switchDocumentType = (documentType: ProviderDocumentType) => {
-    setData(current => ({
-      ...current,
-      documentType,
-      documentNumber: `OM-${documentType === 'fee-proposal' ? 'FP' : 'PSA'}-${Date.now().toString(36).toUpperCase()}`,
-    }));
-  };
-
   const completeAndDownload = async () => {
     const finalData: ProviderDocumentData = {
       ...data,
+      documentType: 'fee-proposal',
       providerSignatureData: data.providerSignatureType === 'typed' ? data.providerSignerName : data.providerSignatureData,
       providerSignedDate: data.providerSignedDate || today(),
       electronicConsentText: ELECTRONIC_RECORD_CONSENT_TEXT,
@@ -367,7 +371,7 @@ export default function FormsProviderAgreement({ services, specialty }: Props) {
     setBusy(true);
     try {
       await new Promise<void>(resolve => window.requestAnimationFrame(() => resolve()));
-      if (!previewRef.current) throw new Error('The agreement preview is not ready.');
+      if (!previewRef.current) throw new Error('The pricing proposal preview is not ready.');
       const bytes = await providerDocumentPdf(previewRef.current);
       downloadPdf(bytes, safeFilename(finalData));
     } catch (downloadError) {
@@ -387,21 +391,21 @@ export default function FormsProviderAgreement({ services, specialty }: Props) {
   const completedServices = data.services.filter(row => row.component.trim() && row.price.trim()).length;
 
   return (
-    <section className={styles.shell} aria-label="Occu-Med provider forms agreement workflow">
+    <section className={styles.shell} aria-label="Occu-Med provider pricing proposal workflow">
       <div className={styles.launch}>
-        <div><span>OCCU-MED FORMS</span><h3>The actual provider agreement workflow.</h3><p>{specialty} · {services.length} selected service{services.length === 1 ? '' : 's'} · fee proposal / service agreement</p></div>
-        <button type="button" onClick={() => setOpen(value => !value)}>{open ? 'Close workspace' : 'Open agreement workspace →'}</button>
+        <div><span>OCCU-MED FORMS</span><h3>Build the pricing response Occu-Med will review.</h3><p>{specialty} · {services.length} selected service{services.length === 1 ? '' : 's'} · Provider Fee Proposal</p></div>
+        <button type="button" onClick={() => setOpen(value => !value)}>{open ? 'Close workspace' : 'Open pricing workspace →'}</button>
       </div>
 
       {open && <div className={styles.workspace}>
         <div className={styles.toolbar}>
-          <div><span>DOCUMENT TYPE</span><div className={styles.typeSwitch}><button type="button" className={data.documentType === 'fee-proposal' ? styles.activeType : ''} onClick={() => switchDocumentType('fee-proposal')}>Fee Proposal</button><button type="button" className={data.documentType === 'service-agreement' ? styles.activeType : ''} onClick={() => switchDocumentType('service-agreement')}>Service Agreement</button></div></div>
+          <div><span>DOCUMENT</span><div className={styles.typeSwitch}><button type="button" className={styles.activeType} disabled>Provider Fee Proposal</button></div></div>
           <div className={styles.status}><span>{completedServices}/{data.services.filter(row => row.component.trim()).length || 0} rates entered</span><span>{lastSaved ? `Draft saved ${lastSaved.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : 'Local draft'}</span></div>
         </div>
 
         <div className={styles.layout}>
           <aside className={styles.editor}>
-            <div className={styles.editorIntro}><span>YOUR RESPONSE</span><h4>{documentTitle(data.documentType)}</h4><p>Review the services, enter your fees, complete your information, and sign the same document that becomes the PDF.</p></div>
+            <div className={styles.editorIntro}><span>YOUR PRICING RESPONSE</span><h4>Provider Fee Proposal</h4><p>Review the requested services, enter your self-pay fees, complete your facility information, and sign the exact pricing response that will be sent to Occu-Med for review.</p></div>
 
             {error && <div className={styles.error} role="alert">{error}</div>}
 
@@ -409,16 +413,16 @@ export default function FormsProviderAgreement({ services, specialty }: Props) {
 
             <fieldset><legend>Provider address</legend><label>Street address<input value={data.address.street1} onChange={event => setAddress('street1', event.target.value)} /></label><label>Suite / Building<input value={data.address.street2} onChange={event => setAddress('street2', event.target.value)} /></label><div className={styles.addressGrid}><label>City<input value={data.address.city} onChange={event => setAddress('city', event.target.value)} /></label><label>State / Region<input value={data.address.state} onChange={event => setAddress('state', event.target.value)} /></label><label>ZIP / Postal<input value={data.address.zip} onChange={event => setAddress('zip', event.target.value)} /></label></div></fieldset>
 
-            <fieldset><legend>Document terms</legend><div className={styles.twoCol}><label>Billing terms<select value={data.billingTerms} onChange={event => set('billingTerms', event.target.value)}><option>Net 30</option><option>Net 15</option><option>Other — see notes</option></select></label><label>Valid through<input type="date" value={data.expiresDate} onChange={event => set('expiresDate', event.target.value)} /></label></div></fieldset>
+            <fieldset><legend>Proposal terms</legend><div className={styles.twoCol}><label>Billing terms<select value={data.billingTerms} onChange={event => set('billingTerms', event.target.value)}><option>Net 30</option><option>Net 15</option><option>Other — see notes</option></select></label><label>Pricing valid through<input type="date" value={data.expiresDate} onChange={event => set('expiresDate', event.target.value)} /></label></div></fieldset>
 
             <fieldset><legend>Services and fees</legend><div className={styles.serviceEditor}>{data.services.map(row => <div className={styles.serviceRow} key={row.id}><input value={row.component} onChange={event => updateService(row.id, { component: event.target.value })} placeholder="Service / exam component" /><input value={row.price} onChange={event => updateService(row.id, { price: event.target.value })} placeholder="$0.00" /><button type="button" onClick={() => removeService(row.id)} aria-label={`Remove ${row.component || 'service'}`}>×</button></div>)}</div><div className={styles.addService}><input value={newService} onChange={event => setNewService(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); addService(); } }} placeholder="Add another service" /><button type="button" onClick={addService}>Add</button></div></fieldset>
 
             <fieldset><legend>Notes or special conditions</legend><textarea value={data.notes} onChange={event => set('notes', event.target.value)} placeholder="Scope details, conditions, exclusions, or other instructions…" /></fieldset>
 
-            <fieldset><legend>Provider acceptance</legend><div className={styles.twoCol}><label>Full legal name<input value={data.providerSignerName} onChange={event => { set('providerSignerName', event.target.value); if (data.providerSignatureType === 'typed') set('providerSignatureData', event.target.value); }} /></label><label>Title / role<input value={data.providerSignerTitle} onChange={event => set('providerSignerTitle', event.target.value)} /></label></div><div className={styles.signatureModes}><button type="button" className={data.providerSignatureType === 'typed' ? styles.activeSignature : ''} onClick={() => { set('providerSignatureType', 'typed'); set('providerSignatureData', data.providerSignerName); }}>Type signature</button><button type="button" className={data.providerSignatureType === 'drawn' ? styles.activeSignature : ''} onClick={() => { set('providerSignatureType', 'drawn'); set('providerSignatureData', ''); }}>Draw signature</button></div>{data.providerSignatureType === 'drawn' ? <SignaturePad value={data.providerSignatureData} onChange={value => set('providerSignatureData', value)} /> : <div className={styles.typedSignatureBox}>{data.providerSignerName || 'Your typed signature will appear here'}</div>}<label className={styles.consent}><input type="checkbox" checked={data.agreedElectronic} onChange={event => set('agreedElectronic', event.target.checked)} /><span>{ELECTRONIC_RECORD_CONSENT_TEXT}</span></label></fieldset>
+            <fieldset><legend>Provider pricing response</legend><div className={styles.twoCol}><label>Full legal name<input value={data.providerSignerName} onChange={event => { set('providerSignerName', event.target.value); if (data.providerSignatureType === 'typed') set('providerSignatureData', event.target.value); }} /></label><label>Title / role<input value={data.providerSignerTitle} onChange={event => set('providerSignerTitle', event.target.value)} /></label></div><div className={styles.signatureModes}><button type="button" className={data.providerSignatureType === 'typed' ? styles.activeSignature : ''} onClick={() => { set('providerSignatureType', 'typed'); set('providerSignatureData', data.providerSignerName); }}>Type signature</button><button type="button" className={data.providerSignatureType === 'drawn' ? styles.activeSignature : ''} onClick={() => { set('providerSignatureType', 'drawn'); set('providerSignatureData', ''); }}>Draw signature</button></div>{data.providerSignatureType === 'drawn' ? <SignaturePad value={data.providerSignatureData} onChange={value => set('providerSignatureData', value)} /> : <div className={styles.typedSignatureBox}>{data.providerSignerName || 'Your typed signature will appear here'}</div>}<label className={styles.consent}><input type="checkbox" checked={data.agreedElectronic} onChange={event => set('agreedElectronic', event.target.checked)} /><span>{ELECTRONIC_RECORD_CONSENT_TEXT}</span></label></fieldset>
 
-            <div className={styles.actions}><button type="button" className={styles.secondary} onClick={clearDraft}>Clear draft</button><button type="button" className={styles.primary} disabled={busy} onClick={() => void completeAndDownload()}>{busy ? 'Generating PDF…' : 'Accept & download exact PDF'}</button></div>
-            <p className={styles.backendNote}>This is the Occu-Med Forms provider document engine embedded in the onboarding experience. Final server submission / audit handoff remains separate until the Forms backend is connected to this route.</p>
+            <div className={styles.actions}><button type="button" className={styles.secondary} onClick={clearDraft}>Clear draft</button><button type="button" className={styles.primary} disabled={busy} onClick={() => void completeAndDownload()}>{busy ? 'Generating PDF…' : 'Download exact PDF copy'}</button></div>
+            <p className={styles.backendNote}>Use the submission handoff immediately below this workspace to send the exact Provider Fee Proposal into Occu-Med for Network Management review. If pricing is accepted, the final Provider Service Agreement is issued through the secure Occu-Med Forms invitation lifecycle.</p>
           </aside>
 
           <div className={styles.previewColumn}><div className={styles.previewLabel}><span>EXACT PDF PREVIEW</span><strong>{data.documentNumber}</strong></div><ProviderDocumentPreview data={data} previewRef={previewRef} /></div>
