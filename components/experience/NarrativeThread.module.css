@@ -1,5 +1,6 @@
 .thread {
   --thread-progress: 0;
+  --token-accent: 139 220 250;
   position: fixed;
   inset: 0;
   z-index: 107;
@@ -11,9 +12,7 @@
   mix-blend-mode: screen;
 }
 
-.hidden {
-  opacity: 0;
-}
+.hidden { opacity: 0; }
 
 .copy {
   position: absolute;
@@ -57,22 +56,19 @@
   width: 67vw;
   height: 72vh;
   overflow: visible;
-  filter: drop-shadow(0 0 18px rgba(126,213,247,.12));
+  filter: drop-shadow(0 0 18px rgb(var(--token-accent) / .12));
+  transition: left .7s cubic-bezier(.2,.75,.2,1), top .7s cubic-bezier(.2,.75,.2,1), width .7s cubic-bezier(.2,.75,.2,1), height .7s cubic-bezier(.2,.75,.2,1);
 }
 
 .route path {
   fill: none;
   vector-effect: non-scaling-stroke;
-  transition: d .75s cubic-bezier(.2,.75,.2,1), opacity .4s ease;
+  transition: d .75s cubic-bezier(.2,.75,.2,1), opacity .4s ease, stroke .6s ease;
 }
 
-.routeGhost {
-  stroke: rgba(255,255,255,.07);
-  stroke-width: .35;
-}
-
+.routeGhost { stroke: rgba(255,255,255,.07); stroke-width: .35; }
 .routeLive {
-  stroke: rgba(139,220,250,.58);
+  stroke: rgb(var(--token-accent) / .58);
   stroke-width: .55;
   stroke-linecap: round;
   stroke-dasharray: 1;
@@ -80,121 +76,208 @@
   opacity: .82;
 }
 
-.puck {
+.token {
   position: absolute;
   left: calc(33vw + var(--thread-progress) * 53vw);
   top: calc(18vh + var(--thread-progress) * 50vh);
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(173,230,251,.38);
-  border-radius: 50%;
-  background: rgba(5,20,29,.28);
-  box-shadow: 0 0 36px rgba(111,208,244,.12), inset 0 0 20px rgba(255,255,255,.035);
-  backdrop-filter: blur(10px);
-  transform: translate(-50%,-50%) scale(calc(.82 + var(--thread-progress) * .2));
-  transition: left .65s cubic-bezier(.2,.75,.2,1), top .65s cubic-bezier(.2,.75,.2,1), border-color .4s ease;
+  width: 68px;
+  height: 68px;
+  transform: translate(-50%,-50%) scale(calc(.84 + var(--thread-progress) * .18));
+  transform-origin: center;
+  transition: left .7s cubic-bezier(.2,.75,.2,1), top .7s cubic-bezier(.2,.75,.2,1), width .65s cubic-bezier(.2,.75,.2,1), height .65s cubic-bezier(.2,.75,.2,1), transform .65s cubic-bezier(.2,.75,.2,1);
+  filter: drop-shadow(0 18px 28px rgba(0,0,0,.18));
 }
 
-.puck::before,
-.puck::after {
+.tokenHalo,
+.tokenHalo i,
+.tokenPulse {
+  position: absolute;
+  inset: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%,-50%);
+  border-radius: 50%;
+}
+
+.tokenHalo { opacity: .8; transition: opacity .5s ease; }
+.tokenHalo::before,
+.tokenHalo::after,
+.tokenHalo i {
   content: '';
   position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 1px solid rgb(var(--token-accent) / .16);
   border-radius: 50%;
-  border: 1px solid rgba(144,221,250,.14);
+  transform: translate(-50%,-50%);
+  transition: width .65s ease, height .65s ease, border-radius .65s ease, transform .65s ease, opacity .5s ease;
 }
+.tokenHalo::before { width: 122%; height: 122%; }
+.tokenHalo::after { width: 154%; height: 154%; opacity: .48; }
+.tokenHalo i:nth-child(1) { width: 188%; height: 188%; opacity: .24; }
+.tokenHalo i:nth-child(2) { width: 232%; height: 232%; opacity: .1; }
 
-.puck::before { inset: -11px; }
-.puck::after { inset: -24px; opacity: .45; }
-
-.puck i {
-  position: absolute;
-  inset: 7px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, rgba(197,240,255,.8), rgba(59,148,187,.2) 38%, transparent 68%);
-  filter: blur(.2px);
-}
-
-.puck span {
-  position: relative;
-  z-index: 2;
-  font-family: Georgia, serif;
-  font-size: 11px;
-  letter-spacing: .05em;
-}
-
-.echo {
+.tokenSurface {
   position: absolute;
   inset: 0;
-}
-
-.echo i {
-  position: absolute;
-  width: 4px;
-  height: 4px;
+  display: grid;
+  grid-template-rows:auto 1fr auto auto;
+  gap: 5px;
+  padding: 9px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--token-accent) / .42);
   border-radius: 50%;
-  background: rgba(149,224,251,.74);
-  box-shadow: 0 0 14px rgba(149,224,251,.5);
-  opacity: .2;
-  transition: left .7s cubic-bezier(.2,.75,.2,1), top .7s cubic-bezier(.2,.75,.2,1), transform .7s cubic-bezier(.2,.75,.2,1), opacity .4s ease;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.09),transparent 38%),
+    rgba(5,20,29,.52);
+  box-shadow: 0 0 34px rgb(var(--token-accent) / .12), inset 0 0 22px rgba(255,255,255,.035);
+  backdrop-filter: blur(12px) saturate(1.2);
+  transition: border-radius .65s cubic-bezier(.2,.75,.2,1), clip-path .65s cubic-bezier(.2,.75,.2,1), background .55s ease, border-color .55s ease, padding .55s ease, transform .65s cubic-bezier(.2,.75,.2,1);
 }
 
-.echo i:nth-child(1) { left: 57%; top: 31%; }
-.echo i:nth-child(2) { left: 72%; top: 52%; }
-.echo i:nth-child(3) { left: 83%; top: 37%; }
-
-.thread[data-phase='method'] .puck { left: calc(68vw + var(--thread-progress) * 7vw); top: calc(27vh + var(--thread-progress) * 36vh); }
-.thread[data-phase='method'] .echo i:nth-child(1) { left: 65%; top: 26%; }
-.thread[data-phase='method'] .echo i:nth-child(2) { left: 82%; top: 49%; }
-.thread[data-phase='method'] .echo i:nth-child(3) { left: 62%; top: 71%; }
-
-.thread[data-phase='referral'] .puck { left: calc(31vw + var(--thread-progress) * 57vw); top: calc(66vh - var(--thread-progress) * 17vh); }
-.thread[data-phase='referral'] .echo i { top: 69%; opacity: .3; }
-.thread[data-phase='referral'] .echo i:nth-child(1) { left: 42%; }
-.thread[data-phase='referral'] .echo i:nth-child(2) { left: 61%; }
-.thread[data-phase='referral'] .echo i:nth-child(3) { left: 80%; }
-
-.thread[data-phase='clinical'] .puck { left: calc(78vw - var(--thread-progress) * 23vw); top: calc(28vh + var(--thread-progress) * 38vh); }
-.thread[data-phase='clinical'] .echo i:nth-child(1) { left: 38%; top: 29%; }
-.thread[data-phase='clinical'] .echo i:nth-child(2) { left: 54%; top: 55%; }
-.thread[data-phase='clinical'] .echo i:nth-child(3) { left: 72%; top: 34%; }
-
-.thread[data-phase='workforce'] .puck { left: calc(39vw + var(--thread-progress) * 45vw); top: calc(35vh + var(--thread-progress) * 17vh); }
-.thread[data-phase='workforce'] .routeLive { stroke: rgba(235,183,110,.58); }
-.thread[data-phase='workforce'] .puck { border-color: rgba(235,183,110,.38); }
-.thread[data-phase='workforce'] .puck i { background: radial-gradient(circle at 35% 30%, rgba(255,227,188,.82), rgba(185,118,54,.18) 40%, transparent 68%); }
-
-.thread[data-phase='network'] .route {
-  left: 18vw;
-  width: 77vw;
+.tokenHeader {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  min-width:0;
+  color:rgba(255,255,255,.5);
+  font-size:5px;
+  font-weight:900;
+  letter-spacing:.13em;
+  opacity:.66;
+  transition: opacity .4s ease;
 }
-.thread[data-phase='network'] .routeLive { stroke-width: .72; }
-.thread[data-phase='network'] .puck { left: calc(46vw + var(--thread-progress) * 24vw); top: calc(53vh - var(--thread-progress) * 10vh); transform: translate(-50%,-50%) scale(calc(1 + var(--thread-progress) * .55)); }
-.thread[data-phase='network'] .echo i { opacity: .64; transform: scale(calc(1 + var(--thread-progress) * 1.5)); }
-.thread[data-phase='network'] .echo i:nth-child(1) { left: 34%; top: 28%; }
-.thread[data-phase='network'] .echo i:nth-child(2) { left: 76%; top: 62%; }
-.thread[data-phase='network'] .echo i:nth-child(3) { left: 88%; top: 31%; }
+.tokenHeader b { color:#fff; font-size:7px; letter-spacing:.04em; }
 
-.thread[data-phase='values'] .route { top: 28vh; height: 46vh; }
-.thread[data-phase='values'] .routeLive { stroke: rgba(255,255,255,.22); }
-.thread[data-phase='values'] .puck { left: 50%; top: 52%; transform: translate(-50%,-50%) scale(calc(1.35 - var(--thread-progress) * .35)); }
-.thread[data-phase='values'] .echo i { left: 50%; top: 52%; opacity: calc(.4 - var(--thread-progress) * .28); transform: scale(calc(1 + var(--thread-progress) * 8)); }
-
-@media (max-width: 900px) {
-  .copy { bottom: 24px; }
-  .copy p { display: none; }
-  .route { left: 18vw; width: 78vw; top: 18vh; height: 63vh; }
-  .puck { width: 42px; height: 42px; }
+.tokenSurface > strong {
+  position:relative;
+  z-index:2;
+  align-self:end;
+  overflow:hidden;
+  color:#fff;
+  font-size:6px;
+  line-height:1;
+  letter-spacing:.12em;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  opacity:.88;
 }
 
-@media (max-width: 620px) {
-  .copy { display: none; }
-  .route { left: 7vw; width: 86vw; opacity: .6; }
-  .puck { width: 36px; height: 36px; }
-  .puck::after { display: none; }
+.tokenGlyph {
+  position:relative;
+  place-self:center;
+  width:28px;
+  height:28px;
+  transition: width .55s ease, height .55s ease, transform .55s ease;
+}
+.tokenGlyph i {
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:3px;
+  height:22px;
+  border-radius:4px;
+  background:rgb(var(--token-accent) / .86);
+  box-shadow:0 0 12px rgb(var(--token-accent) / .38);
+  transform-origin:center;
+  transition:width .55s ease,height .55s ease,border-radius .55s ease,transform .55s cubic-bezier(.2,.75,.2,1),opacity .4s ease;
+}
+.tokenGlyph i:nth-child(1){transform:translate(-50%,-50%) rotate(0deg)}
+.tokenGlyph i:nth-child(2){transform:translate(-50%,-50%) rotate(60deg)}
+.tokenGlyph i:nth-child(3){transform:translate(-50%,-50%) rotate(120deg)}
+
+.tokenLines { display:grid; gap:2px; opacity:.38; transition:opacity .4s ease; }
+.tokenLines i { display:block; height:1px; background:linear-gradient(90deg,rgb(var(--token-accent) / .8),transparent); }
+.tokenLines i:nth-child(2){width:72%}.tokenLines i:nth-child(3){width:46%}
+
+.tokenPulse {
+  inset:50%;
+  width:16px;
+  height:16px;
+  border:1px solid rgb(var(--token-accent) / .34);
+  opacity:0;
+  transition:opacity .4s ease,width .6s ease,height .6s ease;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .thread { display: none; }
+.echo { position:absolute; inset:0; }
+.echo i {
+  position:absolute;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:rgb(var(--token-accent) / .74);
+  box-shadow:0 0 14px rgb(var(--token-accent) / .5);
+  opacity:.2;
+  transition:left .7s cubic-bezier(.2,.75,.2,1),top .7s cubic-bezier(.2,.75,.2,1),transform .7s cubic-bezier(.2,.75,.2,1),opacity .4s ease,background .5s ease;
 }
+.echo i:nth-child(1){left:57%;top:31%}.echo i:nth-child(2){left:72%;top:52%}.echo i:nth-child(3){left:83%;top:37%}
+
+/* METHOD — compact diamond / three-axis compatibility object */
+.thread[data-phase='method'] { --token-accent: 126 213 247; }
+.thread[data-phase='method'] .token { left:calc(68vw + var(--thread-progress) * 7vw);top:calc(27vh + var(--thread-progress) * 36vh);width:74px;height:74px;transform:translate(-50%,-50%) rotate(45deg) scale(calc(.84 + var(--thread-progress) * .16)); }
+.thread[data-phase='method'] .tokenSurface { border-radius:18px; transform:rotate(-45deg); }
+.thread[data-phase='method'] .tokenHalo { transform:translate(-50%,-50%) rotate(-45deg); }
+.thread[data-phase='method'] .tokenGlyph i:nth-child(1){transform:translate(-50%,-50%) rotate(0deg)}
+.thread[data-phase='method'] .tokenGlyph i:nth-child(2){transform:translate(-50%,-50%) rotate(60deg)}
+.thread[data-phase='method'] .tokenGlyph i:nth-child(3){transform:translate(-50%,-50%) rotate(120deg)}
+.thread[data-phase='method'] .echo i:nth-child(1){left:65%;top:26%}.thread[data-phase='method'] .echo i:nth-child(2){left:82%;top:49%}.thread[data-phase='method'] .echo i:nth-child(3){left:62%;top:71%}
+
+/* REFERRAL — the same object stretches into an authorization / case card */
+.thread[data-phase='referral'] { --token-accent: 67 164 197; }
+.thread[data-phase='referral'] .token { left:calc(31vw + var(--thread-progress) * 57vw);top:calc(66vh - var(--thread-progress) * 17vh);width:112px;height:68px; }
+.thread[data-phase='referral'] .tokenSurface { border-radius:11px; padding:9px 11px; }
+.thread[data-phase='referral'] .tokenHalo::before{width:118%;height:150%;border-radius:18px}.thread[data-phase='referral'] .tokenHalo::after{width:138%;height:190%;border-radius:22px}.thread[data-phase='referral'] .tokenHalo i{opacity:.08}
+.thread[data-phase='referral'] .tokenGlyph { position:absolute;right:9px;bottom:8px;width:22px;height:22px;opacity:.72 }
+.thread[data-phase='referral'] .tokenGlyph i{width:2px;height:17px}
+.thread[data-phase='referral'] .tokenSurface>strong{font-size:7px}.thread[data-phase='referral'] .tokenLines{width:58%;align-self:end}
+.thread[data-phase='referral'] .echo i{top:69%;opacity:.3}.thread[data-phase='referral'] .echo i:nth-child(1){left:42%}.thread[data-phase='referral'] .echo i:nth-child(2){left:61%}.thread[data-phase='referral'] .echo i:nth-child(3){left:80%}
+
+/* CLINICAL — case card resolves into a compact medical instrument / cross */
+.thread[data-phase='clinical'] { --token-accent: 57 153 184; }
+.thread[data-phase='clinical'] .token { left:calc(78vw - var(--thread-progress) * 23vw);top:calc(28vh + var(--thread-progress) * 38vh);width:76px;height:76px;transform:translate(-50%,-50%) rotate(calc((var(--thread-progress) - .5)*14deg)); }
+.thread[data-phase='clinical'] .tokenSurface { border-radius:24px; }
+.thread[data-phase='clinical'] .tokenHeader,.thread[data-phase='clinical'] .tokenLines{opacity:.25}
+.thread[data-phase='clinical'] .tokenGlyph i:nth-child(1){width:7px;height:30px;transform:translate(-50%,-50%) rotate(0)}
+.thread[data-phase='clinical'] .tokenGlyph i:nth-child(2){width:7px;height:30px;transform:translate(-50%,-50%) rotate(90deg)}
+.thread[data-phase='clinical'] .tokenGlyph i:nth-child(3){opacity:0}
+.thread[data-phase='clinical'] .tokenPulse{opacity:.7;width:112%;height:112%}
+.thread[data-phase='clinical'] .echo i:nth-child(1){left:38%;top:29%}.thread[data-phase='clinical'] .echo i:nth-child(2){left:54%;top:55%}.thread[data-phase='clinical'] .echo i:nth-child(3){left:72%;top:34%}
+
+/* WORKFORCE — medical object becomes an ID / role badge */
+.thread[data-phase='workforce'] { --token-accent: 235 183 110; }
+.thread[data-phase='workforce'] .token { left:calc(39vw + var(--thread-progress) * 45vw);top:calc(35vh + var(--thread-progress) * 17vh);width:72px;height:92px; }
+.thread[data-phase='workforce'] .tokenSurface { border-radius:10px; padding:10px 9px; background:linear-gradient(145deg,rgba(255,239,217,.12),transparent 45%),rgba(35,24,15,.44); }
+.thread[data-phase='workforce'] .tokenHalo::before{width:126%;height:108%;border-radius:13px}.thread[data-phase='workforce'] .tokenHalo::after{width:148%;height:126%;border-radius:16px}.thread[data-phase='workforce'] .tokenHalo i{opacity:.06}
+.thread[data-phase='workforce'] .tokenGlyph{width:26px;height:26px}.thread[data-phase='workforce'] .tokenGlyph i{width:3px;height:20px}.thread[data-phase='workforce'] .tokenSurface>strong{font-size:6px;white-space:normal;line-height:1.15}
+
+/* NETWORK — badge collapses into a true connected node */
+.thread[data-phase='network'] { --token-accent: 56 214 211; }
+.thread[data-phase='network'] .route{left:18vw;width:77vw}.thread[data-phase='network'] .routeLive{stroke-width:.72}
+.thread[data-phase='network'] .token{left:calc(46vw + var(--thread-progress) * 24vw);top:calc(53vh - var(--thread-progress) * 10vh);width:58px;height:58px;transform:translate(-50%,-50%) scale(calc(1 + var(--thread-progress) * .55))}
+.thread[data-phase='network'] .tokenSurface{border-radius:50%;padding:8px;background:radial-gradient(circle at 35% 30%,rgb(var(--token-accent) / .2),rgba(4,19,27,.42) 55%)}
+.thread[data-phase='network'] .tokenHeader,.thread[data-phase='network'] .tokenLines,.thread[data-phase='network'] .tokenSurface>strong{opacity:0}
+.thread[data-phase='network'] .tokenGlyph{width:18px;height:18px}.thread[data-phase='network'] .tokenGlyph i{width:4px;height:4px;border-radius:50%}.thread[data-phase='network'] .tokenGlyph i:nth-child(1){transform:translate(-50%,-50%) translate(-7px,-5px)}.thread[data-phase='network'] .tokenGlyph i:nth-child(2){transform:translate(-50%,-50%) translate(8px,-2px)}.thread[data-phase='network'] .tokenGlyph i:nth-child(3){transform:translate(-50%,-50%) translate(0,8px)}
+.thread[data-phase='network'] .tokenPulse{opacity:.78;width:130%;height:130%}.thread[data-phase='network'] .tokenHalo::before{width:155%;height:155%}.thread[data-phase='network'] .tokenHalo::after{width:220%;height:220%}.thread[data-phase='network'] .tokenHalo i:nth-child(1){width:310%;height:310%;opacity:.15}.thread[data-phase='network'] .tokenHalo i:nth-child(2){width:410%;height:410%;opacity:.07}
+.thread[data-phase='network'] .echo i{opacity:.64;transform:scale(calc(1 + var(--thread-progress) * 1.5))}.thread[data-phase='network'] .echo i:nth-child(1){left:34%;top:28%}.thread[data-phase='network'] .echo i:nth-child(2){left:76%;top:62%}.thread[data-phase='network'] .echo i:nth-child(3){left:88%;top:31%}
+
+/* VALUES — node resolves into a quiet seal / standard */
+.thread[data-phase='values'] { --token-accent: 238 187 86; }
+.thread[data-phase='values'] .route{top:28vh;height:46vh}.thread[data-phase='values'] .routeLive{stroke:rgba(255,255,255,.22)}
+.thread[data-phase='values'] .token{left:50%;top:52%;width:78px;height:78px;transform:translate(-50%,-50%) scale(calc(1.35 - var(--thread-progress) * .35))}
+.thread[data-phase='values'] .tokenSurface{clip-path:polygon(50% 0,88% 18%,100% 58%,73% 100%,27% 100%,0 58%,12% 18%);border-radius:0;padding:12px 10px;background:linear-gradient(145deg,rgb(var(--token-accent) / .15),rgba(8,20,26,.4))}
+.thread[data-phase='values'] .tokenGlyph{width:22px;height:22px}.thread[data-phase='values'] .tokenGlyph i{width:3px;height:18px}.thread[data-phase='values'] .tokenGlyph i:nth-child(1){transform:translate(-50%,-50%) rotate(0)}.thread[data-phase='values'] .tokenGlyph i:nth-child(2){transform:translate(-50%,-50%) rotate(120deg)}.thread[data-phase='values'] .tokenGlyph i:nth-child(3){transform:translate(-50%,-50%) rotate(240deg)}
+.thread[data-phase='values'] .echo i{left:50%;top:52%;opacity:calc(.4 - var(--thread-progress) * .28);transform:scale(calc(1 + var(--thread-progress) * 8))}
+
+/* PARTNER — the seal opens into the provider-facing destination */
+.thread[data-phase='partner'] { --token-accent: 109 169 190; mix-blend-mode:normal; }
+.thread[data-phase='partner'] .route{left:20vw;top:36vh;width:60vw;height:34vh;opacity:calc(1 - var(--thread-progress) * .55)}
+.thread[data-phase='partner'] .routeLive{stroke:rgb(var(--token-accent) / .45);stroke-width:.65}
+.thread[data-phase='partner'] .token{left:50%;top:54%;width:clamp(150px,18vw,250px);height:86px;transform:translate(-50%,-50%) scale(calc(.82 + var(--thread-progress) * .18))}
+.thread[data-phase='partner'] .tokenSurface{border-radius:43px;padding:14px 20px;grid-template-columns:50px 1fr;grid-template-rows:auto 1fr auto;background:linear-gradient(120deg,rgba(232,247,252,.94),rgba(192,224,235,.82));border-color:rgba(255,255,255,.85);color:#102530;box-shadow:0 24px 90px rgba(2,16,24,.24),0 0 55px rgb(var(--token-accent) / .12)}
+.thread[data-phase='partner'] .tokenHeader{grid-column:2;color:rgba(16,37,48,.5);font-size:6px}.thread[data-phase='partner'] .tokenHeader b{color:#102530}.thread[data-phase='partner'] .tokenGlyph{grid-column:1;grid-row:1 / 4;width:34px;height:34px}.thread[data-phase='partner'] .tokenGlyph i{background:#23566d;box-shadow:none}.thread[data-phase='partner'] .tokenGlyph i:nth-child(1){width:6px;height:28px;transform:translate(-50%,-50%)}.thread[data-phase='partner'] .tokenGlyph i:nth-child(2){width:6px;height:28px;transform:translate(-50%,-50%) rotate(90deg)}.thread[data-phase='partner'] .tokenGlyph i:nth-child(3){opacity:0}.thread[data-phase='partner'] .tokenSurface>strong{grid-column:2;color:#102530;font-size:10px;letter-spacing:.08em}.thread[data-phase='partner'] .tokenLines{grid-column:2;width:70%;opacity:.28}.thread[data-phase='partner'] .tokenLines i{background:linear-gradient(90deg,#23566d,transparent)}
+.thread[data-phase='partner'] .tokenHalo::before{width:112%;height:132%;border-radius:50px}.thread[data-phase='partner'] .tokenHalo::after{width:124%;height:164%;border-radius:60px}.thread[data-phase='partner'] .tokenHalo i{opacity:.04}.thread[data-phase='partner'] .echo i{opacity:calc(.28 - var(--thread-progress) * .2);transform:scale(calc(1 + var(--thread-progress) * 6))}
+
+@media (max-width:900px){.copy{bottom:24px}.copy p{display:none}.route{left:18vw;width:78vw;top:18vh;height:63vh}.token{transform:translate(-50%,-50%) scale(.84)}.thread[data-phase='partner'] .token{width:min(250px,68vw)}}
+@media (max-width:620px){.copy{display:none}.route{left:7vw;width:86vw;opacity:.6}.token{width:48px;height:48px}.tokenHeader,.tokenSurface>strong,.tokenLines{display:none}.thread[data-phase='referral'] .token{width:82px;height:48px}.thread[data-phase='workforce'] .token{width:54px;height:70px}.thread[data-phase='network'] .token{width:44px;height:44px}.thread[data-phase='values'] .token{width:58px;height:58px}.thread[data-phase='partner'] .token{width:min(220px,72vw);height:72px}.thread[data-phase='partner'] .tokenHeader,.thread[data-phase='partner'] .tokenSurface>strong,.thread[data-phase='partner'] .tokenLines{display:flex}}
+@media (prefers-reduced-motion:reduce){.thread{display:none}}
