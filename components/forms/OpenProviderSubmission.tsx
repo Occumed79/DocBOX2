@@ -67,6 +67,7 @@ export default function OpenProviderSubmission({ specialty }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [reference, setReference] = useState('');
+  const [website, setWebsite] = useState('');
 
   const submit = async () => {
     setBusy(true);
@@ -94,7 +95,7 @@ export default function OpenProviderSubmission({ specialty }: Props) {
           specialty,
           data,
           pdfBase64: bytesToBase64(bytes),
-          website: '',
+          website,
         }),
       });
       const result = await response.json() as { ok?: boolean; reference?: string; error?: string; nextStep?: string };
@@ -111,6 +112,9 @@ export default function OpenProviderSubmission({ specialty }: Props) {
 
   return (
     <section className={styles.shell} aria-label="Submit provider pricing proposal">
+      <div className={styles.honeypot} aria-hidden="true">
+        <label>Website<input name="website" tabIndex={-1} autoComplete="off" value={website} onChange={event => setWebsite(event.target.value)} /></label>
+      </div>
       <div className={styles.kicker}>FINAL ONBOARDING HANDOFF</div>
       <div className={styles.layout}>
         <div>
