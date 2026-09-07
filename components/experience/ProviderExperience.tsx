@@ -1,7 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import ResearchArchive from './ResearchArchive';
+import ProblemScene from './ProblemScene';
+import PricingAgreementBuilder from './PricingAgreementBuilder';
 import styles from './ProviderExperience.module.css';
 
 const PHOTOS = {
@@ -76,55 +79,13 @@ const HISTORY = [
 ] as const;
 
 const PROCESS = [
-  {
-    id: '01',
-    label: 'Referral',
-    copy: 'The employer request enters Occu-Med’s system with the job and requested medical scope.',
-    image: PHOTOS.employeeId,
-    imageAlt: 'Employee identification illustration',
-  },
-  {
-    id: '02',
-    label: 'Scheduling',
-    copy: 'Availability is coordinated with the examinee and clinic before the appointment is confirmed.',
-    image: PHOTOS.appointment,
-    imageAlt: 'Medical appointment scheduling illustration',
-  },
-  {
-    id: '03',
-    label: 'Clinic',
-    copy: 'The authorized exam packet and requested services reach the selected provider facility.',
-    image: PHOTOS.facilities,
-    imageAlt: 'Illustration of healthcare facilities',
-  },
-  {
-    id: '04',
-    label: 'Exam',
-    copy: 'The provider performs the authorized evaluation and documents findings for Occu-Med review.',
-    image: PHOTOS.medicalEval,
-    imageAlt: 'Medical evaluation illustration',
-  },
-  {
-    id: '05',
-    label: 'Records',
-    copy: 'Provider Relations follows the case until the required reports, tracings, images, or laboratory results are received.',
-    image: PHOTOS.examReport,
-    imageAlt: 'Medical examination report illustration',
-  },
-  {
-    id: '06',
-    label: 'QA',
-    copy: 'Documentation is checked for completeness and accuracy before medical review.',
-    image: PHOTOS.team,
-    imageAlt: 'Diverse healthcare team illustration',
-  },
-  {
-    id: '07',
-    label: 'Review',
-    copy: 'Medical findings are interpreted against the applicable job and deployment requirements.',
-    image: PHOTOS.fitness,
-    imageAlt: 'Fitness determination illustration',
-  },
+  { id: '01', label: 'Referral', copy: 'The employer request enters Occu-Med’s system with the job and requested medical scope.', image: PHOTOS.employeeId, imageAlt: 'Employee identification illustration' },
+  { id: '02', label: 'Scheduling', copy: 'Availability is coordinated with the examinee and clinic before the appointment is confirmed.', image: PHOTOS.appointment, imageAlt: 'Medical appointment scheduling illustration' },
+  { id: '03', label: 'Clinic', copy: 'The authorized exam packet and requested services reach the selected provider facility.', image: PHOTOS.facilities, imageAlt: 'Illustration of healthcare facilities' },
+  { id: '04', label: 'Exam', copy: 'The provider performs the authorized evaluation and documents findings for Occu-Med review.', image: PHOTOS.medicalEval, imageAlt: 'Medical evaluation illustration' },
+  { id: '05', label: 'Records', copy: 'Provider Relations follows the case until the required reports, tracings, images, or laboratory results are received.', image: PHOTOS.examReport, imageAlt: 'Medical examination report illustration' },
+  { id: '06', label: 'QA', copy: 'Documentation is checked for completeness and accuracy before medical review.', image: PHOTOS.team, imageAlt: 'Diverse healthcare team illustration' },
+  { id: '07', label: 'Review', copy: 'Medical findings are interpreted against the applicable job and deployment requirements.', image: PHOTOS.fitness, imageAlt: 'Fitness determination illustration' },
 ] as const;
 
 const CLINICAL = [
@@ -205,21 +166,43 @@ export default function ProviderExperience() {
     const root = rootRef.current;
     if (!root) return;
 
-    const sections = Array.from(root.querySelectorAll<HTMLElement>('[data-reveal]'));
+    const revealSections = Array.from(root.querySelectorAll<HTMLElement>('[data-reveal]'));
     const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) entry.target.dataset.visible = 'true';
-        });
-      },
-      { threshold: 0.18 }
+      entries => entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.setAttribute('data-visible', 'true');
+      }),
+      { threshold: 0.16 }
     );
+    revealSections.forEach(section => observer.observe(section));
 
-    sections.forEach(section => observer.observe(section));
-    return () => observer.disconnect();
+    let raf = 0;
+    const updateScrub = () => {
+      raf = 0;
+      const height = window.innerHeight || 1;
+      const scrubSections = Array.from(root.querySelectorAll<HTMLElement>('[data-scrub]'));
+      scrubSections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        const raw = (height - rect.top) / (height + rect.height);
+        const progress = Math.max(0, Math.min(1, raw));
+        section.style.setProperty('--scene', progress.toFixed(4));
+      });
+    };
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(updateScrub);
+    };
+    updateScrub();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
   }, []);
 
-  const updateTilt = (event: React.PointerEvent<HTMLDivElement>) => {
+  const updateTilt = (event: PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width - 0.5;
     const y = (event.clientY - rect.top) / rect.height - 0.5;
@@ -227,7 +210,7 @@ export default function ProviderExperience() {
     event.currentTarget.style.setProperty('--ry', `${x * 8}deg`);
   };
 
-  const resetTilt = (event: React.PointerEvent<HTMLDivElement>) => {
+  const resetTilt = (event: PointerEvent<HTMLDivElement>) => {
     event.currentTarget.style.setProperty('--rx', '0deg');
     event.currentTarget.style.setProperty('--ry', '0deg');
   };
@@ -250,7 +233,7 @@ export default function ProviderExperience() {
 
   return (
     <main ref={rootRef} className={styles.root}>
-      <section className={styles.threshold} data-reveal>
+      <section className={styles.threshold} data-reveal data-scrub>
         <Image className={styles.thresholdArt} src={PHOTOS.headquarters} alt="Illustrated Occu-Med headquarters" fill priority sizes="100vw" />
         <div className={styles.thresholdShade} />
         <div className={styles.thresholdGrid} aria-hidden="true" />
@@ -263,7 +246,7 @@ export default function ProviderExperience() {
         <div className={styles.thresholdMarker}>FRESNO / CALIFORNIA</div>
       </section>
 
-      <section id="history" className={styles.history} data-reveal>
+      <section id="history" className={styles.history} data-reveal data-scrub>
         <div className={styles.historyIntro}>
           <span>COMPANY HISTORY</span>
           <h2>Not a timeline.<br /><em>An evolution.</em></h2>
@@ -296,7 +279,10 @@ export default function ProviderExperience() {
         </div>
       </section>
 
-      <section className={styles.method} data-reveal>
+      <ResearchArchive />
+      <ProblemScene />
+
+      <section className={styles.method} data-reveal data-scrub>
         <div className={styles.methodBackdrop} aria-hidden="true">
           <Image src={PHOTOS.concerned} alt="" fill sizes="50vw" />
         </div>
@@ -317,18 +303,16 @@ export default function ProviderExperience() {
         </div>
       </section>
 
-      <section className={styles.process} data-reveal>
+      <section className={styles.process} data-reveal data-scrub>
         <div className={styles.processLead}>
           <span>HOW THE SYSTEM MOVES</span>
           <h2>Follow one referral<br /><em>through Occu-Med.</em></h2>
         </div>
-
         <div className={styles.processStage}>
           <div className={styles.processRail}>
             {PROCESS.map((item, index) => (
               <button type="button" key={item.id} onClick={() => setActiveProcess(index)} className={index === activeProcess ? styles.processActive : ''}>
-                <span>{item.id}</span>
-                <strong>{item.label}</strong>
+                <span>{item.id}</span><strong>{item.label}</strong>
               </button>
             ))}
           </div>
@@ -341,13 +325,12 @@ export default function ProviderExperience() {
               <strong>{process.label}</strong>
               <p>{process.copy}</p>
             </div>
-            <div className={styles.signalA} />
-            <div className={styles.signalB} />
+            <div className={styles.signalA} /><div className={styles.signalB} />
           </div>
         </div>
       </section>
 
-      <section className={styles.clinicalWorld} data-reveal>
+      <section className={styles.clinicalWorld} data-reveal data-scrub>
         <div className={styles.clinicalLead}>
           <span>ONE NETWORK / MANY CAPABILITIES</span>
           <h2>The exam changes.<br /><em>The operating model doesn’t.</em></h2>
@@ -369,7 +352,7 @@ export default function ProviderExperience() {
         </div>
       </section>
 
-      <section className={styles.workforce} data-reveal>
+      <section className={styles.workforce} data-reveal data-scrub>
         <div className={styles.workforceImage}>
           <Image src={workforceView === 0 ? PHOTOS.workforce : PHOTOS.workforce2} alt={workforceView === 0 ? 'Diverse industrial workforce illustration' : 'Public safety and military workforce illustration'} fill sizes="100vw" />
           <div className={styles.workforceShade} />
@@ -379,13 +362,13 @@ export default function ProviderExperience() {
           <h2>Different work.<br /><em>Different demands.</em></h2>
           <p>The system has to understand the job before a medical finding can mean anything useful about fitness, readiness, or safe performance.</p>
           <div className={styles.workforceToggle}>
-            <button type="button" className={workforceView === 0 ? styles.workforceActive : ''} onClick={() => setWorkforceView(0)}>Industrial & operational</button>
-            <button type="button" className={workforceView === 1 ? styles.workforceActive : ''} onClick={() => setWorkforceView(1)}>Public safety & readiness</button>
+            <button type="button" className={workforceView === 0 ? styles.workforceActive : ''} onClick={() => setWorkforceView(0)}>Industrial &amp; operational</button>
+            <button type="button" className={workforceView === 1 ? styles.workforceActive : ''} onClick={() => setWorkforceView(1)}>Public safety &amp; readiness</button>
           </div>
         </div>
       </section>
 
-      <section className={styles.scale} data-reveal>
+      <section className={styles.scale} data-reveal data-scrub>
         <Image className={styles.scaleImage} src={PHOTOS.internationalNetwork} alt="Connected global provider network" fill sizes="100vw" />
         <div className={styles.scaleShade} />
         <div className={styles.scaleCopy}>
@@ -395,7 +378,7 @@ export default function ProviderExperience() {
         </div>
         <div className={styles.certificationFloat} aria-hidden="true"><Image src={PHOTOS.internationalCertification} alt="" fill sizes="180px" /></div>
         <div className={styles.constellation} aria-hidden="true">
-          {Array.from({ length: 28 }, (_, i) => <i key={i} style={{ '--i': i } as React.CSSProperties} />)}
+          {Array.from({ length: 28 }, (_, i) => <i key={i} style={{ '--i': i } as CSSProperties} />)}
         </div>
       </section>
 
@@ -412,8 +395,7 @@ export default function ProviderExperience() {
           <div className={styles.valueIndex}>
             {VALUES.map((value, index) => (
               <button type="button" key={value.label} onClick={() => setActiveValue(index)} className={index === activeValue ? styles.valueActive : ''}>
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <strong>{value.label}</strong>
+                <span>{String(index + 1).padStart(2, '0')}</span><strong>{value.label}</strong>
               </button>
             ))}
           </div>
@@ -473,17 +455,7 @@ export default function ProviderExperience() {
           </article>
         </div>
 
-        <div className={styles.agreementPreview}>
-          <div>
-            <span>PRICING AGREEMENT</span>
-            <h3>Your selected services become the fee schedule.</h3>
-            <p>{selectedServices.length} service{selectedServices.length === 1 ? '' : 's'} currently selected. The next build step is the editable rate table, location handling, business terms, review, and submission.</p>
-          </div>
-          <div className={styles.agreementServices}>
-            {selectedServices.length ? selectedServices.map(service => <span key={service}>{service}</span>) : <em>Select at least one service above.</em>}
-          </div>
-          <button type="button" disabled={!selectedServices.length}>Build pricing agreement →</button>
-        </div>
+        <PricingAgreementBuilder services={selectedServices} specialty={activeSpecialty.label} />
       </section>
     </main>
   );
