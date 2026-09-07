@@ -27,6 +27,7 @@ type CachedFileView = {
 
 const fileViewCache = new Map<string, CachedFileView>();
 const CACHE_FRESHNESS_MS = 60_000;
+const PROVIDER_QUEUE_FOLDER = 'Provider Onboarding Submissions';
 
 function fileViewKey(view: NavView, folderId: string | null) {
   return view === 'archive' ? 'archive' : `folder:${folderId || 'root'}`;
@@ -219,6 +220,10 @@ export default function VaultApp() {
   }, [folderMutation, loadFolders, newFolderName, reportError]);
 
   const deleteFolder = useCallback(async (folder: Folder) => {
+    if (folder.name === PROVIDER_QUEUE_FOLDER) {
+      reportError('Provider Onboarding Submissions is a system review folder and cannot be deleted from the DocBox interface.');
+      return;
+    }
     if (folderMutation || !window.confirm(`Delete “${folder.name}”? Files in this folder will move to All Files.`)) return;
     setFolderMutation(true);
     setError(null);
@@ -280,7 +285,7 @@ export default function VaultApp() {
 
   const rootFolders = useMemo(() => folders.filter(folder => !folder.parent_id), [folders]);
   const activeFolderName = activeFolder ? folders.find(folder => folder.id === activeFolder)?.name : null;
-  const providerQueueActive = !isSearching && activeFolderName === 'Provider Onboarding Submissions';
+  const providerQueueActive = !isSearching && activeFolderName === PROVIDER_QUEUE_FOLDER;
   const displayFiles = providerQueueActive && providerQueueFilter !== 'all'
     ? unfilteredDisplayFiles.filter(file => providerQueueStatus(file) === providerQueueFilter)
     : unfilteredDisplayFiles;
@@ -327,7 +332,7 @@ export default function VaultApp() {
                     onClick={() => navigateTo('all', folder.id)}
                     onPointerEnter={() => void prefetchView('all', folder.id)}
                   ><FolderIcon color="currentColor" /><span>{folder.name}</span><small>{folder.file_count}</small></button>
-                  <button type="button" className="cosmic-folder-delete" onClick={() => void deleteFolder(folder)} aria-label={`Delete ${folder.name}`}><CloseIcon /></button>
+                  {folder.name !== PROVIDER_QUEUE_FOLDER ? <button type="button" className="cosmic-folder-delete" onClick={() => void deleteFolder(folder)} aria-label={`Delete ${folder.name}`}><CloseIcon /></button> : null}
                 </div>
               ))}
             </div>
