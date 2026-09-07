@@ -3,12 +3,12 @@
   right: 18px;
   bottom: 18px;
   z-index: 500;
-  width: min(360px, calc(100vw - 36px));
+  width: min(390px, calc(100vw - 36px));
   overflow: hidden;
   color: #eaf4f8;
   border: 1px solid rgba(255,255,255,.15);
   border-radius: 18px;
-  background: rgba(4,16,24,.88);
+  background: rgba(4,16,24,.9);
   box-shadow: 0 24px 80px rgba(0,0,0,.36);
   backdrop-filter: blur(22px) saturate(1.25);
   font-family: Arial, sans-serif;
@@ -30,6 +30,7 @@
 
 .director header span,
 .scrubber span,
+.modeRow > span,
 .director footer span {
   font-size: 8px;
   font-weight: 900;
@@ -72,6 +73,76 @@
   width: 100%;
   margin: 12px 0 0;
   accent-color: #7ed8fb;
+}
+
+.modeRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 7px;
+  align-items: center;
+  margin: 0 14px 10px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.modeRow button {
+  padding: 6px 9px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 999px;
+  color: rgba(255,255,255,.45);
+  background: rgba(255,255,255,.035);
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.modeRow .modeActive {
+  color: #061722;
+  border-color: #8edbf8;
+  background: #8edbf8;
+}
+
+.stageStrip {
+  display: flex;
+  gap: 6px;
+  margin: 0 14px 13px;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(126,216,251,.32) transparent;
+}
+
+.stageStrip button {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px;
+  align-items: center;
+  padding: 7px 9px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 999px;
+  color: rgba(255,255,255,.48);
+  background: rgba(255,255,255,.025);
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.stageStrip button span {
+  color: rgba(255,255,255,.25);
+  font-family: Georgia, serif;
+  font-size: 8px;
+}
+
+.stageStrip .stageActive {
+  color: #fff;
+  border-color: rgba(126,216,251,.45);
+  background: rgba(45,126,163,.28);
+  box-shadow: 0 0 18px rgba(126,216,251,.08);
+}
+
+.stageStrip .stageActive span {
+  color: #8edbf8;
 }
 
 .chapterGrid {
@@ -132,4 +203,5 @@
   .director { right: 10px; bottom: 10px; width: calc(100vw - 20px); }
   .chapterGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .chapterGrid button { grid-template-columns: 1fr; gap: 2px; }
+  .modeRow { grid-template-columns: 1fr auto auto; }
 }
