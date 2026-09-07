@@ -62,9 +62,9 @@ export default function ValuesPlayground() {
 
         <div className={styles.experiment}>
           {active === 'Humility' && <div className={styles.humility}>
-            <div className={styles.humilityField} style={{ '--humility': humility } as React.CSSProperties}>
-              <span className={styles.selfWord}>ME</span>
-              <span className={styles.workWord}>THE WORK</span>
+            <div className={styles.humilityField}>
+              <span className={styles.selfWord} style={{ fontSize: `${96 - humility * 0.68}px`, opacity: 1 - humility * 0.007 }}>ME</span>
+              <span className={styles.workWord} style={{ fontSize: `${32 + humility * 0.56}px` }}>THE WORK</span>
               <div className={styles.balanceLine} />
             </div>
             <label><span>REDUCE SELF / AMPLIFY WORK</span><input aria-label="Humility balance" type="range" min="0" max="100" value={humility} onChange={event => setHumility(Number(event.target.value))} /></label>
@@ -75,9 +75,9 @@ export default function ValuesPlayground() {
             <div className={styles.pulseReadout}>PULSES SENT <b>{String(pulse).padStart(2,'0')}</b></div>
           </div>}
 
-          {active === 'Customer Service' && <div className={styles.service} style={{ '--service': service } as React.CSSProperties}>
+          {active === 'Customer Service' && <div className={styles.service}>
             <div className={styles.serviceNodes}><span>PROVIDER</span><i /><span>OCCU-MED</span><i /><span>CUSTOMER</span></div>
-            <div className={styles.serviceLine}><i /></div>
+            <div className={styles.serviceLine}><i style={{ left: `${service}%` }} /></div>
             <label><span>MOVE THE CASE BETWEEN PEOPLE</span><input aria-label="Customer service connection" type="range" min="0" max="100" value={service} onChange={event => setService(Number(event.target.value))} /></label>
             <strong>{service < 35 ? 'LISTEN' : service < 70 ? 'COORDINATE' : 'CLOSE THE LOOP'}</strong>
           </div>}
@@ -85,16 +85,16 @@ export default function ValuesPlayground() {
           {active === 'Quality' && <div ref={lensRef} className={styles.quality} onPointerMove={onLensMove}>
             <Image src="/photos/EXAM%20REPORT.png" alt="Medical report under quality inspection" fill sizes="620px" />
             <div className={styles.qualityShade} />
-            <div className={styles.lens} style={{ left: `${lens.x}%`, top: `${lens.y}%`, '--lens-x': `${lens.x}%`, '--lens-y': `${lens.y}%` } as React.CSSProperties}><span>QA</span></div>
+            <div className={styles.lens} style={{ left: `${lens.x}%`, top: `${lens.y}%`, backgroundPosition: `${360 - lens.x * 5.4}px ${270 - lens.y * 4.4}px` }}><span>QA</span></div>
             <div className={styles.qualityLabel}>MOVE THE INSPECTION LENS</div>
           </div>}
 
-          {active === 'Integrity' && <div className={styles.integrity} style={{ '--integrity': integrity } as React.CSSProperties}>
+          {active === 'Integrity' && <div className={styles.integrity}>
             <div className={styles.integrityGrid}>
-              <article><span>THE RECORD</span><strong>DOCUMENTED FINDINGS</strong></article>
-              <article><span>THE DECISION</span><strong>JOB-COMPATIBILITY REVIEW</strong></article>
+              <article style={{ transform: `translateX(${(integrity - 50) * 0.35}px)` }}><span>THE RECORD</span><strong>DOCUMENTED FINDINGS</strong></article>
+              <article style={{ transform: `translateX(${(50 - integrity) * 0.35}px)` }}><span>THE DECISION</span><strong>JOB-COMPATIBILITY REVIEW</strong></article>
             </div>
-            <div className={styles.integrityNeedle}><i /></div>
+            <div className={styles.integrityNeedle}><i style={{ left: `${integrity}%` }} /></div>
             <label><span>ALIGN EVIDENCE WITH DECISION</span><input aria-label="Integrity alignment" type="range" min="0" max="100" value={integrity} onChange={event => setIntegrity(Number(event.target.value))} /></label>
             <b>{Math.abs(integrity - 50) <= 4 ? 'ALIGNED' : integrity < 50 ? 'RECORD OUT OF BALANCE' : 'DECISION OUT OF BALANCE'}</b>
           </div>}
