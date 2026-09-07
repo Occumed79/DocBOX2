@@ -34,4 +34,21 @@ test.describe('provider experience', () => {
     await expect(page.getByRole('heading', { name: /The company starts/i })).toBeVisible();
     await expect(director.getByText('Archive', { exact: true }).first()).toBeVisible();
   });
+
+  test('reduced motion removes spatial canvases without removing the story or provider flow', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/experience');
+
+    await expect(page.getByRole('heading', { name: /Before the network/i })).toBeVisible();
+    await expect(page.locator('[data-spatial-archive-canvas]')).toBeHidden();
+
+    const archive = page.locator('[data-spatial-archive]');
+    await archive.scrollIntoViewIfNeeded();
+    await expect(page.getByRole('heading', { name: /The company starts/i })).toBeVisible();
+
+    const provider = page.locator('#provider-details');
+    await provider.scrollIntoViewIfNeeded();
+    await expect(page.getByRole('heading', { name: 'Show us what your facility does.' })).toBeVisible();
+    await expect(page.getByText('Provider Fee Proposal').first()).toBeVisible();
+  });
 });
