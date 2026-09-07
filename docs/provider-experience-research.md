@@ -11,6 +11,7 @@ This file is the research ledger for the public provider-onboarding experience.
 - Do not turn the history into a list of who joined the company and when. People should be named only when required to explain the origin of the company or methodology.
 - When a current Occu-Med marketing statistic conflicts with a stronger independent benchmark, preserve the distinction in this ledger rather than silently presenting both as equivalent.
 - Public procurement records may reveal customer identities. Use those records as evidence, but strip the customer name from the public narrative unless the identity itself is essential to the history.
+- When an archival source is **contested or critical** of how the Occu-Med system was applied, record that context here. Do not cherry-pick praise from a disputed case and present it publicly as independent endorsement.
 
 ## Verified company-history beats
 
@@ -39,6 +40,19 @@ An official civil-rights findings document states that in **1980** a municipal c
 For the public experience, the customer identity is unnecessary. The company-level historical point is stronger: within roughly a year of founding, Occu-Med's medical standards were already being operationalized alongside formal analysis of a job's physical work.
 
 Source: https://labor.hawaii.gov/hcrc/files/2013/01/DOCAho_HE_Findings.pdf
+
+### 1994 archival checkpoint — the system is national and quantifies job demands
+
+A 1994 Wisconsin Employment Relations Commission arbitration record describes a **national Occu-Med system of occupational-health consultants** whose operations were based on late-1970s research into valid medical hiring standards. The record describes job profiles built from employee questionnaires, physical and environmental job demands, and **19 categories of physical ability**. It also describes panels of medical specialists contributing to the medical standards used for comparison against the job profile.
+
+This is valuable evidence that the research had become a structured, national operating system by the early 1990s. However, the arbitration decision also sharply criticized the rigid application of generalized standards in the individual case before it. Therefore:
+
+- use the source internally to establish the existence, maturity, and architecture of the system;
+- do **not** use the case as a testimonial or independent endorsement;
+- do not surface the customer, employee, or dispute in the public history;
+- if the 19-physical-ability architecture is used publicly, phrase it as an archival description of the historical system, not as a claim about the present methodology.
+
+Source: https://werc.wi.gov/grievance_awards/4826.pdf
 
 ### Research matures — Compendium of Medical Standards → Medical Guidelines
 
@@ -113,17 +127,18 @@ Sources:
 ## Visual-story implications
 
 1. **History should begin in 1976, not 1979.** The research question is the opening historical beat; the company is the result.
-2. The history chapter should visualize the evolution **research → operating medical standards → methodology → distributed U.S. system → international system → global network**.
+2. The history chapter should visualize the evolution **research → operating medical standards → quantified job profiles / specialist standards → methodology → distributed U.S. system → international system → global network**.
 3. Historical records should be treated like archival evidence in the experience, inspired by the Nasdaq 50th-anniversary approach, rather than shown as ordinary citations or document screenshots.
 4. The 1976 research record supports a dedicated archival scene built around the three research objectives and the scale of the project, without turning the scene into a founder biography.
 5. The **1980** evidence is especially valuable because it shows the research becoming operational almost immediately: comprehensive medical standards are paired with position physical-effort analysis. This can appear as an archival marker inside the research sequence rather than another standalone webpage section.
-6. The archive should then **morph**, rather than cut, into the later specialist-research story: 12 abstract body-system research nodes converge into the Compendium of Medical Standards, which resolves into Medical Guidelines. Do not label the individual body systems unless an authoritative source enumerating them is found.
-7. The injury-risk scene should use independently verified workforce data and then transition directly into why job-specific context matters.
-8. The proprietary-methodology section should make the three dimensions spatial and interactive rather than presenting three ordinary cards.
-9. The 2013 distributed-office footprint can be used as a quiet scale transition between methodology and global expansion: Fresno → multiple U.S. offices → 36+ countries → 15,000+ locations.
-10. The global-network scene should function as both spectacle and information visualization, drawing conceptually from WWF Blue Corridors and Climate TRACE.
-11. The immersive story should gradually settle into a much quieter, provider-specific onboarding interface.
-12. The provider section should be functional, not decorative: specialty selection, capability selection, location handling, rate entry, and review should work before any submission backend is added.
+6. The **1994** record can inform an internal reconstruction of the historical system — including 19 physical-ability categories and specialist panels — but because the underlying arbitration criticized the application of generalized standards, it should not be presented publicly as praise or validation.
+7. The archive should then **morph**, rather than cut, into the later specialist-research story: 12 abstract body-system research nodes converge into the Compendium of Medical Standards, which resolves into Medical Guidelines. Do not label the individual body systems unless an authoritative source enumerating them is found.
+8. The injury-risk scene should use independently verified workforce data and then transition directly into why job-specific context matters.
+9. The proprietary-methodology section should make the three dimensions spatial and interactive rather than presenting three ordinary cards.
+10. The 2013 distributed-office footprint can be used as a quiet scale transition between methodology and global expansion: Fresno → multiple U.S. offices → 36+ countries → 15,000+ locations.
+11. The global-network scene should function as both spectacle and information visualization, drawing conceptually from WWF Blue Corridors and Climate TRACE.
+12. The immersive story should gradually settle into a much quieter, provider-specific onboarding interface.
+13. The provider section should be functional, not decorative: specialty selection, capability selection, location handling, rate entry, and review should work before any submission backend is added.
 
 ## Founder-name note
 
