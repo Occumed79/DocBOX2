@@ -17,7 +17,7 @@ test.describe('provider experience', () => {
     const valuesHeading = page.getByRole('heading', { name: /Six values/i });
     await valuesHeading.scrollIntoViewIfNeeded();
     await expect(valuesHeading).toBeVisible();
-    await page.getByRole('button', { name: 'Integrity', exact: true }).click();
+    await page.getByRole('button', { name: /Integrity$/ }).click();
     await expect(page.locator('[data-spatial-values-canvas]')).toBeVisible();
 
     const provider = page.locator('#provider-details');
@@ -38,15 +38,15 @@ test.describe('provider experience', () => {
     await expect(director).toBeVisible();
     await expect(director.getByText('DIRECTOR MODE')).toBeVisible();
 
-    await director.getByRole('button', { name: 'Archive' }).click();
+    await director.getByRole('button', { name: /Archive$/ }).click();
     await expect(page.getByRole('heading', { name: /The company starts/i })).toBeVisible();
     await expect(director.getByText('Archive', { exact: true }).first()).toBeVisible();
-    await expect(director.getByRole('button', { name: 'Method seed', exact: true })).toBeVisible();
-    await director.getByRole('button', { name: 'Method seed', exact: true }).click();
+    await expect(director.getByRole('button', { name: /Method seed$/ })).toBeVisible();
+    await director.getByRole('button', { name: /Method seed$/ }).click();
     await expect(page.locator('[data-spatial-archive-canvas]')).toBeVisible();
 
-    await director.getByRole('button', { name: 'Values' }).click();
-    await director.getByRole('button', { name: 'Integrity', exact: true }).click();
+    await director.getByRole('button', { name: /Values$/ }).click();
+    await director.getByRole('button', { name: /Integrity$/ }).click();
     await expect(page.locator('[data-spatial-values-canvas]')).toBeVisible();
   });
 
