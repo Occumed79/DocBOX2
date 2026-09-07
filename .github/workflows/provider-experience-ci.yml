@@ -1,0 +1,68 @@
+name: Provider Experience CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [provider-experience-v1]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium for browser QA
+        run: npx playwright install --with-deps chromium
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Production route smoke tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          PORT=3000 npm start > /tmp/provider-experience-next.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true; cat /tmp/provider-experience-next.log' EXIT
+
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:3000/ > /dev/null; then
+              break
+            fi
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "Next.js exited before becoming ready."
+              exit 1
+            fi
+            sleep 1
+          done
+
+          curl --silent --fail http://127.0.0.1:3000/experience > /dev/null
+          curl --silent --fail 'http://127.0.0.1:3000/experience?director=1' > /dev/null
+          curl --silent --fail http://127.0.0.1:3000/vault > /dev/null
+          curl --silent --fail http://127.0.0.1:3000/provider/ci-invalid-token > /dev/null
+
+          STATUS=$(curl --silent --output /tmp/provider-submit-response.json --write-out '%{http_code}' \
+            --request POST \
+            --header 'Content-Type: application/json' \
+            --data '{}' \
+            http://127.0.0.1:3000/api/provider-onboarding/submit)
+          test "$STATUS" = "400"
+          grep -q 'pricing proposals only' /tmp/provider-submit-response.json
+
+      - name: Browser-level cinematic and onboarding tests
+        run: npm run test:e2e

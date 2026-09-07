@@ -1,0 +1,307 @@
+.progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 120;
+  height: 2px;
+  pointer-events: none;
+  opacity: var(--cinema, 1);
+  background: rgba(255,255,255,.06);
+  transition: opacity .5s ease;
+}
+
+.progress i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(119,205,247,.25), rgba(154,226,255,.96));
+  box-shadow: 0 0 18px rgba(119,205,247,.5);
+}
+
+.atmosphere {
+  position: fixed;
+  inset: -12vh -10vw;
+  z-index: 102;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: var(--cinema, 1);
+  mix-blend-mode: screen;
+  transition: opacity .55s ease;
+}
+
+.atmosphere::before,
+.atmosphere::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.atmosphere::before {
+  background:
+    radial-gradient(circle at var(--experience-x, 50%) var(--chapter-y, 48%), rgb(var(--continuity-tone, 91 178 221) / .11), transparent 29%),
+    radial-gradient(circle at var(--experience-x-reverse, 62%) 74%, rgb(var(--continuity-tone, 91 178 221) / .07), transparent 27%);
+  filter: blur(34px) saturate(1.2);
+}
+
+.atmosphere::after {
+  background: radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 45%), rgb(var(--continuity-tone, 91 178 221) / .12), transparent 18%);
+  filter: blur(22px);
+  opacity: .78;
+}
+
+.atmosphere i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--continuity-tone, 91 178 221) / .12);
+  box-shadow: inset 0 0 60px rgb(var(--continuity-tone, 91 178 221) / .025), 0 0 50px rgb(var(--continuity-tone, 91 178 221) / .04);
+  filter: blur(calc(var(--scroll-energy, 0) * 4px));
+  transform: translate3d(0, var(--orb-shift, 0px), 0) rotate(calc(var(--experience-progress, 0) * 80deg));
+  transition: border-color .55s ease, box-shadow .55s ease, filter .18s ease;
+}
+
+.atmosphere i:nth-child(1) {
+  width: 42vw;
+  height: 42vw;
+  left: -12vw;
+  top: 7vh;
+}
+
+.atmosphere i:nth-child(2) {
+  width: 31vw;
+  height: 31vw;
+  right: 4vw;
+  top: 20vh;
+  transform: translate3d(0, var(--orb-shift-reverse, 0px), 0) rotate(calc(var(--experience-progress, 0) * -110deg));
+}
+
+.atmosphere i:nth-child(3) {
+  width: 18vw;
+  height: 18vw;
+  left: 47vw;
+  bottom: 2vh;
+  opacity: .7;
+}
+
+.effectField {
+  position: fixed;
+  inset: 0;
+  z-index: 103;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: var(--cinema, 1);
+  transition: opacity .5s ease;
+}
+
+.effectField > i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--continuity-tone, 91 178 221) / .62);
+  box-shadow: 0 0 18px rgb(var(--continuity-tone, 91 178 221) / .46);
+  opacity: .12;
+  transition: left .8s cubic-bezier(.2,.75,.2,1), top .8s cubic-bezier(.2,.75,.2,1), opacity .55s ease, transform .8s cubic-bezier(.2,.75,.2,1), border-radius .55s ease;
+}
+
+.effectField > i:nth-child(1){left:8%;top:24%}.effectField > i:nth-child(2){left:21%;top:65%}.effectField > i:nth-child(3){left:37%;top:38%}.effectField > i:nth-child(4){left:49%;top:73%}.effectField > i:nth-child(5){left:63%;top:27%}.effectField > i:nth-child(6){left:74%;top:59%}.effectField > i:nth-child(7){left:87%;top:34%}.effectField > i:nth-child(8){left:93%;top:78%}
+
+.effectField > b {
+  position: absolute;
+  left: 12%;
+  top: 50%;
+  width: 76%;
+  height: 1px;
+  transform-origin: left center;
+  background: linear-gradient(90deg,transparent,rgb(var(--continuity-tone,91 178 221) / .2),transparent);
+  opacity: 0;
+  transition: opacity .5s ease, transform .8s cubic-bezier(.2,.75,.2,1), left .8s ease, top .8s ease, width .8s ease;
+}
+.effectField > b:nth-of-type(2){top:35%;transform:rotate(8deg)}
+.effectField > b:nth-of-type(3){top:66%;transform:rotate(-9deg)}
+
+.effectField[data-chapter='archive'] > i {opacity:.22;transform:scale(.7)}
+.effectField[data-chapter='archive'] > i:nth-child(odd){left:83%}
+.effectField[data-chapter='archive'] > i:nth-child(even){left:74%}
+.effectField[data-chapter='archive'] > b{opacity:.18;left:68%;width:24%;transform:rotate(90deg)}
+
+.effectField[data-chapter='method'] > i {opacity:.3;transform:scale(1.15)}
+.effectField[data-chapter='method'] > i:nth-child(1){left:65%;top:22%}.effectField[data-chapter='method'] > i:nth-child(2){left:84%;top:48%}.effectField[data-chapter='method'] > i:nth-child(3){left:60%;top:74%}.effectField[data-chapter='method'] > i:nth-child(n+4){opacity:.06}
+.effectField[data-chapter='method'] > b{left:59%;width:26%;opacity:.2}.effectField[data-chapter='method'] > b:nth-of-type(2){top:35%;transform:rotate(54deg)}.effectField[data-chapter='method'] > b:nth-of-type(3){top:63%;transform:rotate(-52deg)}
+
+.effectField[data-chapter='referral'] > i {opacity:.33;top:70%;transform:scale(.9)}
+.effectField[data-chapter='referral'] > i:nth-child(1){left:12%}.effectField[data-chapter='referral'] > i:nth-child(2){left:24%}.effectField[data-chapter='referral'] > i:nth-child(3){left:36%}.effectField[data-chapter='referral'] > i:nth-child(4){left:48%}.effectField[data-chapter='referral'] > i:nth-child(5){left:60%}.effectField[data-chapter='referral'] > i:nth-child(6){left:72%}.effectField[data-chapter='referral'] > i:nth-child(7){left:84%}.effectField[data-chapter='referral'] > i:nth-child(8){left:93%}
+.effectField[data-chapter='referral'] > b:first-of-type{top:70%;left:12%;width:82%;opacity:.28;transform:scaleX(var(--chapter-progress,0))}
+
+.effectField[data-chapter='clinical']::after {
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  top:var(--chapter-y,50%);
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgb(var(--continuity-tone,91 178 221) / .42),transparent);
+  box-shadow:0 0 24px rgb(var(--continuity-tone,91 178 221) / .22);
+  opacity:.42;
+}
+.effectField[data-chapter='clinical'] > i{opacity:.08}
+
+.effectField[data-chapter='network'] > i {opacity:.74;transform:scale(1.35)}
+.effectField[data-chapter='network'] > b {opacity:.4}
+.effectField[data-chapter='network'] > b:first-of-type{transform:rotate(5deg) scaleX(var(--chapter-progress,0))}
+.effectField[data-chapter='network'] > b:nth-of-type(2){transform:rotate(16deg) scaleX(var(--chapter-progress,0))}
+.effectField[data-chapter='network'] > b:nth-of-type(3){transform:rotate(-14deg) scaleX(var(--chapter-progress,0))}
+
+.effectField[data-chapter='values'] > i {opacity:.22;transform:scale(calc(.7 + var(--chapter-progress,0)*.7))}
+.effectField[data-chapter='values'] > b {opacity:.12}
+
+/* Humility: everything lowers, gathers, and quiets. */
+.effectField[data-chapter='values'][data-value='humility'] > i {top:72%;opacity:.16;transform:scale(.72)}
+.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(1){left:37%}.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(2){left:43%}.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(3){left:49%}.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(4){left:55%}.effectField[data-chapter='values'][data-value='humility'] > i:nth-child(5){left:61%}
+.effectField[data-chapter='values'][data-value='humility'] > b:first-of-type{left:34%;top:76%;width:32%;opacity:.16}
+
+/* Positivity: a restrained light burst rather than confetti. */
+.effectField[data-chapter='values'][data-value='positivity'] > i {left:74%;top:36%;opacity:.64;transform:scale(calc(.8 + var(--value-progress,0)*1.1))}
+.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(1){transform:translate(-90px,-65px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(2){transform:translate(0,-105px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(3){transform:translate(92px,-52px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(4){transform:translate(112px,30px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(5){transform:translate(45px,96px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(6){transform:translate(-52px,92px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(7){transform:translate(-112px,24px)}.effectField[data-chapter='values'][data-value='positivity'] > i:nth-child(8){transform:scale(2.4)}
+.effectField[data-chapter='values'][data-value='positivity'] > b{left:64%;top:36%;width:20%;opacity:.26}.effectField[data-chapter='values'][data-value='positivity'] > b:nth-of-type(2){transform:rotate(60deg)}.effectField[data-chapter='values'][data-value='positivity'] > b:nth-of-type(3){transform:rotate(-60deg)}
+
+/* Customer service: two sides stay connected through a live communication path. */
+.effectField[data-chapter='values'][data-value='customer-service'] > i{opacity:.42;top:54%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(-n+4){left:25%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(n+5){left:75%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(1),.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(5){top:40%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(2),.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(6){top:49%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(3),.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(7){top:58%}.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(4),.effectField[data-chapter='values'][data-value='customer-service'] > i:nth-child(8){top:67%}
+.effectField[data-chapter='values'][data-value='customer-service'] > b{left:25%;top:49%;width:50%;opacity:.34}.effectField[data-chapter='values'][data-value='customer-service'] > b:nth-of-type(2){top:58%;transform:none}.effectField[data-chapter='values'][data-value='customer-service'] > b:nth-of-type(3){top:40%;transform:none}
+
+/* Quality: elements snap to an inspection grid / target. */
+.effectField[data-chapter='values'][data-value='quality'] > i{border-radius:2px;opacity:.48;transform:scale(1)}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(1){left:63%;top:30%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(2){left:72%;top:30%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(3){left:81%;top:30%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(4){left:63%;top:48%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(5){left:72%;top:48%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(6){left:81%;top:48%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(7){left:67%;top:66%}.effectField[data-chapter='values'][data-value='quality'] > i:nth-child(8){left:77%;top:66%}
+.effectField[data-chapter='values'][data-value='quality'] > b{left:60%;width:25%;opacity:.22}.effectField[data-chapter='values'][data-value='quality'] > b:first-of-type{top:39%}.effectField[data-chapter='values'][data-value='quality'] > b:nth-of-type(2){top:57%;transform:none}.effectField[data-chapter='values'][data-value='quality'] > b:nth-of-type(3){left:72%;top:25%;width:1px;height:47%;transform:none;background:rgb(var(--continuity-tone,91 178 221) / .22)}
+
+/* Integrity: a symmetrical balance around a center line. */
+.effectField[data-chapter='values'][data-value='integrity'] > i{opacity:.5}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(1){left:31%;top:38%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(2){left:36%;top:51%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(3){left:41%;top:64%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(4){left:49%;top:51%;transform:scale(1.8)}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(5){left:57%;top:64%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(6){left:62%;top:51%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(7){left:67%;top:38%}.effectField[data-chapter='values'][data-value='integrity'] > i:nth-child(8){left:49%;top:74%}
+.effectField[data-chapter='values'][data-value='integrity'] > b{opacity:.3}.effectField[data-chapter='values'][data-value='integrity'] > b:first-of-type{left:31%;top:51%;width:36%}.effectField[data-chapter='values'][data-value='integrity'] > b:nth-of-type(2){left:49%;top:31%;width:1px;height:46%;transform:none;background:rgb(var(--continuity-tone,91 178 221) / .25)}.effectField[data-chapter='values'][data-value='integrity'] > b:nth-of-type(3){left:31%;top:38%;width:36%;transform:rotate(0)}
+
+/* Diligence: a deliberate scanning path moves through checkpoints. */
+.effectField[data-chapter='values'][data-value='diligence'] > i{opacity:.52;left:72%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(1){top:19%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(2){top:28%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(3){top:37%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(4){top:46%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(5){top:55%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(6){top:64%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(7){top:73%}.effectField[data-chapter='values'][data-value='diligence'] > i:nth-child(8){top:82%;transform:scale(1.8)}
+.effectField[data-chapter='values'][data-value='diligence']::after{content:'';position:absolute;left:58%;right:13%;top:calc(18% + var(--value-progress,0)*64%);height:1px;background:linear-gradient(90deg,transparent,rgb(var(--continuity-tone,91 178 221) / .62),transparent);box-shadow:0 0 20px rgb(var(--continuity-tone,91 178 221) / .28);opacity:.56}
+.effectField[data-chapter='values'][data-value='diligence'] > b:first-of-type{left:72%;top:19%;width:1px;height:63%;opacity:.25;background:rgb(var(--continuity-tone,91 178 221) / .22)}
+
+.effectField[data-chapter='partner'] {opacity:calc(var(--cinema,1)*.35)}
+
+.chapterStamp {
+  position: fixed;
+  right: 24px;
+  top: 22px;
+  z-index: 111;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  pointer-events: none;
+  color: rgba(255,255,255,.72);
+  mix-blend-mode: difference;
+  opacity: var(--cinema, 1);
+  transition: opacity .45s ease;
+}
+
+.chapterStamp span {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  color: rgba(255,255,255,.38);
+}
+
+.chapterStamp strong {
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.chapterNav {
+  position: fixed;
+  left: 24px;
+  top: 50%;
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transform: translateY(-50%);
+  mix-blend-mode: difference;
+  opacity: var(--cinema, 1);
+  transition: opacity .45s ease;
+}
+
+.chapterNav button {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,.42);
+  cursor: pointer;
+  text-align: left;
+}
+
+.chapterNav button i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08);
+  transition: transform .3s ease, color .3s ease, box-shadow .3s ease;
+}
+
+.chapterNav button span {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  transition: max-width .35s ease, opacity .25s ease, transform .35s ease;
+  transform: translateX(-6px);
+}
+
+.chapterNav button:hover span,
+.chapterNav .active span {
+  max-width: 110px;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.chapterNav .active {
+  color: #fff;
+}
+
+.chapterNav .active i {
+  transform: scale(2.2);
+  box-shadow: 0 0 16px rgba(255,255,255,.72);
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 105;
+  pointer-events: none;
+  opacity: var(--cinema, 1);
+  background:
+    radial-gradient(circle at center, transparent 58%, rgba(0,0,0,.22) 100%),
+    linear-gradient(90deg, rgba(0,0,0,.08), transparent 10%, transparent 90%, rgba(0,0,0,.08));
+  transition: opacity .5s ease;
+}
+
+@media (max-width: 900px) {
+  .chapterNav { left: 12px; }
+  .chapterNav button span { display: none; }
+  .chapterStamp { right: 12px; top: 14px; }
+  .atmosphere { opacity: .45; }
+  .effectField { opacity: .35; }
+  .vignette { opacity: .35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapterNav *, .progress *, .atmosphere *, .chapterStamp, .effectField * { transition: none !important; }
+  .atmosphere i { transform: none !important; filter: none !important; }
+  .atmosphere::after, .effectField { display: none; }
+}

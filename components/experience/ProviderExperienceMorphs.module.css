@@ -1,0 +1,96 @@
+.processLayer,
+.clinicalLayer,
+.historyLayer,
+.workforceLayer,
+.valueLayer {
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity, clip-path, filter;
+}
+
+.historyLayer {
+  clip-path: inset(0 100% 0 0 round 0);
+  filter: saturate(.62) contrast(.9) brightness(.7);
+  transition:
+    opacity .55s ease,
+    clip-path 1.05s cubic-bezier(.18,.75,.16,1),
+    filter .9s ease;
+}
+.historyLayerActive {
+  opacity: 1;
+  clip-path: inset(0 0 0 0 round 0);
+  filter: saturate(1) contrast(1) brightness(1);
+}
+
+.processLayer {
+  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  filter: saturate(.7) brightness(.72);
+  transition:
+    opacity .55s ease,
+    clip-path 1s cubic-bezier(.2,.72,.18,1),
+    filter .8s ease;
+}
+.processLayerActive {
+  opacity: 1;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  filter: saturate(1) brightness(1);
+}
+
+.clinicalLayer {
+  clip-path: circle(0% at 68% 52%);
+  filter: saturate(.72) brightness(.72) blur(3px);
+  transition:
+    opacity .6s ease,
+    clip-path 1.05s cubic-bezier(.18,.74,.18,1),
+    filter .85s ease;
+}
+.clinicalLayerActive {
+  opacity: 1;
+  clip-path: circle(115% at 52% 50%);
+  filter: saturate(1) brightness(1) blur(0);
+}
+
+.workforceLayer {
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 0 100%);
+  filter: saturate(.55) brightness(.58);
+  transform-origin: 50% 70%;
+  transition:
+    opacity .7s ease,
+    clip-path 1.05s cubic-bezier(.17,.72,.16,1),
+    filter .85s ease;
+}
+.workforceLayer:nth-child(2) {
+  clip-path: polygon(16% 0, 100% 0, 100% 100%, 0 100%);
+}
+.workforceLayerActive {
+  opacity: 1;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  filter: saturate(1) brightness(1);
+}
+
+.valueLayer {
+  clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+  filter: saturate(.6) brightness(.74) blur(2px);
+  transform-origin: center;
+  transition:
+    opacity .55s ease,
+    clip-path .95s cubic-bezier(.18,.75,.18,1),
+    filter .8s ease;
+}
+.valueLayerActive {
+  opacity: 1;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  filter: saturate(1) brightness(1) blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processLayer,
+  .clinicalLayer,
+  .historyLayer,
+  .workforceLayer,
+  .valueLayer {
+    transition: none;
+    clip-path: none;
+    filter: none;
+  }
+}

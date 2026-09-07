@@ -1,0 +1,237 @@
+.morph {
+  --morph: 0;
+  --morph-tone: 91 178 221;
+  position: fixed;
+  inset: 0;
+  z-index: 106;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: var(--morph);
+}
+
+.bladeA,
+.bladeB {
+  position: absolute;
+  top: -16vh;
+  bottom: -16vh;
+  width: 64vw;
+  background:
+    linear-gradient(135deg, rgb(var(--morph-tone) / .13), transparent 46%),
+    linear-gradient(180deg, rgba(3,12,18,.76), rgba(5,19,28,.58));
+  backdrop-filter: blur(calc(var(--morph) * 12px));
+  box-shadow: 0 0 80px rgba(0,0,0,.2);
+  will-change: transform;
+  transition: clip-path .2s linear;
+}
+
+.bladeA {
+  left: -15vw;
+  clip-path: polygon(0 0, 78% 0, 100% 100%, 0 100%);
+  transform: translate3d(calc((1 - var(--morph)) * -82%), 0, 0) rotate(-2deg);
+}
+
+.bladeB {
+  right: -15vw;
+  clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%);
+  transform: translate3d(calc((1 - var(--morph)) * 82%), 0, 0) rotate(2deg);
+}
+
+.iris {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16vw;
+  height: 16vw;
+  min-width: 150px;
+  min-height: 150px;
+  border-radius: 50%;
+  transform: translate(-50%,-50%) scale(calc(.4 + var(--morph) * 4.6));
+  border: 1px solid rgb(var(--morph-tone) / .18);
+  box-shadow: 0 0 80px rgb(var(--morph-tone) / .08), inset 0 0 70px rgb(var(--morph-tone) / .04);
+  opacity: calc(var(--morph) * .75);
+}
+
+.iris i {
+  position: absolute;
+  border-radius: inherit;
+  border: 1px solid rgb(var(--morph-tone) / .12);
+}
+
+.iris i:first-child { inset: 12%; }
+.iris i:last-child { inset: 31%; }
+
+.route,
+.scan,
+.triad,
+.grid,
+.seal { position:absolute; inset:0; opacity:0; }
+
+/* Referral: the previous object stretches into a live routing path. */
+.morph[data-next='referral'] .bladeA,
+.morph[data-next='referral'] .bladeB { opacity:.28; }
+.morph[data-next='referral'] .iris { opacity:0; }
+.morph[data-next='referral'] .route { opacity:calc(var(--morph) * .95); }
+.route::before {
+  content:'';
+  position:absolute;
+  left:8vw;
+  right:8vw;
+  top:50%;
+  height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgb(var(--morph-tone)/.2) 8%,rgb(var(--morph-tone)/.95) 48%,rgb(var(--morph-tone)/.25) 92%,transparent 100%);
+  transform:scaleX(var(--morph));
+  transform-origin:left center;
+  box-shadow:0 0 24px rgb(var(--morph-tone)/.35);
+}
+.route i {
+  position:absolute;
+  top:calc(50% - 5px);
+  width:10px;
+  height:10px;
+  border:1px solid rgb(var(--morph-tone)/.9);
+  border-radius:50%;
+  background:#07151e;
+  transform:scale(calc(.2 + var(--morph) * .8));
+  box-shadow:0 0 18px rgb(var(--morph-tone)/.32);
+}
+.route i:nth-child(1){left:15%}.route i:nth-child(2){left:38%}.route i:nth-child(3){left:63%}.route i:nth-child(4){left:84%}
+
+/* Clinical: a horizontal diagnostic scan wipes the routing world away. */
+.morph[data-next='clinical'] .bladeA,
+.morph[data-next='clinical'] .bladeB { opacity:.16; }
+.morph[data-next='clinical'] .iris { opacity:calc(var(--morph) * .28); }
+.morph[data-next='clinical'] .scan { opacity:calc(var(--morph) * .92); }
+.scan::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,rgb(var(--morph-tone)/.035) 39px 40px);
+  clip-path:inset(calc((1 - var(--morph)) * 48%) 0);
+}
+.scan i {
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(18% + var(--morph) * 64%);
+  height:2px;
+  background:linear-gradient(90deg,transparent,rgb(var(--morph-tone)/.95),#fff,rgb(var(--morph-tone)/.95),transparent);
+  box-shadow:0 0 25px rgb(var(--morph-tone)/.65),0 0 70px rgb(var(--morph-tone)/.3);
+}
+
+/* Method: three dimensions visibly converge into one compatibility object. */
+.morph[data-next='method'] .bladeA,
+.morph[data-next='method'] .bladeB { opacity:.12; }
+.morph[data-next='method'] .iris { opacity:0; }
+.morph[data-next='method'] .triad { opacity:calc(var(--morph) * .96); }
+.triad i {
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:clamp(58px,7vw,110px);
+  aspect-ratio:1;
+  border:1px solid rgb(var(--morph-tone)/.74);
+  border-radius:50%;
+  background:radial-gradient(circle,rgb(var(--morph-tone)/.12),transparent 68%);
+  box-shadow:0 0 38px rgb(var(--morph-tone)/.14);
+}
+.triad i:nth-child(1){transform:translate(calc(-50% - (1 - var(--morph))*34vw),calc(-50% - (1 - var(--morph))*22vh))}
+.triad i:nth-child(2){transform:translate(calc(-50% + (1 - var(--morph))*34vw),calc(-50% - (1 - var(--morph))*22vh))}
+.triad i:nth-child(3){transform:translate(-50%,calc(-50% + (1 - var(--morph))*34vh))}
+.triad b {
+  position:absolute;
+  left:50%;top:50%;width:18px;height:18px;border-radius:4px;
+  background:rgb(var(--morph-tone)/.92);
+  transform:translate(-50%,-50%) rotate(calc(var(--morph)*45deg)) scale(calc(.2 + var(--morph)*1.2));
+  box-shadow:0 0 34px rgb(var(--morph-tone)/.42);
+}
+
+/* Archive: document planes close like a research light table. */
+.morph[data-next='archive'] .bladeA { clip-path:polygon(0 4%,94% 0,82% 96%,0 100%);transform:translate3d(calc((1 - var(--morph)) * -72%),0,0) rotate(-5deg); }
+.morph[data-next='archive'] .bladeB { clip-path:polygon(8% 0,100% 4%,100% 100%,20% 96%);transform:translate3d(calc((1 - var(--morph)) * 72%),0,0) rotate(5deg); }
+.morph[data-next='archive'] .iris { border-radius:3px;transform:translate(-50%,-50%) scale(calc(.65 + var(--morph)*3.3)); }
+
+/* Problem: a fractured split produces a visual discontinuity on purpose. */
+.morph[data-next='problem'] .bladeA { clip-path:polygon(0 0,73% 0,61% 18%,79% 36%,58% 55%,74% 71%,55% 100%,0 100%);transform:translate3d(calc((1 - var(--morph)) * -76%),0,0); }
+.morph[data-next='problem'] .bladeB { clip-path:polygon(27% 0,100% 0,100% 100%,45% 100%,26% 71%,42% 55%,21% 36%,39% 18%);transform:translate3d(calc((1 - var(--morph)) * 76%),0,0); }
+.morph[data-next='problem'] .iris { opacity:0; }
+
+/* Work: quantified job demands resolve into a measurement grid. */
+.morph[data-next='work'] .bladeA,
+.morph[data-next='work'] .bladeB { opacity:.22; }
+.morph[data-next='work'] .iris { opacity:calc(var(--morph)*.2); }
+.morph[data-next='work'] .grid { opacity:calc(var(--morph)*.75);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1px;padding:12vh 14vw;transform:perspective(900px) rotateX(calc((1 - var(--morph))*18deg)) scale(calc(.84 + var(--morph)*.16)); }
+.grid i { border:1px solid rgb(var(--morph-tone)/.12);background:linear-gradient(135deg,rgb(var(--morph-tone)/.025),transparent); }
+
+/* Network: the grid collapses into a radial connected node field. */
+.morph[data-next='network'] .bladeA,
+.morph[data-next='network'] .bladeB { opacity:.08; }
+.morph[data-next='network'] .iris { opacity:calc(var(--morph)*.9);border-width:1px;transform:translate(-50%,-50%) scale(calc(.22 + var(--morph)*6.2)); }
+.morph[data-next='network'] .route { opacity:calc(var(--morph)*.68);transform:rotate(calc((1 - var(--morph))*18deg)); }
+
+/* Values: geometry resolves into a stable seal instead of another wipe. */
+.morph[data-next='values'] .bladeA,
+.morph[data-next='values'] .bladeB { opacity:.08; }
+.morph[data-next='values'] .iris { opacity:0; }
+.morph[data-next='values'] .seal { opacity:calc(var(--morph)*.95); }
+.seal i {
+  position:absolute;left:50%;top:50%;border-radius:50%;border:1px solid rgb(var(--morph-tone)/.6);
+  transform:translate(-50%,-50%) rotate(calc((1 - var(--morph))*45deg));
+}
+.seal i:first-child{width:26vmin;height:26vmin;box-shadow:0 0 60px rgb(var(--morph-tone)/.14)}
+.seal i:nth-child(2){width:16vmin;height:16vmin;border-style:dashed}
+.seal b{position:absolute;left:50%;top:50%;width:5vmin;height:5vmin;min-width:28px;min-height:28px;border:1px solid rgb(var(--morph-tone)/.9);transform:translate(-50%,-50%) rotate(45deg) scale(calc(.25 + var(--morph)*.75));background:rgb(var(--morph-tone)/.08)}
+
+/* Partner: everything becomes a clean vertical seam that opens into the light UI. */
+.morph[data-next='partner'] { background:rgba(245,249,251,calc(var(--morph)*.12)); }
+.morph[data-next='partner'] .bladeA,
+.morph[data-next='partner'] .bladeB { width:52vw;background:linear-gradient(180deg,rgba(248,251,253,.98),rgba(231,241,247,.96));box-shadow:none; }
+.morph[data-next='partner'] .bladeA { left:0;clip-path:none;transform:translateX(calc((1 - var(--morph))*-102%)); }
+.morph[data-next='partner'] .bladeB { right:0;clip-path:none;transform:translateX(calc((1 - var(--morph))*102%)); }
+.morph[data-next='partner'] .iris,
+.morph[data-next='partner'] .route,
+.morph[data-next='partner'] .scan,
+.morph[data-next='partner'] .triad,
+.morph[data-next='partner'] .grid,
+.morph[data-next='partner'] .seal { opacity:0; }
+.morph[data-next='partner'] .label { color:#102a3b;mix-blend-mode:normal; }
+.morph[data-next='partner'] .label span { color:rgba(16,42,59,.45); }
+
+.label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  transform: translate(-50%,-50%) translateY(calc((1 - var(--morph)) * 26px));
+  color: #fff;
+  mix-blend-mode: difference;
+  white-space: nowrap;
+  opacity: calc((var(--morph) - .38) * 1.62);
+}
+
+.label span {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .22em;
+  color: rgba(255,255,255,.45);
+}
+
+.label strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(28px, 4vw, 58px);
+  font-weight: 500;
+  letter-spacing: -.045em;
+}
+
+@media (max-width: 760px) {
+  .bladeA,
+  .bladeB { width: 76vw; }
+  .label { gap: 8px; }
+  .label strong { font-size: 34px; }
+  .morph[data-next='work'] .grid{padding:18vh 7vw}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .morph { display: none; }
+}
