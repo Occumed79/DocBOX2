@@ -1,3 +1,4 @@
+import ChapterMorph from '@/components/experience/ChapterMorph';
 import CinematicContinuity from '@/components/experience/CinematicContinuity';
 import CinematicHandoff from '@/components/experience/CinematicHandoff';
 import NarrativeThread from '@/components/experience/NarrativeThread';
@@ -10,6 +11,7 @@ export default function ProviderExperiencePage() {
     <>
       <CinematicContinuity />
       <NarrativeThread />
+      <ChapterMorph />
       <CinematicHandoff />
       <ProviderCompass />
       <div className={polish.surface}>
