@@ -10,6 +10,7 @@ This file is the research ledger for the public provider-onboarding experience.
 - Prefer external/public records for historical corroboration and Occu-Med's current site for present-day scale and current methodology language.
 - Do not turn the history into a list of who joined the company and when. People should be named only when required to explain the origin of the company or methodology.
 - When a current Occu-Med marketing statistic conflicts with a stronger independent benchmark, preserve the distinction in this ledger rather than silently presenting both as equivalent.
+- Public procurement records may reveal customer identities. Use those records as evidence, but strip the customer name from the public narrative unless the identity itself is essential to the history.
 
 ## Verified company-history beats
 
@@ -31,20 +32,43 @@ Sources:
 - https://www.occu-med.com/who-we-are/
 - https://thebusinessjournal.com/occu-med-globe-trotting-rising-star/
 
+### Research matures — Compendium of Medical Standards → Medical Guidelines
+
+A public 2013 Occu-Med proposal states that the company's medical research involved specialists and subspecialists representing **12 separate body systems** who initially formulated Occu-Med's **Compendium of Medical Standards**. The same record says continuing medical-research meetings reviewed the effectiveness and appropriateness of that Compendium and describes the later body of work as the company's **Medical Guidelines**.
+
+A 2018 public record repeats the same description, providing later corroboration that the Compendium / Medical Guidelines were part of a continuing research process rather than a one-time document.
+
+The public experience should make this a **company-methodology** story, not a biography. It is enough to say that specialist and subspecialist research across 12 separate body systems was synthesized into an evolving set of medical standards / guidelines. Do **not** invent the identities of the 12 body systems because the located sources do not enumerate them.
+
+Sources:
+- https://local.anaheim.net/docs_agend/questys_pub/23162/23192/23193/23484/23494/2.%20Original%20Agreement23494.pdf
+- https://santaana.granicus.com/MetaViewer.php?clip_id=1900&meta_id=67982&view_id=2
+
 ### Current methodology — three-part model
 
 Occu-Med currently describes its approach as proprietary and research-based, integrating valid job demands / job information, job-related medical exams, and legal/job compatibility into one placement decision.
+
+The 2013 public record provides useful historical detail on how that system operated. It describes comprehensive physical and environmental job-demand analysis, a Physical Abilities Analysis, Medical Exam Component Profiles, EXAMQA, and QA2 as mechanisms for bringing job and medical information together for the employment decision. These terms can inform visual storytelling about the system's evolution without surfacing the customer identity from the underlying procurement record.
 
 Sources:
 - https://www.occu-med.com/who-we-are/
 - https://www.occu-med.com/pre-placement-medical-evaluations/
 - https://www.occu-med.com/what-we-do/
+- https://local.anaheim.net/docs_agend/questys_pub/23162/23192/23193/23484/23494/2.%20Original%20Agreement23494.pdf
 
 ### 2006 — International markets
 
 Occu-Med's current company history states that it has served international markets since 2006.
 
 Source: https://www.occu-med.com/who-we-are/
+
+### 2013 — A distributed U.S. operating footprint
+
+A public 2013 Occu-Med proposal identifies Fresno as the corporate headquarters and states that the company also maintained **four secondary offices** at the time: two in Colorado, one in Washington, D.C., and one in South Carolina.
+
+This is useful as a company-growth milestone because it demonstrates that the organization had become a distributed national operating system before the later global-network scale became visible. The public story should describe the geographic expansion, not the customer for whom the proposal was prepared.
+
+Source: https://local.anaheim.net/docs_agend/questys_pub/23162/23192/23193/23484/23494/2.%20Original%20Agreement23494.pdf
 
 ### 2016 — International infrastructure and outside recognition
 
@@ -81,16 +105,23 @@ Sources:
 ## Visual-story implications
 
 1. **History should begin in 1976, not 1979.** The research question is the opening historical beat; the company is the result.
-2. The history chapter should visualize the evolution **research → methodology → operating company → international system → global network**.
+2. The history chapter should visualize the evolution **research → methodology → operating company → distributed U.S. system → international system → global network**.
 3. Historical records should be treated like archival evidence in the experience, inspired by the Nasdaq 50th-anniversary approach, rather than shown as ordinary citations or document screenshots.
 4. The 1976 research record supports a dedicated archival scene built around the three research objectives and the scale of the project, without turning the scene into a founder biography.
-5. The injury-risk scene should use independently verified workforce data and then transition directly into why job-specific context matters.
-6. The proprietary-methodology section should make the three dimensions spatial and interactive rather than presenting three ordinary cards.
-7. The global-network scene should function as both spectacle and information visualization, drawing conceptually from WWF Blue Corridors and Climate TRACE.
-8. The immersive story should gradually settle into a much quieter, provider-specific onboarding interface.
-9. The provider section should be functional, not decorative: specialty selection, capability selection, location handling, rate entry, and review should work before any submission backend is added.
+5. The archive should then **morph**, rather than cut, into the later specialist-research story: 12 abstract body-system research nodes converge into the Compendium of Medical Standards, which resolves into Medical Guidelines. Do not label the individual body systems unless an authoritative source enumerating them is found.
+6. The injury-risk scene should use independently verified workforce data and then transition directly into why job-specific context matters.
+7. The proprietary-methodology section should make the three dimensions spatial and interactive rather than presenting three ordinary cards.
+8. The 2013 distributed-office footprint can be used as a quiet scale transition between methodology and global expansion: Fresno → multiple U.S. offices → 36+ countries → 15,000+ locations.
+9. The global-network scene should function as both spectacle and information visualization, drawing conceptually from WWF Blue Corridors and Climate TRACE.
+10. The immersive story should gradually settle into a much quieter, provider-specific onboarding interface.
+11. The provider section should be functional, not decorative: specialty selection, capability selection, location handling, rate entry, and review should work before any submission backend is added.
+
+## Founder-name note
+
+Current public records located for this project identify James / Jim Johnson as the founder and identify Devonna Kaji as deeply involved in the company's medical research. No reliable public record located in this research pass identifies a founder named Ken. Because the public experience is company-centric anyway, do not build a founder-biography scene around this discrepancy. If internal archival material later establishes another founding role, add it here with the source and adjust only the historically necessary public copy.
 
 ## Build-status notes
 
-- The branch now has a GitHub Actions workflow that installs dependencies, runs TypeScript verification, and performs a production Next.js build.
+- The branch has a GitHub Actions workflow that installs dependencies, runs TypeScript verification, and performs a production Next.js build.
 - The repository's committed lockfile is currently out of sync with `package.json`; CI intentionally uses `npm install` instead of `npm ci` until the lockfile is normalized in a dedicated cleanup change.
+- The cinematic controller now drives chapter state, scroll-scrubbed scene progression, automatic stage changes, multi-layer image drift, a pointer-reactive atmospheric field, chapter-specific color tone, and a deliberate fade-out as the static provider-onboarding interface begins.
