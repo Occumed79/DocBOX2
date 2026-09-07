@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import type { CSSProperties } from 'react';
 import styles from './ResearchArchive.module.css';
 
 const GOALS = [
@@ -75,7 +76,7 @@ export default function ResearchArchive() {
           <div className={styles.systemField} aria-label="Twelve body-system research groups converging into the Medical Guidelines">
             <div className={styles.systemOrbit} aria-hidden="true" />
             {SYSTEMS.map((system, index) => (
-              <span key={system} className={styles.systemNode} style={{ '--system-index': index } as React.CSSProperties}>
+              <span key={system} className={styles.systemNode} style={{ '--system-index': index } as CSSProperties}>
                 <i>{system}</i>
               </span>
             ))}
@@ -85,6 +86,17 @@ export default function ResearchArchive() {
               <span>↓</span>
               <strong>MEDICAL GUIDELINES</strong>
             </div>
+          </div>
+
+          <div className={styles.growthMarkers}>
+            <article>
+              <span>1980</span>
+              <p>Public records show Occu-Med-developed comprehensive employment medical standards already being used with position physical-effort analyses.</p>
+            </article>
+            <article>
+              <span>2013</span>
+              <p>Public records show a mature EXAMQA / QA2 operating system and a distributed U.S. footprint: Fresno headquarters plus four secondary offices.</p>
+            </article>
           </div>
 
           <div className={styles.guidelinesEvidence}>
