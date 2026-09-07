@@ -1,8 +1,8 @@
-import { redirect } from 'next/navigation';
+import FormsProviderInvitation from '@/components/forms/FormsProviderInvitation';
 
 type Props = { params: Promise<{ token: string }> };
 
 export default async function ProviderInvitationEntry({ params }: Props) {
   const { token } = await params;
-  redirect(`/experience?provider_token=${encodeURIComponent(token)}#provider-details`);
+  return <FormsProviderInvitation token={token} />;
 }
