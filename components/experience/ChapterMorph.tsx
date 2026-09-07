@@ -96,12 +96,18 @@ export default function ChapterMorph() {
   return (
     <div
       className={styles.morph}
+      data-next={nextChapter.toLowerCase()}
       style={{ '--morph': morph, '--morph-tone': tone } as CSSProperties}
       aria-hidden="true"
     >
       <div className={styles.bladeA} />
       <div className={styles.bladeB} />
       <div className={styles.iris}><i /><i /></div>
+      <div className={styles.route}><i /><i /><i /><i /></div>
+      <div className={styles.scan}><i /></div>
+      <div className={styles.triad}><i /><i /><i /><b /></div>
+      <div className={styles.grid}>{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</div>
+      <div className={styles.seal}><i /><i /><b /></div>
       <div className={styles.label}>
         <span>NEXT</span>
         <strong>{nextChapter}</strong>
