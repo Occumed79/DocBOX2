@@ -89,3 +89,8 @@ Sources:
 7. The global-network scene should function as both spectacle and information visualization, drawing conceptually from WWF Blue Corridors and Climate TRACE.
 8. The immersive story should gradually settle into a much quieter, provider-specific onboarding interface.
 9. The provider section should be functional, not decorative: specialty selection, capability selection, location handling, rate entry, and review should work before any submission backend is added.
+
+## Build-status notes
+
+- The branch now has a GitHub Actions workflow that installs dependencies, runs TypeScript verification, and performs a production Next.js build.
+- The repository's committed lockfile is currently out of sync with `package.json`; CI intentionally uses `npm install` instead of `npm ci` until the lockfile is normalized in a dedicated cleanup change.
