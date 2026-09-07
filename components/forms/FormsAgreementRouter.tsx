@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import FormsProviderAgreement from './FormsProviderAgreement';
 import FormsProviderInvitation from './FormsProviderInvitation';
+import OpenProviderSubmission from './OpenProviderSubmission';
 
 type Props = {
   services: string[];
@@ -14,5 +15,10 @@ export default function FormsAgreementRouter({ services, specialty }: Props) {
   const token = searchParams.get('provider_token')?.trim() || '';
 
   if (token) return <FormsProviderInvitation token={token} />;
-  return <FormsProviderAgreement services={services} specialty={specialty} />;
+  return (
+    <>
+      <FormsProviderAgreement services={services} specialty={specialty} />
+      <OpenProviderSubmission specialty={specialty} />
+    </>
+  );
 }
