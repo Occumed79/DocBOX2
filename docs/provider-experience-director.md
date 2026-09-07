@@ -56,8 +56,24 @@ After the cinematic handoff, test the practical flow separately:
 - local draft autosave / restore;
 - agreement readiness states;
 - full review copy;
-- **Print / Save review PDF** from the browser print dialog.
+- **Print / Save review PDF** from the browser print dialog;
+- provider FAQ interactions and mobile wrapping.
 
 Final electronic submission and signature acceptance remain intentionally disabled until the next workflow layer is implemented.
+
+## Final QA pass
+
+For each release candidate, run the following checks before moving the PR out of draft:
+
+1. **Desktop narrative:** scroll from the landing-page handoff through Partner without using chapter navigation. No transition should feel like a separate page load or a hard visual reset.
+2. **Director Mode:** manually inspect the start, midpoint, and exit of Method, Referral, Clinical, Network, and Values. Confirm the persistent case object remains visually recognizable while changing form.
+3. **Manual staging:** hold at least one non-default state in History, Referral, Clinical, Work, and Values and confirm automatic scroll staging does not fight the pinned state.
+4. **Reduced motion:** verify the page remains understandable with `prefers-reduced-motion: reduce`; cinematic decoration may disappear, but content and provider workflow must remain usable.
+5. **Mobile:** verify specialty selection, capability rows, address inputs, rate tables, agreement review, and FAQ do not overflow the viewport.
+6. **Draft recovery:** enter provider/contact/location/rate data, reload, and confirm the local draft restores. Then clear the draft and confirm the reset persists.
+7. **Agreement review:** test both shared pricing and location-specific pricing with multiple facilities. Print the review copy and verify addresses, contacts, terms, and every selected service rate are present.
+8. **No customer names:** scan all public-facing history copy before release. Source records can identify customers internally; the experience must not.
+9. **Historical wording:** preserve the distinction between proprietary methodology and patent protection, and do not turn contested archival records into testimonials.
+10. **CI:** require install, TypeScript, and production build to pass on the exact release-candidate head.
 
 Director Mode is a tuning tool, not part of the provider-facing product UI.
