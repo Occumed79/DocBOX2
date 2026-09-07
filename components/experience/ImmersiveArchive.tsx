@@ -106,19 +106,28 @@ function clamp(value: number, min: number, max: number) {
 
 export default function ImmersiveArchive() {
   const [theme, setTheme] = useState<Theme>('All');
+  const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const shellRef = useRef<HTMLElement | null>(null);
   const dragStart = useRef<number | null>(null);
   const dragOrigin = useRef(0);
   const wheelLock = useRef(0);
 
-  const artifacts = useMemo(() => theme === 'All' ? ARTIFACTS : ARTIFACTS.filter(item => item.theme === theme), [theme]);
+  const artifacts = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    return ARTIFACTS.filter(item => {
+      const themeMatch = theme === 'All' || item.theme === theme;
+      const queryMatch = !normalized || [item.year, item.theme, item.eyebrow, item.title, item.body, item.datum].join(' ').toLowerCase().includes(normalized);
+      return themeMatch && queryMatch;
+    });
+  }, [theme, query]);
 
   useEffect(() => {
     setActive(0);
-  }, [theme]);
+  }, [theme, query]);
 
   useEffect(() => {
+    if (!artifacts.length) return;
     const onKey = (event: KeyboardEvent) => {
       if (!shellRef.current) return;
       const rect = shellRef.current.getBoundingClientRect();
@@ -131,6 +140,7 @@ export default function ImmersiveArchive() {
   }, [artifacts.length]);
 
   const onWheel = (event: React.WheelEvent) => {
+    if (!artifacts.length) return;
     const now = performance.now();
     if (now - wheelLock.current < 280 || Math.abs(event.deltaY) < 12) return;
     wheelLock.current = now;
@@ -138,13 +148,14 @@ export default function ImmersiveArchive() {
   };
 
   const onPointerDown = (event: React.PointerEvent) => {
+    if (!artifacts.length) return;
     dragStart.current = event.clientX;
     dragOrigin.current = active;
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const onPointerMove = (event: React.PointerEvent) => {
-    if (dragStart.current === null) return;
+    if (dragStart.current === null || !artifacts.length) return;
     const delta = event.clientX - dragStart.current;
     if (Math.abs(delta) < 70) return;
     const shift = Math.round(-delta / 170);
@@ -166,19 +177,26 @@ export default function ImmersiveArchive() {
           <span>OCCU-MED / ARCHIVE EXHIBITION</span>
           <h2>Walk through the research,<br />not a stack of slides.</h2>
         </div>
-        <p>Drag, scroll, use the arrow keys, or choose a year. Every object is built from Occu-Med history and source artwork.</p>
+        <p>Drag, scroll, use the arrow keys, choose a year, or search the archive. Every object is built from Occu-Med history and source artwork.</p>
       </header>
 
-      <nav className={styles.filters} aria-label="Filter archive">
-        {(['All', 'Research', 'Method', 'Scale'] as Theme[]).map(item => (
-          <button key={item} type="button" onClick={() => setTheme(item)} data-active={theme === item}>{item}</button>
-        ))}
-      </nav>
+      <div className={styles.discoveryBar}>
+        <nav className={styles.filters} aria-label="Filter archive">
+          {(['All', 'Research', 'Method', 'Scale'] as Theme[]).map(item => (
+            <button key={item} type="button" onClick={() => setTheme(item)} data-active={theme === item}>{item}</button>
+          ))}
+        </nav>
+        <label className={styles.search}>
+          <span>SEARCH ARCHIVE</span>
+          <input value={query} onChange={event => setQuery(event.target.value)} placeholder="1976, Honolulu, EXAMQA, 15,000…" />
+          {query && <button type="button" onClick={() => setQuery('')} aria-label="Clear archive search">×</button>}
+        </label>
+      </div>
 
       <div className={styles.viewport} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
         <div className={styles.floor} aria-hidden="true" />
         <div className={styles.rail} aria-hidden="true" />
-        <div className={styles.world} style={{ '--active': active } as React.CSSProperties}>
+        {artifacts.length ? <div className={styles.world} style={{ '--active': active } as React.CSSProperties}>
           {artifacts.map((item, index) => {
             const offset = index - active;
             return (
@@ -205,10 +223,14 @@ export default function ImmersiveArchive() {
               </article>
             );
           })}
-        </div>
+        </div> : <div className={styles.empty}>
+          <span>NO MATCHING ARTIFACT</span>
+          <strong>Try a year, place, method, or network term.</strong>
+          <button type="button" onClick={() => { setTheme('All'); setQuery(''); }}>RESET ARCHIVE</button>
+        </div>}
       </div>
 
-      <div className={styles.timeline}>
+      {artifacts.length ? <div className={styles.timeline}>
         <button type="button" className={styles.arrow} onClick={() => setActive(current => clamp(current - 1, 0, artifacts.length - 1))} disabled={active === 0} aria-label="Previous archive object">←</button>
         <div className={styles.years}>
           {artifacts.map((item, index) => (
@@ -219,9 +241,9 @@ export default function ImmersiveArchive() {
           ))}
         </div>
         <button type="button" className={styles.arrow} onClick={() => setActive(current => clamp(current + 1, 0, artifacts.length - 1))} disabled={active === artifacts.length - 1} aria-label="Next archive object">→</button>
-      </div>
+      </div> : null}
 
-      <div className={styles.counter}>{String(active + 1).padStart(2, '0')} / {String(artifacts.length).padStart(2, '0')}</div>
+      <div className={styles.counter}>{artifacts.length ? `${String(active + 1).padStart(2, '0')} / ${String(artifacts.length).padStart(2, '0')}` : '00 / 00'}</div>
     </section>
   );
 }
