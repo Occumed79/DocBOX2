@@ -15,13 +15,13 @@ export function formsProviderHeaders(request: Request) {
 }
 
 export async function formsBackendFetch(path: string, init?: RequestInit) {
+  const headers = new Headers(init?.headers);
+  if (init?.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+
   return fetch(formsBackendUrl(path), {
     ...init,
     cache: 'no-store',
-    headers: {
-      ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
-      ...(init?.headers || {}),
-    },
+    headers,
   });
 }
 
