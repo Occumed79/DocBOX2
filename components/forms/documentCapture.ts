@@ -28,7 +28,9 @@ export async function providerDocumentPdf(root: HTMLElement): Promise<Uint8Array
 }
 
 export function downloadPdf(bytes: Uint8Array, filename: string) {
-  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  const blob = new Blob([buffer], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
