@@ -6,6 +6,7 @@ import styles from './DirectorOverlay.module.css';
 const CHAPTERS = ['Origin', 'History', 'Archive', 'Problem', 'Method', 'Referral', 'Clinical', 'Work', 'Network', 'Values', 'Partner'] as const;
 const STAGES: Partial<Record<(typeof CHAPTERS)[number], readonly string[]>> = {
   History: ['1976', '1979', '2006', '2016', 'Today'],
+  Archive: ['Documents', 'Research', 'Guidelines', 'Method seed'],
   Referral: ['Referral', 'Scheduling', 'Clinic', 'Exam', 'Records', 'QA', 'Review'],
   Clinical: ['Medical', 'Lab', 'Dental', 'Audio', 'Vaccine'],
   Work: ['Industrial', 'Public safety'],
@@ -38,8 +39,7 @@ function collectSections() {
 function applyStage(section: HTMLElement | undefined, chapter: (typeof CHAPTERS)[number], index: number) {
   if (!section || !(STAGES[chapter]?.length)) return;
   const buttons = Array.from(section.querySelectorAll<HTMLButtonElement>('button'));
-  if (!buttons[index]) return;
-  buttons[index].click();
+  if (buttons[index]) buttons[index].click();
   window.dispatchEvent(new CustomEvent('occumed:director-stage', { detail: { chapter, index } }));
 }
 
