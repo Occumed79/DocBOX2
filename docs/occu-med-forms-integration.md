@@ -4,6 +4,8 @@ The provider pricing/agreement portion of the DocBOX2 provider experience now us
 
 Source repository: `Occumed79/occu-med-forms`
 
+Source revision used for this integration: `817f5db747865540c6dc5377917f43285c7dc16d` (`main` when the integration was ported).
+
 Source behaviors adopted into the provider experience:
 
 - Provider Fee Proposal and Provider Service Agreement document modes.
