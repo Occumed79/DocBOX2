@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { type VaultFile, formatDate, formatSize } from './file-model';
 import { CloseIcon } from './icons';
+import ProviderOnboardingReview from './ProviderOnboardingReview';
 
 async function readError(response: Response, fallback: string) {
   try {
@@ -23,6 +24,7 @@ export default function VaultInspector({ file, onClose, onUpdate, onRemove, onEr
   const [editNotes, setEditNotes] = useState(false);
   const [notes, setNotes] = useState(file.notes || '');
   const [pending, setPending] = useState(false);
+  const providerSubmission = file.tags?.includes('provider-onboarding');
 
   useEffect(() => {
     setEditNotes(false);
@@ -78,11 +80,13 @@ export default function VaultInspector({ file, onClose, onUpdate, onRemove, onEr
   return (
     <aside className="stage-inspector" aria-label={`Details for ${file.name}`}>
       <header className="stage-inspector-header">
-        <div><p>Inspector</p><h2 title={file.name}>{file.name}</h2><span>{file.original_name}</span></div>
+        <div><p>{providerSubmission ? 'Provider Review' : 'Inspector'}</p><h2 title={file.name}>{file.name}</h2><span>{file.original_name}</span></div>
         <button type="button" className="stage-icon-button" onClick={onClose} aria-label="Close inspector"><CloseIcon /></button>
       </header>
 
       <div className="stage-inspector-scroll">
+        {providerSubmission ? <ProviderOnboardingReview file={file} onUpdate={onUpdate} onError={onError} /> : null}
+
         <section className="stage-inspector-section">
           <h3>File Details</h3>
           <dl className="stage-detail-list">
@@ -98,15 +102,17 @@ export default function VaultInspector({ file, onClose, onUpdate, onRemove, onEr
           {file.tags?.length ? <div className="stage-tag-list">{file.tags.map(tag => <span key={tag}>{tag}</span>)}</div> : <p className="stage-muted-copy">No tags yet.</p>}
         </section>
 
-        <section className="stage-inspector-section">
-          <div className="stage-section-heading"><h3>Notes</h3>{!editNotes && <button type="button" onClick={() => setEditNotes(true)}>{file.notes ? 'Edit' : 'Add'}</button>}</div>
-          {editNotes ? (
-            <div className="stage-notes-editor">
-              <textarea autoFocus rows={6} value={notes} onChange={event => setNotes(event.target.value)} placeholder="Add context for this file…" />
-              <div><button type="button" className="stage-action prominent" onClick={() => void saveNotes()} disabled={pending}>Save</button><button type="button" className="stage-action" onClick={() => { setNotes(file.notes || ''); setEditNotes(false); }}>Cancel</button></div>
-            </div>
-          ) : <p className={file.notes ? 'stage-notes-copy' : 'stage-muted-copy'}>{file.notes || 'No notes yet.'}</p>}
-        </section>
+        {!providerSubmission ? (
+          <section className="stage-inspector-section">
+            <div className="stage-section-heading"><h3>Notes</h3>{!editNotes && <button type="button" onClick={() => setEditNotes(true)}>{file.notes ? 'Edit' : 'Add'}</button>}</div>
+            {editNotes ? (
+              <div className="stage-notes-editor">
+                <textarea autoFocus rows={6} value={notes} onChange={event => setNotes(event.target.value)} placeholder="Add context for this file…" />
+                <div><button type="button" className="stage-action prominent" onClick={() => void saveNotes()} disabled={pending}>Save</button><button type="button" className="stage-action" onClick={() => { setNotes(file.notes || ''); setEditNotes(false); }}>Cancel</button></div>
+              </div>
+            ) : <p className={file.notes ? 'stage-notes-copy' : 'stage-muted-copy'}>{file.notes || 'No notes yet.'}</p>}
+          </section>
+        ) : null}
       </div>
 
       <footer className="stage-inspector-footer">
