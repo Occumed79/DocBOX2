@@ -50,16 +50,21 @@ Referral and Clinical also keep their artwork mounted as layered scenes so state
 After the cinematic handoff, test the practical flow separately:
 
 - specialty and capability selection;
-- provider contact details;
-- one or multiple physical locations;
-- shared versus location-specific self-pay pricing;
+- specialty-selected services flowing into the embedded Occu-Med Forms document;
+- provider contact and physical-address fields;
+- self-pay fee entry and provider-added services;
 - local draft autosave / restore;
-- agreement readiness states;
-- full review copy;
-- **Print / Save review PDF** from the browser print dialog;
+- typed and drawn pricing-response signatures;
+- electronic-record consent;
+- exact A4 Fee Proposal preview and PDF copy;
+- public **Submit pricing proposal** handoff;
+- returned `OM-PR-...` reference and downloaded provider copy;
+- the created PDF appearing in DocBOX under **Provider Onboarding Submissions** with searchable provider/specialty/service metadata;
 - provider FAQ interactions and mobile wrapping.
 
-Final electronic submission and signature acceptance remain intentionally disabled until the next workflow layer is implemented.
+Open onboarding is intentionally a **Provider Fee Proposal / review submission**, not an unauthenticated final Provider Service Agreement. If Network Management accepts the pricing response, the final agreement is issued through the existing secure Occu-Med Forms invitation workflow.
+
+Test the authoritative invitation path separately at `/provider/[token]`. That route should go directly to the invited document, preserve the Forms backend audit/finalization lifecycle, and never replay the cinematic onboarding experience.
 
 ## Final QA pass
 
@@ -69,12 +74,14 @@ For each release candidate, run the following checks before moving the PR out of
 2. **Director Mode:** manually inspect the start, midpoint, and exit of Method, Referral, Clinical, Network, and Values. Confirm the persistent case object remains visually recognizable while changing form.
 3. **Manual staging:** hold at least one non-default state in History, Referral, Clinical, Work, and Values and confirm automatic scroll staging does not fight the pinned state.
 4. **Reduced motion:** verify the page remains understandable with `prefers-reduced-motion: reduce`; cinematic decoration may disappear, but content and provider workflow must remain usable.
-5. **Mobile:** verify specialty selection, capability rows, address inputs, rate tables, agreement review, and FAQ do not overflow the viewport.
-6. **Draft recovery:** enter provider/contact/location/rate data, reload, and confirm the local draft restores. Then clear the draft and confirm the reset persists.
-7. **Agreement review:** test both shared pricing and location-specific pricing with multiple facilities. Print the review copy and verify addresses, contacts, terms, and every selected service rate are present.
-8. **Provider FAQ:** step through all six FAQ states and confirm the provider-role wording stays aligned with the actual referral workflow.
-9. **No customer names:** scan all public-facing history copy before release. Source records can identify customers internally; the experience must not.
-10. **Historical wording:** preserve the distinction between proprietary methodology and patent protection, and do not turn contested archival records into testimonials.
-11. **CI:** require install, TypeScript, and production build to pass on the exact release-candidate head.
+5. **Mobile:** verify specialty selection, capability rows, provider fields, rate rows, exact preview behavior, submission handoff, and FAQ do not overflow the viewport.
+6. **Draft recovery:** enter provider/contact/rate data, reload, and confirm the local draft restores. Then clear the draft and confirm the reset persists.
+7. **Open pricing submission:** complete a Fee Proposal, sign/consent, submit it, confirm an `OM-PR-...` reference is returned, and confirm the exact PDF is stored inside **Provider Onboarding Submissions** in the existing DocBOX vault.
+8. **Security boundary:** confirm public onboarding cannot create an authoritative Forms invitation or execute the final Provider Service Agreement. Public submissions must stop at Network Management review.
+9. **Secure invitation:** open a real `/provider/[token]` invitation and verify load, finalize, decline, document download, certificate download, and Needs Review behavior all remain backed by the existing Forms service.
+10. **Provider FAQ:** step through all FAQ states and confirm the provider-role wording stays aligned with the actual referral workflow.
+11. **No customer names:** scan all public-facing history copy before release. Source records can identify customers internally; the experience must not.
+12. **Historical wording:** preserve the distinction between proprietary methodology and patent protection, and do not turn contested archival records into testimonials.
+13. **CI:** require install, TypeScript, and production build to pass on the exact release-candidate head.
 
 Director Mode is a tuning tool, not part of the provider-facing product UI.
