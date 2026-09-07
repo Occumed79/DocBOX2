@@ -23,6 +23,7 @@ const STAGES: Stage[] = [
 export default function CasePassport() {
   const [stage, setStage] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     let frame = 0;
@@ -45,6 +46,8 @@ export default function CasePassport() {
         }
       });
 
+      const providerTop = document.getElementById('provider-details')?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
+      setVisible(providerTop > vh * .78);
       setStage(nextStage);
       setProgress(local);
     };
@@ -62,7 +65,7 @@ export default function CasePassport() {
   const current = STAGES[stage];
 
   return (
-    <aside className={styles.passport} data-stage={stage} aria-label="Persistent Occu-Med case passport">
+    <aside className={styles.passport} data-stage={stage} data-visible={visible} aria-label="Persistent Occu-Med case passport">
       <div className={styles.edge}><i style={{ height: `${Math.max(8, progress * 100)}%` }} /></div>
       <div className={styles.topline}><span>{current.label}</span><b>{String(stage + 1).padStart(2,'0')} / {String(STAGES.length).padStart(2,'0')}</b></div>
       <strong className={styles.title}>{current.title}</strong>
