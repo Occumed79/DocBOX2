@@ -56,6 +56,13 @@ export default function CinematicContinuity() {
   useEffect(() => {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let frame = 0;
+    let settleTimer = 0;
+    let lastScrollY = window.scrollY;
+    let lastTime = performance.now();
+
+    const root = document.documentElement;
+    root.style.setProperty('--pointer-x', '50%');
+    root.style.setProperty('--pointer-y', '45%');
 
     const clickIndexedButton = (key: AutoKey, section: HTMLElement | null, index: number) => {
       if (!section || lastAuto.current[key] === index) return;
@@ -67,6 +74,7 @@ export default function CinematicContinuity() {
 
     const update = () => {
       frame = 0;
+      const now = performance.now();
       const vh = window.innerHeight || 1;
       const baseSections = Array.from(document.querySelectorAll<HTMLElement>('section[data-scrub]'));
       const values = findValuesSection();
@@ -74,8 +82,16 @@ export default function CinematicContinuity() {
       const allSections = [...baseSections, ...(values ? [values] : []), ...(handoff ? [handoff] : [])];
       const docHeight = Math.max(document.documentElement.scrollHeight - vh, 1);
       const global = clamp(window.scrollY / docHeight);
+      const elapsed = Math.max(16, now - lastTime);
+      const scrollEnergy = clamp(Math.abs(window.scrollY - lastScrollY) / elapsed / 1.15);
+      lastScrollY = window.scrollY;
+      lastTime = now;
+
       setOverallProgress(global);
-      document.documentElement.style.setProperty('--experience-progress', global.toFixed(4));
+      root.style.setProperty('--experience-progress', global.toFixed(4));
+      root.style.setProperty('--experience-x', `${12 + global * 72}%`);
+      root.style.setProperty('--experience-x-reverse', `${88 - global * 52}%`);
+      root.style.setProperty('--scroll-energy', scrollEnergy.toFixed(4));
 
       let nearest = 0;
       let nearestProgress = 0;
@@ -132,9 +148,12 @@ export default function CinematicContinuity() {
       const provider = document.getElementById('provider-details');
       const providerTop = provider?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
       const cinema = clamp((providerTop - vh * 0.12) / (vh * 0.72));
-      document.documentElement.style.setProperty('--cinema', cinema.toFixed(4));
-      document.documentElement.style.setProperty('--chapter-progress', nearestProgress.toFixed(4));
-      document.documentElement.style.setProperty('--continuity-tone', PALETTES[nearest] ?? PALETTES[0]);
+      root.style.setProperty('--cinema', cinema.toFixed(4));
+      root.style.setProperty('--chapter-progress', nearestProgress.toFixed(4));
+      root.style.setProperty('--chapter-y', `${18 + nearestProgress * 54}%`);
+      root.style.setProperty('--orb-shift', `${(nearestProgress - 0.5) * 80}px`);
+      root.style.setProperty('--orb-shift-reverse', `${(0.5 - nearestProgress) * 95}px`);
+      root.style.setProperty('--continuity-tone', PALETTES[nearest] ?? PALETTES[0]);
       setActiveChapter(Math.min(CHAPTERS.length - 1, nearest));
     };
 
@@ -142,12 +161,27 @@ export default function CinematicContinuity() {
       if (!frame) frame = window.requestAnimationFrame(update);
     };
 
+    const onScroll = () => {
+      queue();
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => root.style.setProperty('--scroll-energy', '0'), 110);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (reducedMotion) return;
+      root.style.setProperty('--pointer-x', `${(event.clientX / Math.max(1, window.innerWidth)) * 100}%`);
+      root.style.setProperty('--pointer-y', `${(event.clientY / Math.max(1, window.innerHeight)) * 100}%`);
+    };
+
     update();
-    window.addEventListener('scroll', queue, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', queue);
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
     return () => {
-      window.removeEventListener('scroll', queue);
+      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', queue);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.clearTimeout(settleTimer);
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
