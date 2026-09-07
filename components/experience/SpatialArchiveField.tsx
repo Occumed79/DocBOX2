@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import styles from './SpatialArchiveField.module.css';
 
 type Vec3 = [number, number, number];
+type DirectorStageDetail = { chapter?: string; index?: number };
 
 const COUNT = 216;
 
@@ -222,11 +223,13 @@ export default function SpatialArchiveField() {
       opacity: gl.getUniformLocation(program, 'u_opacity'),
     };
 
+    const root = document.documentElement;
     let frame = 0;
     let pointerX = 0;
     let pointerY = 0;
     let targetStage = 0;
     let stage = 0;
+    let manualStage: number | null = null;
     let targetOpacity = 0;
     let opacity = 0;
     let last = performance.now();
@@ -267,7 +270,9 @@ export default function SpatialArchiveField() {
         bridge = smoothstep(-.12, .86, (vh * .94 - methodRect.top) / Math.max(1, vh * 1.48));
       }
 
-      targetStage = methodNear > .035 ? Math.max(progress * 2, 2 + bridge) : progress * 2;
+      const automaticStage = methodNear > .035 ? Math.max(progress * 2, 2 + bridge) : progress * 2;
+      const manual = root.dataset.directorManualStages === 'true' && manualStage !== null;
+      targetStage = manual ? manualStage as number : automaticStage;
       targetOpacity = Math.max(archiveOpacity, methodNear * .34);
       if (archiveRect.bottom < vh * .06 && methodNear < .035) targetOpacity *= .22;
     };
@@ -275,6 +280,10 @@ export default function SpatialArchiveField() {
     const draw = (now: number) => {
       const delta = Math.min(50, now - last);
       last = now;
+      if (manualStage !== null && root.dataset.directorManualStages !== 'true') {
+        manualStage = null;
+        updateTarget();
+      }
       const response = Math.min(1, delta / 150);
       stage += (targetStage - stage) * response;
       opacity += (targetOpacity - opacity) * response;
@@ -307,6 +316,16 @@ export default function SpatialArchiveField() {
       frame = window.requestAnimationFrame(draw);
     };
 
+    const onDirectorStage = (event: Event) => {
+      const detail = (event as CustomEvent<DirectorStageDetail>).detail;
+      if (detail?.chapter === 'Archive' && typeof detail.index === 'number') {
+        manualStage = clamp(detail.index, 0, 3);
+        targetStage = manualStage;
+      } else if (detail?.chapter && detail.chapter !== 'Archive') {
+        manualStage = null;
+      }
+      updateTarget();
+    };
     const onPointerMove = (event: PointerEvent) => {
       pointerX = event.clientX / Math.max(1, window.innerWidth) - .5;
       pointerY = event.clientY / Math.max(1, window.innerHeight) - .5;
@@ -320,11 +339,13 @@ export default function SpatialArchiveField() {
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
+    window.addEventListener('occumed:director-stage', onDirectorStage);
 
     return () => {
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('occumed:director-stage', onDirectorStage);
       window.cancelAnimationFrame(frame);
       buffers.forEach(buffer => { if (buffer) gl.deleteBuffer(buffer); });
       gl.deleteProgram(program);
