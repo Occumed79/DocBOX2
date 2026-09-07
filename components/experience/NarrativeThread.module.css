@@ -1,0 +1,200 @@
+.thread {
+  --thread-progress: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 107;
+  pointer-events: none;
+  overflow: hidden;
+  color: #fff;
+  opacity: 1;
+  transition: opacity .45s ease;
+  mix-blend-mode: screen;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.copy {
+  position: absolute;
+  left: clamp(22px, 4vw, 62px);
+  bottom: clamp(36px, 6vh, 76px);
+  width: min(430px, calc(100vw - 44px));
+  padding-left: 18px;
+  border-left: 1px solid rgba(255,255,255,.22);
+  transform: translate3d(0, calc((.5 - var(--thread-progress)) * 14px), 0);
+  opacity: calc(.42 + (1 - abs(var(--thread-progress) - .5) * 1.25) * .58);
+}
+
+.copy span {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255,255,255,.5);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .2em;
+}
+
+.copy strong {
+  display: block;
+  font-size: clamp(11px, 1vw, 14px);
+  letter-spacing: .12em;
+}
+
+.copy p {
+  max-width: 390px;
+  margin: 7px 0 0;
+  color: rgba(255,255,255,.42);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.route {
+  position: absolute;
+  left: 29vw;
+  right: 4vw;
+  top: 14vh;
+  width: 67vw;
+  height: 72vh;
+  overflow: visible;
+  filter: drop-shadow(0 0 18px rgba(126,213,247,.12));
+}
+
+.route path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  transition: d .75s cubic-bezier(.2,.75,.2,1), opacity .4s ease;
+}
+
+.routeGhost {
+  stroke: rgba(255,255,255,.07);
+  stroke-width: .35;
+}
+
+.routeLive {
+  stroke: rgba(139,220,250,.58);
+  stroke-width: .55;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--thread-progress));
+  opacity: .82;
+}
+
+.puck {
+  position: absolute;
+  left: calc(33vw + var(--thread-progress) * 53vw);
+  top: calc(18vh + var(--thread-progress) * 50vh);
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(173,230,251,.38);
+  border-radius: 50%;
+  background: rgba(5,20,29,.28);
+  box-shadow: 0 0 36px rgba(111,208,244,.12), inset 0 0 20px rgba(255,255,255,.035);
+  backdrop-filter: blur(10px);
+  transform: translate(-50%,-50%) scale(calc(.82 + var(--thread-progress) * .2));
+  transition: left .65s cubic-bezier(.2,.75,.2,1), top .65s cubic-bezier(.2,.75,.2,1), border-color .4s ease;
+}
+
+.puck::before,
+.puck::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(144,221,250,.14);
+}
+
+.puck::before { inset: -11px; }
+.puck::after { inset: -24px; opacity: .45; }
+
+.puck i {
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(197,240,255,.8), rgba(59,148,187,.2) 38%, transparent 68%);
+  filter: blur(.2px);
+}
+
+.puck span {
+  position: relative;
+  z-index: 2;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  letter-spacing: .05em;
+}
+
+.echo {
+  position: absolute;
+  inset: 0;
+}
+
+.echo i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(149,224,251,.74);
+  box-shadow: 0 0 14px rgba(149,224,251,.5);
+  opacity: .2;
+  transition: left .7s cubic-bezier(.2,.75,.2,1), top .7s cubic-bezier(.2,.75,.2,1), transform .7s cubic-bezier(.2,.75,.2,1), opacity .4s ease;
+}
+
+.echo i:nth-child(1) { left: 57%; top: 31%; }
+.echo i:nth-child(2) { left: 72%; top: 52%; }
+.echo i:nth-child(3) { left: 83%; top: 37%; }
+
+.thread[data-phase='method'] .puck { left: calc(68vw + var(--thread-progress) * 7vw); top: calc(27vh + var(--thread-progress) * 36vh); }
+.thread[data-phase='method'] .echo i:nth-child(1) { left: 65%; top: 26%; }
+.thread[data-phase='method'] .echo i:nth-child(2) { left: 82%; top: 49%; }
+.thread[data-phase='method'] .echo i:nth-child(3) { left: 62%; top: 71%; }
+
+.thread[data-phase='referral'] .puck { left: calc(31vw + var(--thread-progress) * 57vw); top: calc(66vh - var(--thread-progress) * 17vh); }
+.thread[data-phase='referral'] .echo i { top: 69%; opacity: .3; }
+.thread[data-phase='referral'] .echo i:nth-child(1) { left: 42%; }
+.thread[data-phase='referral'] .echo i:nth-child(2) { left: 61%; }
+.thread[data-phase='referral'] .echo i:nth-child(3) { left: 80%; }
+
+.thread[data-phase='clinical'] .puck { left: calc(78vw - var(--thread-progress) * 23vw); top: calc(28vh + var(--thread-progress) * 38vh); }
+.thread[data-phase='clinical'] .echo i:nth-child(1) { left: 38%; top: 29%; }
+.thread[data-phase='clinical'] .echo i:nth-child(2) { left: 54%; top: 55%; }
+.thread[data-phase='clinical'] .echo i:nth-child(3) { left: 72%; top: 34%; }
+
+.thread[data-phase='workforce'] .puck { left: calc(39vw + var(--thread-progress) * 45vw); top: calc(35vh + var(--thread-progress) * 17vh); }
+.thread[data-phase='workforce'] .routeLive { stroke: rgba(235,183,110,.58); }
+.thread[data-phase='workforce'] .puck { border-color: rgba(235,183,110,.38); }
+.thread[data-phase='workforce'] .puck i { background: radial-gradient(circle at 35% 30%, rgba(255,227,188,.82), rgba(185,118,54,.18) 40%, transparent 68%); }
+
+.thread[data-phase='network'] .route {
+  left: 18vw;
+  width: 77vw;
+}
+.thread[data-phase='network'] .routeLive { stroke-width: .72; }
+.thread[data-phase='network'] .puck { left: calc(46vw + var(--thread-progress) * 24vw); top: calc(53vh - var(--thread-progress) * 10vh); transform: translate(-50%,-50%) scale(calc(1 + var(--thread-progress) * .55)); }
+.thread[data-phase='network'] .echo i { opacity: .64; transform: scale(calc(1 + var(--thread-progress) * 1.5)); }
+.thread[data-phase='network'] .echo i:nth-child(1) { left: 34%; top: 28%; }
+.thread[data-phase='network'] .echo i:nth-child(2) { left: 76%; top: 62%; }
+.thread[data-phase='network'] .echo i:nth-child(3) { left: 88%; top: 31%; }
+
+.thread[data-phase='values'] .route { top: 28vh; height: 46vh; }
+.thread[data-phase='values'] .routeLive { stroke: rgba(255,255,255,.22); }
+.thread[data-phase='values'] .puck { left: 50%; top: 52%; transform: translate(-50%,-50%) scale(calc(1.35 - var(--thread-progress) * .35)); }
+.thread[data-phase='values'] .echo i { left: 50%; top: 52%; opacity: calc(.4 - var(--thread-progress) * .28); transform: scale(calc(1 + var(--thread-progress) * 8)); }
+
+@media (max-width: 900px) {
+  .copy { bottom: 24px; }
+  .copy p { display: none; }
+  .route { left: 18vw; width: 78vw; top: 18vh; height: 63vh; }
+  .puck { width: 42px; height: 42px; }
+}
+
+@media (max-width: 620px) {
+  .copy { display: none; }
+  .route { left: 7vw; width: 86vw; opacity: .6; }
+  .puck { width: 36px; height: 36px; }
+  .puck::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thread { display: none; }
+}
