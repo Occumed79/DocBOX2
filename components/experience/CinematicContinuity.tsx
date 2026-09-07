@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './CinematicContinuity.module.css';
 
 const CHAPTERS = ['Origin', 'History', 'Archive', 'Problem', 'Method', 'Referral', 'Clinical', 'Work', 'Network', 'Values', 'Partner'] as const;
+const VALUE_EFFECTS = ['humility', 'positivity', 'customer-service', 'quality', 'integrity', 'diligence'] as const;
 const PALETTES = [
   '91 178 221',
   '78 135 176',
@@ -50,6 +51,7 @@ function storySections() {
 
 export default function CinematicContinuity() {
   const [activeChapter, setActiveChapter] = useState(0);
+  const [activeValueEffect, setActiveValueEffect] = useState(0);
   const [overallProgress, setOverallProgress] = useState(0);
   const lastAuto = useRef<Record<AutoKey, number>>({ history: -1, process: -1, clinical: -1, workforce: -1, values: -1 });
 
@@ -142,7 +144,10 @@ export default function CinematicContinuity() {
 
       if (values) {
         const p = sceneProgress(values, vh);
-        clickIndexedButton('values', values, Math.min(5, Math.floor(clamp((p - 0.05) / 0.9) * 6)));
+        const valueIndex = Math.min(5, Math.floor(clamp((p - 0.05) / 0.9) * 6));
+        clickIndexedButton('values', values, valueIndex);
+        setActiveValueEffect(valueIndex);
+        root.style.setProperty('--value-progress', clamp((p * 6) % 1).toFixed(4));
       }
 
       const provider = document.getElementById('provider-details');
@@ -220,7 +225,7 @@ export default function CinematicContinuity() {
         }
       `}</style>
       <div className={styles.atmosphere} aria-hidden="true"><i /><i /><i /></div>
-      <div className={styles.effectField} data-chapter={effectChapter} aria-hidden="true">
+      <div className={styles.effectField} data-chapter={effectChapter} data-value={VALUE_EFFECTS[activeValueEffect]} aria-hidden="true">
         {Array.from({ length: 8 }, (_, index) => <i key={index} />)}
         <b /><b /><b />
       </div>
