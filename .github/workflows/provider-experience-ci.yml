@@ -49,6 +49,8 @@ jobs:
           done
 
           curl --silent --fail http://127.0.0.1:3000/experience > /dev/null
+          curl --silent --fail 'http://127.0.0.1:3000/experience?director=1' > /dev/null
+          curl --silent --fail http://127.0.0.1:3000/vault > /dev/null
           curl --silent --fail http://127.0.0.1:3000/provider/ci-invalid-token > /dev/null
 
           STATUS=$(curl --silent --output /tmp/provider-submit-response.json --write-out '%{http_code}' \
