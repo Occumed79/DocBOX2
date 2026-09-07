@@ -1,0 +1,45 @@
+.processLayer,
+.clinicalLayer {
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity, clip-path, filter;
+}
+
+.processLayer {
+  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  filter: saturate(.7) brightness(.72);
+  transition:
+    opacity .55s ease,
+    clip-path 1s cubic-bezier(.2,.72,.18,1),
+    filter .8s ease;
+}
+
+.processLayerActive {
+  opacity: 1;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  filter: saturate(1) brightness(1);
+}
+
+.clinicalLayer {
+  clip-path: circle(0% at 68% 52%);
+  filter: saturate(.72) brightness(.72) blur(3px);
+  transition:
+    opacity .6s ease,
+    clip-path 1.05s cubic-bezier(.18,.74,.18,1),
+    filter .85s ease;
+}
+
+.clinicalLayerActive {
+  opacity: 1;
+  clip-path: circle(115% at 52% 50%);
+  filter: saturate(1) brightness(1) blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processLayer,
+  .clinicalLayer {
+    transition: none;
+    clip-path: none;
+    filter: none;
+  }
+}
