@@ -1,0 +1,1 @@
+.canvas{position:fixed;inset:0;z-index:103;width:100vw;height:100vh;pointer-events:none;opacity:0;mix-blend-mode:screen;filter:drop-shadow(0 0 26px rgba(89,204,230,.08));transition:opacity .16s linear}@media(max-width:760px){.canvas{filter:none}}@media(prefers-reduced-motion:reduce){.canvas{display:none}}
