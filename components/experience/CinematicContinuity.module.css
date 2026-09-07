@@ -31,14 +31,24 @@
   transition: opacity .55s ease;
 }
 
-.atmosphere::before {
+.atmosphere::before,
+.atmosphere::after {
   content: '';
   position: absolute;
   inset: 0;
+}
+
+.atmosphere::before {
   background:
-    radial-gradient(circle at calc(12% + var(--experience-progress, 0) * 72%) calc(18% + var(--chapter-progress, 0) * 54%), rgb(var(--continuity-tone, 91 178 221) / .11), transparent 29%),
-    radial-gradient(circle at calc(88% - var(--experience-progress, 0) * 52%) 74%, rgb(var(--continuity-tone, 91 178 221) / .07), transparent 27%);
+    radial-gradient(circle at var(--experience-x, 50%) var(--chapter-y, 48%), rgb(var(--continuity-tone, 91 178 221) / .11), transparent 29%),
+    radial-gradient(circle at var(--experience-x-reverse, 62%) 74%, rgb(var(--continuity-tone, 91 178 221) / .07), transparent 27%);
   filter: blur(34px) saturate(1.2);
+}
+
+.atmosphere::after {
+  background: radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 45%), rgb(var(--continuity-tone, 91 178 221) / .12), transparent 18%);
+  filter: blur(22px);
+  opacity: .78;
 }
 
 .atmosphere i {
@@ -47,8 +57,9 @@
   border-radius: 50%;
   border: 1px solid rgb(var(--continuity-tone, 91 178 221) / .12);
   box-shadow: inset 0 0 60px rgb(var(--continuity-tone, 91 178 221) / .025), 0 0 50px rgb(var(--continuity-tone, 91 178 221) / .04);
-  transform: translate3d(0, calc((var(--chapter-progress, 0) - .5) * 80px), 0) rotate(calc(var(--experience-progress, 0) * 80deg));
-  transition: border-color .55s ease, box-shadow .55s ease;
+  filter: blur(calc(var(--scroll-energy, 0) * 4px));
+  transform: translate3d(0, var(--orb-shift, 0px), 0) rotate(calc(var(--experience-progress, 0) * 80deg));
+  transition: border-color .55s ease, box-shadow .55s ease, filter .18s ease;
 }
 
 .atmosphere i:nth-child(1) {
@@ -63,7 +74,7 @@
   height: 31vw;
   right: 4vw;
   top: 20vh;
-  transform: translate3d(0, calc((.5 - var(--chapter-progress, 0)) * 95px), 0) rotate(calc(var(--experience-progress, 0) * -110deg));
+  transform: translate3d(0, var(--orb-shift-reverse, 0px), 0) rotate(calc(var(--experience-progress, 0) * -110deg));
 }
 
 .atmosphere i:nth-child(3) {
@@ -189,5 +200,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .chapterNav *, .progress *, .atmosphere *, .chapterStamp { transition: none !important; }
-  .atmosphere i { transform: none !important; }
+  .atmosphere i { transform: none !important; filter: none !important; }
+  .atmosphere::after { display: none; }
 }
