@@ -71,15 +71,16 @@ export default function DocBoxLanding() {
   const router = useRouter();
 
   useEffect(() => {
+    router.prefetch('/experience');
     router.prefetch('/vault');
   }, [router]);
 
-  const enterVault = () => router.push('/vault');
+  const enterExperience = () => router.push('/experience');
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      enterVault();
+      enterExperience();
     }
   };
 
@@ -88,8 +89,8 @@ export default function DocBoxLanding() {
       className="docbox-landing"
       role="button"
       tabIndex={0}
-      aria-label="Enter Occu-Med DocBox"
-      onClick={enterVault}
+      aria-label="Enter the Occu-Med provider experience"
+      onClick={enterExperience}
       onKeyDown={handleKeyDown}
     >
       <Image
