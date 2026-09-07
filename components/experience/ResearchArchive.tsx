@@ -91,11 +91,15 @@ export default function ResearchArchive() {
           <div className={styles.growthMarkers}>
             <article>
               <span>1980</span>
-              <p>Public records show Occu-Med-developed comprehensive employment medical standards already being used with position physical-effort analyses.</p>
+              <p>Comprehensive employment medical standards are already being used alongside formal position physical-effort analyses.</p>
+            </article>
+            <article>
+              <span>1994</span>
+              <p>An archival description shows a national system using quantified job profiles, including 19 physical-ability categories, with specialist medical input.</p>
             </article>
             <article>
               <span>2013</span>
-              <p>Public records show a mature EXAMQA / QA2 operating system and a distributed U.S. footprint: Fresno headquarters plus four secondary offices.</p>
+              <p>Public records show a mature EXAMQA / QA2 operating system and a distributed U.S. footprint centered on Fresno.</p>
             </article>
           </div>
 
@@ -105,7 +109,7 @@ export default function ResearchArchive() {
           </div>
 
           <div className={styles.guidelinesFoot}>
-            No patent claim is implied. Public records describe a proprietary, research-based methodology and an evolving body of medical guidance.
+            Archival milestones describe the historical system; they are not presented as testimonials. No patent claim is implied. Public records describe a proprietary, research-based methodology and an evolving body of medical guidance.
           </div>
         </div>
       </div>
