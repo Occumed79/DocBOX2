@@ -12,6 +12,18 @@ async function captureStickyProgress(page: Page, region: Locator, progress: numb
   await page.screenshot({ path: testInfo.outputPath(name) });
 }
 
+async function captureElementViewport(page: Page, region: Locator, progress: number, testInfo: TestInfo, name: string) {
+  await region.scrollIntoViewIfNeeded();
+  await region.evaluate((node, p) => {
+    const rect = node.getBoundingClientRect();
+    const top = window.scrollY + rect.top;
+    const travel = Math.max(0, rect.height - window.innerHeight * .86);
+    window.scrollTo(0, top + travel * Number(p));
+  }, progress);
+  await page.waitForTimeout(320);
+  await page.screenshot({ path: testInfo.outputPath(name) });
+}
+
 test('capture reference experience worlds for visual QA', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium-desktop', 'Visual capture runs once on desktop.');
 
@@ -63,10 +75,10 @@ test('capture reference experience worlds for visual QA', async ({ page }, testI
   await values.screenshot({ path: testInfo.outputPath('10-values-quality.png') });
 
   const gateway = page.getByRole('region', { name: 'Occu-Med values converge into the provider partner gateway' });
-  await captureStickyProgress(page, gateway, .84, testInfo, '11-partner-gateway.png');
+  await captureStickyProgress(page, gateway, .42, testInfo, '11-gateway-operating-standard.png');
+  await captureStickyProgress(page, gateway, .86, testInfo, '12-gateway-open-node.png');
 
   const provider = page.locator('#provider-details');
-  await provider.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(250);
-  await provider.screenshot({ path: testInfo.outputPath('12-provider-onboarding.png') });
+  await captureElementViewport(page, provider, 0, testInfo, '13-provider-entry.png');
+  await captureElementViewport(page, provider, .26, testInfo, '14-provider-capabilities.png');
 });
