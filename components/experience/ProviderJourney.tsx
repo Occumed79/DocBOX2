@@ -1,8 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Suspense, useEffect, useRef, useState, type CSSProperties } from 'react';
-import PricingAgreementBuilder from './PricingAgreementBuilder';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import styles from './ProviderJourney.module.css';
 
 const P = '/photos/';
@@ -29,21 +28,8 @@ const PORTALS = [
   { id: 'agreement', href: '/experience/agreement', number: '05', title: 'Service agreement', note: 'Build and submit your pricing proposal', tone: 'white' },
 ] as const;
 
-const SPECIALTIES = ['Occupational medicine', 'Dental', 'Laboratory', 'Cardiology', 'Imaging', 'Pharmacy / vaccination'] as const;
-const SERVICES = ['Physical examinations', 'Audiometry', 'Laboratory collection', 'Dental evaluation', 'EKG / cardiology', 'Vaccination'];
-
-const FAQ = [
-  ['How does a referral begin?', 'Occu-Med contacts your facility with the authorized services, examinee information, scheduling needs, and the forms required for that case.'],
-  ['Do we make the final employment decision?', 'No. Your facility performs and documents the authorized clinical services. Occu-Med reviews the results against the applicable occupational or deployment requirements.'],
-  ['What records should we return?', 'Return the completed examination forms and every requested report, tracing, image, laboratory result, or vaccination record listed in the authorization.'],
-  ['Can we perform additional services?', 'Contact Occu-Med before performing anything outside the authorization. Additional services require approval before they are completed.'],
-  ['How does payment work?', 'The standard relationship is direct pay. Your facility invoices Occu-Med using the accepted fee schedule and agreed payment terms.'],
-] as const;
-
 export default function ProviderJourney() {
   const rootRef = useRef<HTMLElement | null>(null);
-  const [specialty, setSpecialty] = useState<(typeof SPECIALTIES)[number]>('Occupational medicine');
-  const [openQuestion, setOpenQuestion] = useState(0);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -104,43 +90,6 @@ export default function ProviderJourney() {
             </a>
           ))}
         </div>
-      </section>
-
-      <section id="history" className={`${styles.destination} ${styles.history}`}>
-        <header><span>PORTAL 01 / COMPANY HISTORY</span><h2>Forty-six years,<br />still moving forward.</h2></header>
-        <div className={styles.timeline}>
-          {[
-            ['1979', 'Founded in Honolulu', 'A legal, medical, and job-specific response to the workers’ compensation crisis.'],
-            ['2000', 'A company formalized', 'Occu-Med, Ltd. is incorporated after two decades of operating experience.'],
-            ['2006', 'The model travels', 'Evaluation services expand to international companies and deployment work.'],
-            ['TODAY', 'A connected network', 'More than one million employees supported through thousands of medical and dental facilities.'],
-          ].map(([year, title, copy]) => <article key={year}><b>{year}</b><div><h3>{title}</h3><p>{copy}</p></div></article>)}
-        </div>
-      </section>
-
-      <section id="network" className={`${styles.destination} ${styles.network}`}>
-        <div className={styles.networkMap} aria-hidden="true">
-          {Array.from({ length: 96 }, (_, i) => <i key={i} style={{ '--x': `${(i * 47) % 100}%`, '--y': `${(i * 71) % 100}%`, '--delay': `${(i % 12) * -.3}s` } as CSSProperties} />)}
-        </div>
-        <div className={styles.networkCopy}><span>PORTAL 02 / NETWORK</span><h2>Every point is a place a case can land.</h2><p>The directory contains 23,544 anonymized facility records spanning occupational medicine, dental, laboratories, imaging, specialists, hospitals, and pharmacies across the United States and abroad.</p><div><b>23,544</b><small>ANONYMIZED FACILITY RECORDS</small></div></div>
-      </section>
-
-      <section id="resources" className={`${styles.destination} ${styles.resources}`}>
-        <header><span>PORTAL 03 / PROVIDER RESOURCES</span><h2>Guidance that starts<br />with your specialty.</h2></header>
-        <div className={styles.specialtyPicker}>{SPECIALTIES.map(item => <button key={item} className={item === specialty ? styles.selected : ''} onClick={() => setSpecialty(item)}><span>+</span>{item}</button>)}</div>
-        <div className={styles.resourcePanel}><span>SELECTED PATH</span><h3>{specialty}</h3><p>Your resource library will collect current authorizations, service instructions, required forms, documentation checklists, and billing guidance for this specialty in one place.</p><div>{['Referral checklist', 'Required documentation', 'Clinical guidance', 'Billing & invoices'].map(item => <button key={item}>{item}<b>↗</b></button>)}</div></div>
-      </section>
-
-      <section id="questions" className={`${styles.destination} ${styles.questions}`}>
-        <header><span>PORTAL 04 / PROVIDER Q&A</span><h2>Know what happens<br />before the first case.</h2></header>
-        <div className={styles.faq}>{FAQ.map(([question, answer], index) => <article key={question}><button onClick={() => setOpenQuestion(index)} aria-expanded={openQuestion === index}><span>{String(index + 1).padStart(2, '0')}</span><strong>{question}</strong><b>{openQuestion === index ? '−' : '+'}</b></button>{openQuestion === index && <p>{answer}</p>}</article>)}</div>
-      </section>
-
-      <section id="agreement" className={`${styles.destination} ${styles.agreement}`}>
-        <header><span>PORTAL 05 / BECOME A PROVIDER</span><h2>Let’s define the<br />relationship.</h2><p>Select services, enter your pricing, and prepare a Provider Fee Proposal for Network Management review.</p></header>
-        <Suspense fallback={<div className={styles.agreementLoading}>Preparing your provider proposal…</div>}>
-          <PricingAgreementBuilder specialty={specialty} services={SERVICES} />
-        </Suspense>
       </section>
     </main>
   );

@@ -46,8 +46,7 @@ test.describe('provider journey', () => {
 
   test('has no horizontal overflow on the complete experience', async ({ page }) => {
     await page.goto('/experience');
-    const agreement = page.locator('#agreement');
-    await agreement.scrollIntoViewIfNeeded();
+    await page.getByRole('heading', { name: /Your facility can become/i }).scrollIntoViewIfNeeded();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(2);
   });
