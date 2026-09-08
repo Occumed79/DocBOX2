@@ -24,6 +24,10 @@ export default function ValuesToPartnerGateway() {
   useEffect(() => {
     const shell = ref.current;
     if (!shell) return;
+    const portal = shell.querySelector<HTMLElement>('[data-partner-portal]');
+    const team = shell.querySelector<HTMLElement>('[data-partner-team]');
+    const facility = shell.querySelector<HTMLElement>('[data-partner-facility]');
+    const portalLabel = shell.querySelector<HTMLElement>('[data-partner-label]');
     let frame = 0;
 
     const update = () => {
@@ -31,7 +35,37 @@ export default function ValuesToPartnerGateway() {
       const rect = shell.getBoundingClientRect();
       const travel = Math.max(1, rect.height - window.innerHeight);
       const progress = clamp(-rect.top / travel);
+      const handoff = clamp((progress - .78) / .22);
       shell.style.setProperty('--partner-progress', progress.toFixed(4));
+
+      if (portal) {
+        const vw = Math.max(1, window.innerWidth);
+        const vh = Math.max(1, window.innerHeight);
+        const baseSize = vw <= 620
+          ? Math.min(vw * 1.2, vh * .79)
+          : vw <= 1050
+            ? Math.min(vw * .94, 760, vh * .79)
+            : Math.min(vw * .66, 820, vh * .79);
+        const size = baseSize * (1 - handoff * .38);
+        portal.style.left = `${50 + handoff * 31}%`;
+        portal.style.top = `${55 - handoff * 29}%`;
+        portal.style.width = `${size}px`;
+        portal.style.height = `${size}px`;
+        portal.style.maxHeight = 'none';
+      }
+
+      if (team) {
+        const teamIn = Math.max(0, Math.min(.9, (progress - .58) * 3.25));
+        team.style.opacity = `${teamIn * (1 - handoff)}`;
+      }
+      if (facility) {
+        const facilitySize = 158 + handoff * 82;
+        facility.style.width = `${facilitySize}px`;
+        facility.style.height = `${facilitySize}px`;
+        facility.style.boxShadow = `0 0 0 ${24 + handoff * 18}px rgba(40,130,148,.04), 0 0 ${80 + handoff * 50}px rgba(42,139,158,.2)`;
+      }
+      if (portalLabel) portalLabel.style.opacity = `${1 - handoff}`;
+
       const next = progress < .3 ? 'SIX BEHAVIORS' : progress < .58 ? 'ONE OPERATING STANDARD' : progress < .82 ? 'OPEN NETWORK NODE' : 'YOUR FACILITY';
       setPhase(previous => previous === next ? previous : next);
     };
@@ -81,11 +115,11 @@ export default function ValuesToPartnerGateway() {
           <div className={styles.standardCore}><small>OCCU-MED</small><strong>OPERATING<br />STANDARD</strong><i /></div>
         </div>
 
-        <div className={styles.portal} aria-hidden="true">
+        <div className={styles.portal} data-partner-portal aria-hidden="true">
           <div className={styles.portalOuter} /><div className={styles.portalMiddle} /><div className={styles.portalInner} />
-          <span className={styles.portalLabel}>OPEN PROVIDER NODE</span>
-          <div className={styles.team}><Image src="/photos/Diverse%20Healthcare%20Team%20Portrait%20(1).png" alt="" fill sizes="520px" /></div>
-          <div className={styles.facilityNode}><i /><span>YOUR</span><strong>FACILITY</strong></div>
+          <span className={styles.portalLabel} data-partner-label>OPEN PROVIDER NODE</span>
+          <div className={styles.team} data-partner-team><Image src="/photos/Diverse%20Healthcare%20Team%20Portrait%20(1).png" alt="" fill sizes="520px" /></div>
+          <div className={styles.facilityNode} data-partner-facility><i /><span>YOUR</span><strong>FACILITY</strong></div>
         </div>
 
         <div className={styles.cta}>
