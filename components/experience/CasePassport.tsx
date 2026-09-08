@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import styles from './CasePassport.module.css';
 
 type Stage = {
@@ -63,9 +63,14 @@ export default function CasePassport() {
   }, []);
 
   const current = STAGES[stage];
+  const partnerHandoff = stage === STAGES.length - 1 ? Math.max(0, Math.min(1, (progress - .55) / .45)) : 0;
+  const passportStyle = {
+    '--passport-lift': `${Math.round(partnerHandoff * 210)}px`,
+    '--passport-scale': `${(1 - partnerHandoff * .08).toFixed(4)}`,
+  } as CSSProperties;
 
   return (
-    <aside className={styles.passport} data-stage={stage} data-visible={visible} aria-label="Persistent Occu-Med case passport">
+    <aside className={styles.passport} data-stage={stage} data-visible={visible} aria-label="Persistent Occu-Med case passport" style={passportStyle}>
       <div className={styles.edge}><i style={{ height: `${Math.max(8, progress * 100)}%` }} /></div>
       <div className={styles.topline}><span>{current.label}</span><b>{String(stage + 1).padStart(2,'0')} / {String(STAGES.length).padStart(2,'0')}</b></div>
       <strong className={styles.title}>{current.title}</strong>
