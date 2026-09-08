@@ -12,6 +12,7 @@ import MethodAssembler from './MethodAssembler';
 import NetworkToValuesBridge from './NetworkToValuesBridge';
 import OperationsAtlas from './OperationsAtlas';
 import ValuesPlayground from './ValuesPlayground';
+import ValuesToPartnerGateway from './ValuesToPartnerGateway';
 import styles from './ReferenceStory.module.css';
 
 const CHAPTERS = [
@@ -111,28 +112,7 @@ export default function ReferenceStory() {
       <div id="network-world-v2" className={styles.worldWrap}><GlobalCoverageExplorer /></div>
       <NetworkToValuesBridge />
       <div id="values-world-v2" className={styles.worldWrap}><ValuesPlayground /></div>
-
-      <section id="partner-gateway" className={styles.gateway}>
-        <div className={styles.gatewayNetwork} aria-hidden="true">
-          {Array.from({ length: 36 },(_,i) => (
-            <i
-              key={i}
-              style={{
-                '--i': i,
-                transform: `rotate(${i * 10}deg) translateX(${120 + (i % 6) * 38}px)`,
-                opacity: 0.18 + (i % 4) * 0.09,
-              } as React.CSSProperties}
-            />
-          ))}
-        </div>
-        <div className={styles.gatewayImage} aria-hidden="true"><Image src="/photos/Diverse%20Healthcare%20Team%20Portrait%20(1).png" alt="" fill sizes="55vw" /></div>
-        <div className={styles.gatewayCopy}>
-          <span>THE NEXT NODE IS YOUR FACILITY</span>
-          <h2>Now the experience stops talking about the network.<br /><em>It asks you to join it.</em></h2>
-          <p>From here forward the interface becomes deliberately practical: specialty, capabilities, provider information, rates, terms, and the actual Forms-based fee proposal workflow.</p>
-          <a href="#provider-details">BEGIN PROVIDER ONBOARDING <b>→</b></a>
-        </div>
-      </section>
+      <ValuesToPartnerGateway />
     </div>
   );
 }
