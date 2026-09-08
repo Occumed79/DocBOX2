@@ -26,9 +26,9 @@ test.describe('provider journey', () => {
     await expect(page).toHaveURL(/\/experience\/resources$/);
     await page.getByRole('button', { name: /Open guidance/i }).nth(1).click();
     await expect(page.getByText('ACTIVE RESOURCE PATH')).toBeVisible();
-
-    await page.getByRole('navigation', { name: 'Provider portals' }).getByRole('link', { name: 'Agreement' }).click();
-    await expect(page).toHaveURL(/\/experience\/agreement$/);
+    await page.getByRole('link', { name: /Continue to pricing proposal/i }).click();
+    await expect(page).toHaveURL(/\/experience\/agreement\?specialty=Dental$/);
+    await expect(page.getByText(/OCCU-MED FORMS \/ DENTAL/i)).toBeVisible();
     await expect(page.getByText('Provider Fee Proposal').first()).toBeVisible();
     expect(errors).toEqual([]);
   });
