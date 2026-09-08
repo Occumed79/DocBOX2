@@ -104,7 +104,7 @@ export default function GlobalCoverageExplorer() {
           <div className={styles.mapNote}>{layer === 'coverage' ? 'Verified coverage scope' : layer === 'services' ? `${service} provider-category layer` : layer === 'programs' ? `${program} program layer` : 'Operating-standard layer'} / illustrative pathways</div>
         </div>
 
-        <aside className={styles.panel}>
+        <aside className={styles.panel} style={{ pointerEvents: 'none' }}>
           <span className={styles.panelKicker}>{layer.toUpperCase()} / {selectedMarker.label.toUpperCase()}</span>
           <h3>{scopeCopy}</h3>
 
@@ -116,13 +116,13 @@ export default function GlobalCoverageExplorer() {
           </div>}
 
           {layer === 'services' && <>
-            <div className={styles.serviceTabs}>{(Object.keys(SERVICES) as Service[]).map(item => <button type="button" key={item} data-active={service===item} onClick={() => setService(item)}>{item}</button>)}</div>
+            <div className={styles.serviceTabs}>{(Object.keys(SERVICES) as Service[]).map(item => <button style={{ pointerEvents: 'auto' }} type="button" key={item} data-active={service===item} onClick={() => setService(item)}>{item}</button>)}</div>
             <div className={styles.serviceVisual}><Image src={selectedService.image} alt="" fill sizes="340px" /></div>
             <div className={styles.factList}>{selectedService.examples.map(item => <span key={item}>{item}</span>)}</div>
           </>}
 
           {layer === 'programs' && <>
-            <div className={styles.serviceTabs}>{(Object.keys(PROGRAMS) as Program[]).map(item => <button type="button" key={item} data-active={program===item} onClick={() => setProgram(item)}>{item}</button>)}</div>
+            <div className={styles.serviceTabs}>{(Object.keys(PROGRAMS) as Program[]).map(item => <button style={{ pointerEvents: 'auto' }} type="button" key={item} data-active={program===item} onClick={() => setProgram(item)}>{item}</button>)}</div>
             <div className={styles.factList}>{selectedProgram.facts.map(item => <span key={item}>{item}</span>)}</div>
           </>}
 
