@@ -44,25 +44,29 @@ test('capture reference experience worlds for visual QA', async ({ page }, testI
   await page.waitForTimeout(250);
   await clinical.screenshot({ path: testInfo.outputPath('06-clinical-database.png') });
 
+  const clinicalNetwork = page.getByRole('region', { name: 'Clinical service objects become the global provider network' });
+  await captureStickyProgress(page, clinicalNetwork, .72, testInfo, '07-clinical-to-network.png');
+
   const network = page.getByRole('region', { name: 'Occu-Med global network explorer' });
   await network.scrollIntoViewIfNeeded();
   await network.getByRole('button', { name: 'services', exact: true }).click();
   await page.waitForTimeout(250);
-  await network.screenshot({ path: testInfo.outputPath('07-network-explorer.png') });
+  await network.screenshot({ path: testInfo.outputPath('08-network-explorer.png') });
+
+  const networkValues = page.getByRole('region', { name: 'Global network collapses into Occu-Med operating values' });
+  await captureStickyProgress(page, networkValues, .72, testInfo, '09-network-to-values.png');
 
   const values = page.getByRole('region', { name: 'Occu-Med values interaction playground' });
   await values.scrollIntoViewIfNeeded();
   await values.getByRole('button', { name: /Quality$/ }).click();
   await page.waitForTimeout(250);
-  await values.screenshot({ path: testInfo.outputPath('08-values-quality.png') });
+  await values.screenshot({ path: testInfo.outputPath('10-values-quality.png') });
 
-  const gateway = page.locator('#partner-gateway');
-  await gateway.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(250);
-  await gateway.screenshot({ path: testInfo.outputPath('09-partner-gateway.png') });
+  const gateway = page.getByRole('region', { name: 'Occu-Med values converge into the provider partner gateway' });
+  await captureStickyProgress(page, gateway, .84, testInfo, '11-partner-gateway.png');
 
   const provider = page.locator('#provider-details');
   await provider.scrollIntoViewIfNeeded();
   await page.waitForTimeout(250);
-  await provider.screenshot({ path: testInfo.outputPath('10-provider-onboarding.png') });
+  await provider.screenshot({ path: testInfo.outputPath('12-provider-onboarding.png') });
 });
