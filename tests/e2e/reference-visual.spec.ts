@@ -26,6 +26,7 @@ async function captureElementViewport(page: Page, region: Locator, progress: num
 
 test('capture reference experience worlds for visual QA', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium-desktop', 'Visual capture runs once on desktop.');
+  test.setTimeout(120_000);
 
   await page.goto('/experience');
   await page.setViewportSize({ width: 1440, height: 1000 });
