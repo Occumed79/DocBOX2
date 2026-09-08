@@ -37,11 +37,20 @@ test.describe('provider journey', () => {
     await page.goto('/experience/network');
     await expect(page.getByText('23,544', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'International' }).click();
+    await expect(page.getByText('866', { exact: true })).toBeVisible();
+    await expect(page.getByText('South Africa', { exact: true })).toBeVisible();
 
     await page.goto('/experience/questions');
     await expect(page.getByRole('button', { name: /What is Occu-Med’s role/i })).toHaveAttribute('aria-expanded', 'true');
     await page.getByRole('button', { name: /How should we invoice/i }).click();
     await expect(page.getByText(/accepted fee schedule/i)).toBeVisible();
+  });
+
+  test('serves the stateside provider guide from the resource library', async ({ request }) => {
+    const response = await request.get('/api/provider-resources/stateside-guide');
+    expect(response.ok()).toBeTruthy();
+    expect(response.headers()['content-type']).toBe('application/pdf');
+    expect((await response.body()).byteLength).toBeGreaterThan(1000);
   });
 
   test('has no horizontal overflow on the complete experience', async ({ page }) => {
