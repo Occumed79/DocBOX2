@@ -2,6 +2,10 @@
   display: contents;
 }
 
+.flow :global(#provider-details) {
+  padding-bottom: 70px !important;
+}
+
 /* The provider editorial surface already introduces commercial terms. Avoid
    stacking a second spacer + label before the Forms fee-proposal stage. */
 .flow :global(#provider-details) > div:nth-child(5) {
@@ -36,6 +40,10 @@
 }
 
 @media (max-width: 900px) {
+  .flow :global(#provider-details) {
+    padding-bottom: 52px !important;
+  }
+
   .flow :global(#provider-details) > div:nth-child(5) {
     margin-top: 38px !important;
   }
@@ -44,5 +52,11 @@
     min-height: 0 !important;
     padding-top: 46px !important;
     padding-bottom: 38px !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .flow :global(#provider-details) {
+    padding-bottom: 40px !important;
   }
 }
