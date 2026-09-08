@@ -81,4 +81,22 @@ test('capture reference experience worlds for visual QA', async ({ page }, testI
   const provider = page.locator('#provider-details');
   await captureElementViewport(page, provider, 0, testInfo, '13-provider-entry.png');
   await captureElementViewport(page, provider, .26, testInfo, '14-provider-capabilities.png');
+
+  const pricing = page.getByRole('region', { name: 'Occu-Med provider pricing proposal workflow' });
+  await pricing.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: testInfo.outputPath('15-pricing-launch.png') });
+  await pricing.getByRole('button', { name: /Open pricing workspace/i }).click();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: testInfo.outputPath('16-pricing-workspace.png') });
+
+  const preview = page.getByLabel('Provider Fee Proposal PDF preview');
+  await preview.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(250);
+  await preview.screenshot({ path: testInfo.outputPath('17-fee-proposal-preview.png') });
+
+  const submit = page.getByRole('region', { name: 'Submit provider pricing proposal' });
+  await submit.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: testInfo.outputPath('18-submit-handoff.png') });
 });
