@@ -1,0 +1,48 @@
+.flow {
+  display: contents;
+}
+
+/* The provider editorial surface already introduces commercial terms. Avoid
+   stacking a second spacer + label before the Forms fee-proposal stage. */
+.flow :global(#provider-details) > div:nth-child(5) {
+  margin-top: 54px !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+}
+
+.flow :global(#provider-details) > div:nth-child(5)::before {
+  display: none !important;
+}
+
+.flow :global(section[aria-label="Occu-Med provider pricing proposal workflow"]) {
+  margin-top: 0 !important;
+}
+
+.flow :global(section[aria-label="Occu-Med provider pricing proposal workflow"] > div:first-child) {
+  min-height: 268px !important;
+  padding-top: 58px !important;
+  padding-bottom: 46px !important;
+}
+
+/* Keep one visible connector between the clinical exchange and commercial
+   workflow so the experience reads as a continuous object instead of a new app. */
+.flow :global(#provider-details) > div:nth-child(5) > div::before {
+  height: 34px !important;
+  top: -34px !important;
+}
+
+.flow :global(section[aria-label="Submit provider pricing proposal"]) {
+  margin-top: -1px !important;
+}
+
+@media (max-width: 900px) {
+  .flow :global(#provider-details) > div:nth-child(5) {
+    margin-top: 38px !important;
+  }
+
+  .flow :global(section[aria-label="Occu-Med provider pricing proposal workflow"] > div:first-child) {
+    min-height: 0 !important;
+    padding-top: 46px !important;
+    padding-bottom: 38px !important;
+  }
+}
