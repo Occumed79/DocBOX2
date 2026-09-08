@@ -68,24 +68,12 @@ export default function GlobalCoverageExplorer() {
     <section className={styles.explorer} aria-label="Occu-Med global network explorer">
       <header className={styles.head}>
         <div><span>GLOBAL NETWORK / EXPLORE</span><h2>The spectacle becomes<br />something you can interrogate.</h2></div>
-        <p>This view uses verified network scope. Scope markers describe coverage, not fabricated per-region provider counts.</p>
+        <p>This is not a decorative map. Every control changes the same network instrument while verified anchors stay separate from broader coverage scope.</p>
       </header>
-
-      <div className={styles.metrics}>
-        <article><strong>15,000+</strong><span>provider locations</span></article>
-        <article><strong>50</strong><span>U.S. states</span></article>
-        <article><strong>50+</strong><span>countries abroad</span></article>
-        <article><strong>1M+</strong><span>employees supported</span></article>
-      </div>
-
-      <div className={styles.layerBar}>
-        {(['coverage','services','programs','standards'] as Layer[]).map(item => <button type="button" key={item} data-active={layer===item} onClick={() => setLayer(item)}>{item}</button>)}
-        <button type="button" onClick={reset}>reset view</button>
-      </div>
 
       <div className={styles.workspace}>
         <div className={styles.map} data-layer={layer}>
-          <div className={styles.mapImage} aria-hidden="true"><Image src="/photos/International%20Network.png" alt="" fill sizes="70vw" /></div>
+          <div className={styles.mapImage} aria-hidden="true"><Image src="/photos/International%20Network.png" alt="" fill sizes="100vw" /></div>
           <svg className={styles.graticule} viewBox="0 0 100 70" preserveAspectRatio="none" aria-hidden="true">
             {Array.from({length:8},(_,i)=><line key={`v${i}`} x1={(i+1)*11.1} y1="0" x2={(i+1)*11.1} y2="70" />)}
             {Array.from({length:5},(_,i)=><line key={`h${i}`} x1="0" y1={(i+1)*11.6} x2="100" y2={(i+1)*11.6} />)}
@@ -94,6 +82,18 @@ export default function GlobalCoverageExplorer() {
             <circle className={styles.travelDot} r=".7"><animateMotion dur="15s" repeatCount="indefinite" path="M6 53 C12 47 15 45 17 42 S22 38 25 38 S42 32 52 37 S62 44 68 44 S80 39 92 46" /></circle>
             <circle className={styles.travelDot2} r=".45"><animateMotion begin="-5s" dur="15s" repeatCount="indefinite" path="M17 42 C25 49 30 54 26 58 S47 62 58 53 S68 44 83 34" /></circle>
           </svg>
+
+          <div className={styles.metrics} aria-label="Network scale">
+            <article><strong>15,000+</strong><span>provider locations</span></article>
+            <article><strong>50</strong><span>U.S. states</span></article>
+            <article><strong>50+</strong><span>countries abroad</span></article>
+            <article><strong>1M+</strong><span>employees supported</span></article>
+          </div>
+
+          <div className={styles.layerBar} aria-label="Network data layers">
+            {(['coverage','services','programs','standards'] as Layer[]).map(item => <button type="button" key={item} data-active={layer===item} onClick={() => setLayer(item)}>{item}</button>)}
+            <button type="button" onClick={reset}>reset</button>
+          </div>
 
           {MARKERS.map(item => (
             <button type="button" key={item.id} className={styles.marker} data-kind={item.kind} data-active={item.id===marker} style={{left:`${item.x}%`,top:`${item.y}%`}} onClick={() => setMarker(item.id)}>
