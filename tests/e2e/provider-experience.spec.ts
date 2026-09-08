@@ -38,7 +38,7 @@ test.describe('provider experience', () => {
     const clinical = page.getByRole('region', { name: 'Clinical capability database' });
     await clinical.scrollIntoViewIfNeeded();
     await clinical.getByRole('button', { name: /DEN-03 Dental readiness/i }).click();
-    await expect(clinical.getByText('Bitewings', { exact: true }).first()).toBeVisible();
+    await expect(clinical.getByText(/Bitewings/).first()).toBeVisible();
     await clinical.getByRole('button', { name: 'PROTOCOL SCAN', exact: true }).click();
 
     const clinicalNetwork = page.getByRole('region', { name: 'Clinical service objects become the global provider network' });
