@@ -84,7 +84,7 @@ test.describe('provider experience', () => {
     await expect(pricing.getByRole('heading', { name: 'Provider Fee Proposal', exact: true }).first()).toBeVisible();
     await expect(pricing.getByLabel('Provider / Facility Name')).toBeVisible();
     await expect(pricing.getByLabel('Email')).toBeVisible();
-    await expect(pricing.getByDisplayValue('Comprehensive dental evaluation').first()).toBeVisible();
+    await expect(pricing.locator('input[value="Comprehensive dental evaluation"]').first()).toBeVisible();
 
     const submit = page.getByRole('region', { name: 'Submit provider pricing proposal' });
     await submit.scrollIntoViewIfNeeded();
