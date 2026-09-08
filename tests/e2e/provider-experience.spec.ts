@@ -8,6 +8,10 @@ test.describe('provider journey', () => {
 
     await expect(page.getByRole('heading', { name: /Before the network/i })).toBeVisible();
     await expect(page.locator('[data-scene]')).toHaveCount(12);
+    const storyNavigation = page.getByRole('navigation', { name: 'Company story chapters' });
+    await expect(storyNavigation).toBeVisible();
+    await storyNavigation.getByRole('link', { name: /05 CLINICAL SERVICES/i }).click();
+    await expect(page.locator('#story-5')).toBeInViewport();
 
     const arrival = page.getByRole('heading', { name: /Your facility can become/i });
     await arrival.scrollIntoViewIfNeeded();

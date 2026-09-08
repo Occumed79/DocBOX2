@@ -50,3 +50,12 @@
 @media(max-width:850px){.scene{min-height:125svh;grid-template-columns:1fr;gap:20px;padding-block:12vh}.scene:nth-child(even){direction:ltr}.sceneCanvas{min-height:52vh}.storyFrame{inset:5% 8%}.portalOrbit{grid-template-columns:1fr 1fr}.portal:last-child{grid-column:1/-1}.specialtyPicker{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.prologueCopy{width:calc(100% - 32px)}.portalOrbit,.specialtyPicker,.resourcePanel>div{grid-template-columns:1fr}.portal:last-child{grid-column:auto}.portal{min-height:170px}.timeline article{grid-template-columns:1fr}.faq p{margin-left:0}.destination{padding-block:11vh}.sceneCopy h2,.arrival h2,.destination h2,.networkCopy h2{font-size:44px}}
 @media(prefers-reduced-motion:reduce){.root *{animation:none!important;transition:none!important}.scene{opacity:1}}
+.storyRail{position:fixed;z-index:30;right:18px;top:50%;display:flex;flex-direction:column;gap:3px;padding:10px 8px;border:1px solid #ffffff14;border-radius:18px;background:#02090db8;backdrop-filter:blur(14px);transform:translateY(-50%)}
+.storyRail>span{padding:5px 7px 8px;color:#75ddff;font-size:7px;font-weight:900;letter-spacing:.16em}
+.storyRail a{display:grid;grid-template-columns:10px 20px 1fr;align-items:center;gap:5px;padding:5px 7px;border-radius:8px;color:#ffffff4d}
+.storyRail a i{width:4px;height:4px;border-radius:50%;background:#ffffff44}
+.storyRail a b{font-size:8px}.storyRail a small{width:0;overflow:hidden;font-size:8px;white-space:nowrap;transition:width .25s ease}
+.storyRail a:hover,.storyRail a[aria-current=step]{color:#fff;background:#ffffff0c}
+.storyRail a:hover i,.storyRail a[aria-current=step] i{background:#75ddff;box-shadow:0 0 10px #75ddff}
+.storyRail:hover a small{width:92px}
+@media(max-width:700px){.storyRail{display:none}}

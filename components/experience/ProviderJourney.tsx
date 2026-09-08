@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import styles from './ProviderJourney.module.css';
 
 const P = '/photos/';
@@ -30,6 +30,7 @@ const PORTALS = [
 
 export default function ProviderJourney() {
   const rootRef = useRef<HTMLElement | null>(null);
+  const [activeScene, setActiveScene] = useState(0);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -37,6 +38,7 @@ export default function ProviderJourney() {
     const scenes = Array.from(root.querySelectorAll<HTMLElement>('[data-scene]'));
     const observer = new IntersectionObserver(entries => entries.forEach(entry => {
       entry.target.toggleAttribute('data-active', entry.isIntersecting);
+      if (entry.isIntersecting) setActiveScene(Number((entry.target as HTMLElement).dataset.sceneIndex ?? 0));
     }), { threshold: .34 });
     scenes.forEach(scene => observer.observe(scene));
     return () => observer.disconnect();
@@ -56,8 +58,12 @@ export default function ProviderJourney() {
       </section>
 
       <div id="cinematic-story" className={styles.story}>
+        <nav className={styles.storyRail} aria-label="Company story chapters">
+          <span>STORY</span>
+          {STORY.map((scene, index) => <a key={scene.chapter} href={`#story-${index + 1}`} aria-current={activeScene === index ? 'step' : undefined}><i /> <b>{String(index + 1).padStart(2, '0')}</b><small>{scene.chapter.split('/ ')[1]}</small></a>)}
+        </nav>
         {STORY.map((scene, sceneIndex) => (
-          <section className={styles.scene} data-scene key={scene.chapter} style={{ '--scene-index': sceneIndex } as CSSProperties}>
+          <section id={`story-${sceneIndex + 1}`} className={styles.scene} data-scene data-scene-index={sceneIndex} key={scene.chapter} style={{ '--scene-index': sceneIndex } as CSSProperties}>
             <div className={styles.sceneCanvas}>
               {scene.images.map((image, imageIndex) => (
                 <figure className={styles.storyFrame} key={image} style={{ '--image-index': imageIndex, '--image-count': scene.images.length } as CSSProperties}>
