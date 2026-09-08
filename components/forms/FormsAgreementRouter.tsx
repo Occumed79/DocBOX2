@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import FormsProviderAgreement from './FormsProviderAgreement';
 import FormsProviderInvitation from './FormsProviderInvitation';
 import OpenProviderSubmission from './OpenProviderSubmission';
+import styles from './FormsIntegrationPolish.module.css';
 
 type Props = {
   services: string[];
@@ -16,9 +17,9 @@ export default function FormsAgreementRouter({ services, specialty }: Props) {
 
   if (token) return <FormsProviderInvitation token={token} />;
   return (
-    <>
+    <div className={styles.integration}>
       <FormsProviderAgreement services={services} specialty={specialty} />
       <OpenProviderSubmission specialty={specialty} />
-    </>
+    </div>
   );
 }

@@ -91,9 +91,11 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
-  pointer-events: auto;
+  pointer-events: none;
   transition: color .2s ease, background .2s ease, transform .2s ease;
 }
+
+.compass[data-visible="true"] button { pointer-events: auto; }
 
 .compass button:hover {
   color: #274f69;

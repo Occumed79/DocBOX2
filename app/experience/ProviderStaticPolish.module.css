@@ -7,15 +7,16 @@
   isolation: isolate;
   overflow: hidden;
   background:
-    radial-gradient(circle at 82% 8%, rgba(94,171,214,.09), transparent 24%),
-    linear-gradient(180deg, #ffffff 0%, #fbfcfd 64%, #f7fafc 100%);
+    radial-gradient(circle at 78% 3%, rgba(80,171,202,.12), transparent 19%),
+    radial-gradient(circle at 78% 3%, transparent 0 175px, rgba(40,112,137,.07) 176px 177px, transparent 178px 245px, rgba(40,112,137,.04) 246px 247px, transparent 248px),
+    linear-gradient(180deg, #f6faf9 0%, #ffffff 14%, #fbfcfd 66%, #f7fafc 100%);
 }
 
 .surface :global(#provider-details)::before {
   content: 'PROVIDER PARTNER';
   position: absolute;
   right: -1vw;
-  top: 36px;
+  top: 42px;
   z-index: -1;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(84px, 14vw, 220px);
@@ -26,11 +27,56 @@
   pointer-events: none;
 }
 
+.surface :global(#provider-details)::after {
+  content: '';
+  position: absolute;
+  right: clamp(20px,7vw,110px);
+  top: 84px;
+  z-index: -1;
+  width: clamp(250px,28vw,430px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(34,111,137,.09);
+  box-shadow: 0 0 0 36px rgba(41,124,149,.018), 0 0 0 78px rgba(41,124,149,.012);
+  pointer-events: none;
+}
+
 .surface :global(#provider-details) > div:nth-child(1) {
   position: relative;
   z-index: 2;
-  padding-bottom: 36px;
+  min-height: 430px;
+  padding: 36px min(38vw,470px) 54px 0;
   border-bottom: 1px solid rgba(17,57,80,.1);
+}
+
+.surface :global(#provider-details) > div:nth-child(1)::before {
+  content: 'FROM OPEN NODE → PROVIDER SETUP';
+  position: absolute;
+  right: 0;
+  top: 34px;
+  color: rgba(25,92,117,.52);
+  font: 800 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing: .16em;
+}
+
+.surface :global(#provider-details) > div:nth-child(1)::after {
+  content: 'YOUR\A FACILITY';
+  white-space: pre;
+  position: absolute;
+  right: clamp(20px,5vw,78px);
+  top: 120px;
+  width: clamp(170px,18vw,260px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-radius: 50%;
+  border: 1px solid rgba(36,126,151,.22);
+  background: radial-gradient(circle, rgba(255,255,255,.96), rgba(226,242,242,.82) 66%, rgba(82,173,194,.08));
+  box-shadow: 0 0 0 22px rgba(48,137,158,.028), 0 24px 60px rgba(20,77,94,.08);
+  color: #1a586a;
+  font: 800 clamp(16px,1.7vw,24px)/.95 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing: .12em;
 }
 
 .surface :global(#provider-details) > div:nth-child(1) h2 {
@@ -40,7 +86,7 @@
 }
 
 .surface :global(#provider-details) > div:nth-child(1) p {
-  max-width: 520px;
+  max-width: 540px;
   padding-left: 20px;
   border-left: 1px solid rgba(57,125,169,.18);
 }
@@ -213,6 +259,14 @@
 }
 
 @media (max-width: 900px) {
+  .surface :global(#provider-details) > div:nth-child(1) {
+    min-height: 0;
+    padding: 22px 0 44px;
+  }
+  .surface :global(#provider-details) > div:nth-child(1)::before,
+  .surface :global(#provider-details) > div:nth-child(1)::after {
+    display: none;
+  }
   .surface :global(#provider-details) > div:nth-child(1) h2 {
     font-size: clamp(54px, 12vw, 82px) !important;
   }

@@ -25,6 +25,7 @@ export default function ProviderCompass() {
       const provider = document.getElementById('provider-details');
       if (!provider) {
         compass.style.setProperty('--provider-compass', '0');
+        compass.dataset.visible = 'false';
         return;
       }
 
@@ -38,6 +39,7 @@ export default function ProviderCompass() {
 
       compass.style.setProperty('--provider-compass', visibility.toFixed(4));
       compass.style.setProperty('--provider-progress', progress.toFixed(4));
+      compass.dataset.visible = visibility > 0.15 ? 'true' : 'false';
 
       const nextStep = progress < .25 ? 0 : progress < .5 ? 1 : progress < .74 ? 2 : 3;
       setActiveStep(previous => previous === nextStep ? previous : nextStep);
@@ -68,7 +70,7 @@ export default function ProviderCompass() {
   };
 
   return (
-    <div ref={compassRef} className={styles.compass}>
+    <div ref={compassRef} className={styles.compass} data-visible="false">
       <div className={styles.identity}>
         <span>OCCU-MED</span>
         <strong>Provider setup</strong>

@@ -1,0 +1,35 @@
+.frame {
+  display: contents;
+}
+
+/* Keep the final cinematic handoff luminous without bleaching the provider
+   node. The last frame should still feel like an authored scene, not a white
+   fade laid over the previous one. */
+.frame :global(section[aria-label="Occu-Med values converge into the provider partner gateway"] > div)::after {
+  background: radial-gradient(circle at 52% 54%, rgba(255,255,255,.94), rgba(235,244,243,.91) 42%, rgba(229,239,237,.94) 74%) !important;
+  opacity: clamp(0, calc((var(--partner-progress) - .56) * 1.9), .76) !important;
+}
+
+.frame :global(section[aria-label="Occu-Med values converge into the provider partner gateway"] [data-partner-team] img) {
+  filter: saturate(.98) contrast(1.03) !important;
+}
+
+.frame :global(section[aria-label="Occu-Med values converge into the provider partner gateway"] [data-partner-facility]) {
+  border-color: rgba(30,122,143,.52) !important;
+  background: rgba(255,255,255,.995) !important;
+}
+
+.frame :global(section[aria-label="Occu-Med values converge into the provider partner gateway"] div:has(> a[href="#provider-details"])) {
+  opacity: clamp(0, calc((var(--partner-progress) - .70) * 5.2), 1) !important;
+}
+
+.frame :global(section[aria-label="Occu-Med values converge into the provider partner gateway"] a[href="#provider-details"]) {
+  background: #103a45 !important;
+  box-shadow: 0 18px 42px rgba(16,58,69,.18) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame :global(section[aria-label="Occu-Med values converge into the provider partner gateway"] > div)::after {
+    opacity: .68 !important;
+  }
+}
