@@ -18,6 +18,10 @@ test.describe('provider experience', () => {
     await expect(archive.getByText('1979', { exact: true }).first()).toBeVisible();
     await archive.getByRole('button', { name: 'Clear archive search' }).click();
 
+    const method = page.getByRole('region', { name: 'Research assembles into the Occu-Med method' });
+    await method.scrollIntoViewIfNeeded();
+    await expect(method.getByRole('heading', { name: /assembles itself/i })).toBeVisible();
+
     const atlas = page.getByRole('region', { name: 'Occu-Med referral operations atlas' });
     await atlas.scrollIntoViewIfNeeded();
     await expect(atlas.getByRole('heading', { name: /living system/i })).toBeVisible();
@@ -27,11 +31,19 @@ test.describe('provider experience', () => {
     await expect(atlas.getByText(/Job information × medical evidence/i).first()).toBeVisible();
     await atlas.getByRole('button', { name: 'Dental readiness', exact: true }).click();
 
+    const tunnel = page.getByRole('region', { name: 'Referral case expands into clinical service objects' });
+    await tunnel.scrollIntoViewIfNeeded();
+    await expect(tunnel.getByRole('heading', { name: /medical world unfolds/i })).toBeVisible();
+
     const clinical = page.getByRole('region', { name: 'Clinical capability database' });
     await clinical.scrollIntoViewIfNeeded();
     await clinical.getByRole('button', { name: /DEN-03 Dental readiness/i }).click();
     await expect(clinical.getByText('Bitewings', { exact: true }).first()).toBeVisible();
     await clinical.getByRole('button', { name: 'PROTOCOL SCAN', exact: true }).click();
+
+    const clinicalNetwork = page.getByRole('region', { name: 'Clinical service objects become the global provider network' });
+    await clinicalNetwork.scrollIntoViewIfNeeded();
+    await expect(clinicalNetwork.getByRole('heading', { name: /becomes infrastructure/i })).toBeVisible();
 
     const network = page.getByRole('region', { name: 'Occu-Med global network explorer' });
     await network.scrollIntoViewIfNeeded();
@@ -43,6 +55,10 @@ test.describe('provider experience', () => {
     await network.getByRole('button', { name: 'Deployment', exact: true }).click();
     await expect(network.getByText(/Medical-readiness coordination/i)).toBeVisible();
 
+    const networkValues = page.getByRole('region', { name: 'Global network collapses into Occu-Med operating values' });
+    await networkValues.scrollIntoViewIfNeeded();
+    await expect(networkValues.getByRole('heading', { name: /behavior survives it/i })).toBeVisible();
+
     const values = page.getByRole('region', { name: 'Occu-Med values interaction playground' });
     await values.scrollIntoViewIfNeeded();
     await values.getByRole('button', { name: /Quality$/ }).click();
@@ -50,6 +66,10 @@ test.describe('provider experience', () => {
     await values.getByRole('button', { name: /Diligence$/ }).click();
     await values.getByRole('button', { name: /01 REPORT/ }).click();
     await expect(values.getByText('3 REQUIRED PIECES REMAIN')).toBeVisible();
+
+    const gateway = page.getByRole('region', { name: 'Occu-Med values converge into the provider partner gateway' });
+    await gateway.scrollIntoViewIfNeeded();
+    await expect(gateway.getByRole('heading', { name: /open node/i })).toBeVisible();
 
     const provider = page.locator('#provider-details');
     await provider.scrollIntoViewIfNeeded();
@@ -87,6 +107,14 @@ test.describe('provider experience', () => {
     const archive = page.getByRole('region', { name: 'Occu-Med history exhibition' });
     await archive.scrollIntoViewIfNeeded();
     await expect(archive.getByRole('heading', { name: /Walk through the research/i })).toBeVisible();
+
+    const method = page.getByRole('region', { name: 'Research assembles into the Occu-Med method' });
+    await method.scrollIntoViewIfNeeded();
+    await expect(method.getByRole('heading', { name: /assembles itself/i })).toBeVisible();
+
+    const gateway = page.getByRole('region', { name: 'Occu-Med values converge into the provider partner gateway' });
+    await gateway.scrollIntoViewIfNeeded();
+    await expect(gateway.getByRole('heading', { name: /open node/i })).toBeVisible();
 
     const provider = page.locator('#provider-details');
     await provider.scrollIntoViewIfNeeded();
