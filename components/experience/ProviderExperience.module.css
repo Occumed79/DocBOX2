@@ -162,6 +162,18 @@
 }
 
 .thresholdCopy a b { font-size: 18px; }
+.thresholdActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+.thresholdActions a { margin-top: 0; }
+.thresholdActions a:last-child {
+  color: #071923;
+  border-color: #fff;
+  background: #fff;
+}
 .thresholdMarker {
   position: absolute;
   right: 34px;

@@ -232,16 +232,19 @@ export default function ProviderExperience() {
   const process = PROCESS[activeProcess];
 
   return (
-    <main ref={rootRef} className={styles.root}>
-      <section className={styles.threshold} data-reveal data-scrub>
+    <main ref={rootRef} className={styles.root} id="top">
+      <section className={styles.threshold} data-reveal data-scrub aria-labelledby="experience-title">
         <Image className={styles.thresholdArt} src={PHOTOS.headquarters} alt="Illustrated Occu-Med headquarters" fill priority sizes="100vw" />
         <div className={styles.thresholdShade} />
         <div className={styles.thresholdGrid} aria-hidden="true" />
         <div className={styles.thresholdCopy}>
           <span>OCCU-MED / PROVIDER EXPERIENCE</span>
-          <h1>Before the network,<br />there was a question.</h1>
-          <p>What happens when a medical exam is asked to answer a job-specific question without job-specific context?</p>
-          <a href="#history">Enter the story <b>↓</b></a>
+          <h1 id="experience-title">Better occupational exams start with the job.</h1>
+          <p>See how Occu-Med connects each referral, medical service, and fitness decision—then tell us how your facility can support the network.</p>
+          <div className={styles.thresholdActions}>
+            <a href="#history">Explore our approach <b>↓</b></a>
+            <a href="#provider-details">Join the provider network <b>→</b></a>
+          </div>
         </div>
         <div className={styles.thresholdMarker}>FRESNO / CALIFORNIA</div>
       </section>
@@ -312,7 +315,7 @@ export default function ProviderExperience() {
         </div>
       </section>
 
-      <section className={styles.process} data-reveal data-scrub>
+      <section id="process" className={styles.process} data-reveal data-scrub>
         <div className={styles.processLead}>
           <span>HOW THE SYSTEM MOVES</span>
           <h2>Follow one referral<br /><em>through Occu-Med.</em></h2>
@@ -348,7 +351,7 @@ export default function ProviderExperience() {
         </div>
       </section>
 
-      <section className={styles.clinicalWorld} data-reveal data-scrub>
+      <section id="services" className={styles.clinicalWorld} data-reveal data-scrub>
         <div className={styles.clinicalLead}>
           <span>ONE NETWORK / MANY CAPABILITIES</span>
           <h2>The exam changes.<br /><em>The operating model doesn’t.</em></h2>
@@ -455,8 +458,8 @@ export default function ProviderExperience() {
         <div className={styles.handoffTeam} aria-hidden="true"><Image src={PHOTOS.team} alt="" fill sizes="55vw" /></div>
         <div className={styles.handoffCopy}>
           <span>YOUR FACILITY</span>
-          <h2>The spectacle ends here.<br /><em>The useful part begins.</em></h2>
-          <p>From this point forward, the site becomes quieter and specific to the provider: specialty, services, documentation, payment terms, FAQs, locations, and the pricing agreement.</p>
+          <h2>Ready to work together?<br /><em>Tell us about your facility.</em></h2>
+          <p>Choose your specialty and services, review what each referral includes, and submit your pricing proposal for Network Management review.</p>
           <a className={styles.handoffButton} href="#provider-details">Begin provider onboarding →</a>
         </div>
       </section>

@@ -2,6 +2,52 @@
   display: contents;
 }
 
+.experienceNav {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 80;
+  width: min(1180px, calc(100% - 32px));
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 8px 10px 8px 18px;
+  border: 1px solid rgba(255,255,255,.17);
+  border-radius: 18px;
+  color: #fff;
+  background: rgba(5,22,32,.78);
+  box-shadow: 0 14px 44px rgba(0,0,0,.18);
+  backdrop-filter: blur(18px) saturate(1.2);
+  transform: translateX(-50%);
+}
+
+.experienceBrand {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.experienceBrand strong { font-size: 13px; letter-spacing: .13em; }
+.experienceBrand span { color: rgba(255,255,255,.5); font-size: 11px; }
+
+.experienceNav nav { display: flex; align-items: center; gap: 4px; }
+.experienceNav nav a {
+  padding: 11px 13px;
+  border-radius: 11px;
+  color: rgba(255,255,255,.7);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color .2s ease, background .2s ease;
+}
+.experienceNav nav a:hover { color: #fff; background: rgba(255,255,255,.08); }
+.experienceNav nav .primaryNavAction { margin-left: 5px; color: #09202e; background: #fff; }
+.experienceNav nav .primaryNavAction:hover { color: #09202e; background: #dff4ff; }
+
 .surface :global(#provider-details) {
   position: relative;
   isolation: isolate;
@@ -241,6 +287,10 @@
 }
 
 @media (max-width: 620px) {
+  .experienceNav { top: 10px; width: calc(100% - 20px); min-height: 54px; padding-left: 14px; }
+  .experienceBrand span,
+  .experienceNav nav a:not(.primaryNavAction) { display: none; }
+  .experienceNav nav .primaryNavAction { margin-left: 0; }
   .surface :global(#provider-details) > div:nth-child(3) > div:last-child {
     grid-template-columns: 1fr;
   }
