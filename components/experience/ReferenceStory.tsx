@@ -9,6 +9,7 @@ import ClinicalToNetworkBridge from './ClinicalToNetworkBridge';
 import GlobalCoverageExplorer from './GlobalCoverageExplorer';
 import ImmersiveArchive from './ImmersiveArchive';
 import MethodAssembler from './MethodAssembler';
+import NetworkToValuesBridge from './NetworkToValuesBridge';
 import OperationsAtlas from './OperationsAtlas';
 import ValuesPlayground from './ValuesPlayground';
 import styles from './ReferenceStory.module.css';
@@ -108,6 +109,7 @@ export default function ReferenceStory() {
       <div id="clinical-world-v2" className={styles.worldWrap}><ClinicalDatabase /></div>
       <ClinicalToNetworkBridge />
       <div id="network-world-v2" className={styles.worldWrap}><GlobalCoverageExplorer /></div>
+      <NetworkToValuesBridge />
       <div id="values-world-v2" className={styles.worldWrap}><ValuesPlayground /></div>
 
       <section id="partner-gateway" className={styles.gateway}>
