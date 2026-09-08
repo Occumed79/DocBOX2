@@ -67,7 +67,7 @@ export default function ProviderJourney() {
             <div className={styles.sceneCanvas}>
               {scene.images.map((image, imageIndex) => (
                 <figure className={styles.storyFrame} key={image} style={{ '--image-index': imageIndex, '--image-count': scene.images.length } as CSSProperties}>
-                  <Image src={`${P}${encodeURIComponent(image)}`} alt="" fill sizes="(max-width: 800px) 92vw, 64vw" />
+                  <Image src={`${P}${encodeURIComponent(image)}`} alt={`${scene.title} — visual ${imageIndex + 1} of ${scene.images.length}`} fill sizes="(max-width: 800px) 92vw, 64vw" />
                 </figure>
               ))}
               <div className={styles.orb} aria-hidden="true" />
