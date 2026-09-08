@@ -41,7 +41,40 @@ export default function ProviderJourney() {
       if (entry.isIntersecting) setActiveScene(Number((entry.target as HTMLElement).dataset.sceneIndex ?? 0));
     }), { threshold: .34 });
     scenes.forEach(scene => observer.observe(scene));
-    return () => observer.disconnect();
+
+    let frame = 0;
+    const updateProgress = () => {
+      frame = 0;
+      const viewport = Math.max(window.innerHeight, 1);
+      let nearest = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      scenes.forEach((scene, index) => {
+        const rect = scene.getBoundingClientRect();
+        const travel = Math.max(rect.height - viewport, viewport * .35);
+        const progress = Math.max(0, Math.min(1, (viewport * .5 - rect.top) / travel));
+        const distance = Math.abs(rect.top + rect.height * .5 - viewport * .5);
+        scene.style.setProperty('--scene-progress', progress.toFixed(4));
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearest = index;
+        }
+      });
+      setActiveScene(Math.min(nearest, STORY.length - 1));
+    };
+    const queueProgress = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateProgress);
+    };
+    updateProgress();
+    window.addEventListener('scroll', queueProgress, { passive: true });
+    window.addEventListener('resize', queueProgress);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', queueProgress);
+      window.removeEventListener('resize', queueProgress);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
