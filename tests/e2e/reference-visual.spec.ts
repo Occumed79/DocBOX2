@@ -20,7 +20,7 @@ test('capture reference experience worlds for visual QA', async ({ page }, testI
 
   const origin = page.locator('#origin');
   await expect(origin).toBeVisible();
-  await origin.screenshot({ path: testInfo.outputPath('01-origin.png') });
+  await captureStickyProgress(page, origin, .55, testInfo, '01-origin-threshold.png');
 
   const archive = page.getByRole('region', { name: 'Occu-Med history exhibition' });
   await archive.scrollIntoViewIfNeeded();
