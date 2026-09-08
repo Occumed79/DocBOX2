@@ -22,11 +22,11 @@ const STORY = [
 ] as const;
 
 const PORTALS = [
-  { id: 'history', number: '01', title: 'Company history', note: 'From Honolulu to a global medical network', tone: 'gold' },
-  { id: 'network', number: '02', title: 'Explore the network', note: '23,000+ anonymized facility records', tone: 'cyan' },
-  { id: 'resources', number: '03', title: 'Provider resources', note: 'Guidance organized around your specialty', tone: 'violet' },
-  { id: 'questions', number: '04', title: 'Provider Q&A', note: 'Clear answers before the first referral', tone: 'blue' },
-  { id: 'agreement', number: '05', title: 'Service agreement', note: 'Build and submit your pricing proposal', tone: 'white' },
+  { id: 'history', href: '/experience/history', number: '01', title: 'Company history', note: 'From Honolulu to a global medical network', tone: 'gold' },
+  { id: 'network', href: '/experience/network', number: '02', title: 'Explore the network', note: '23,544 anonymized facility records', tone: 'cyan' },
+  { id: 'resources', href: '/experience/resources', number: '03', title: 'Provider resources', note: 'Guidance organized around your specialty', tone: 'violet' },
+  { id: 'questions', href: '/experience/questions', number: '04', title: 'Provider Q&A', note: 'Clear answers before the first referral', tone: 'blue' },
+  { id: 'agreement', href: '/experience/agreement', number: '05', title: 'Service agreement', note: 'Build and submit your pricing proposal', tone: 'white' },
 ] as const;
 
 const SPECIALTIES = ['Occupational medicine', 'Dental', 'Laboratory', 'Cardiology', 'Imaging', 'Pharmacy / vaccination'] as const;
@@ -99,7 +99,7 @@ export default function ProviderJourney() {
         </div>
         <div className={styles.portalOrbit}>
           {PORTALS.map((portal, index) => (
-            <a key={portal.id} href={`#${portal.id}`} className={styles.portal} data-tone={portal.tone} style={{ '--portal-index': index } as CSSProperties}>
+            <a key={portal.id} href={portal.href} className={styles.portal} data-tone={portal.tone} style={{ '--portal-index': index } as CSSProperties}>
               <span>{portal.number}</span><strong>{portal.title}</strong><small>{portal.note}</small><b>ENTER ↘</b>
             </a>
           ))}
