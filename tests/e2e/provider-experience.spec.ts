@@ -78,6 +78,18 @@ test.describe('provider experience', () => {
     await expect(page.getByText('Comprehensive dental evaluation')).toBeVisible();
     await expect(page.getByText('Provider Fee Proposal').first()).toBeVisible();
 
+    const pricing = page.getByRole('region', { name: 'Occu-Med provider pricing proposal workflow' });
+    await pricing.scrollIntoViewIfNeeded();
+    await pricing.getByRole('button', { name: /Open pricing workspace/i }).click();
+    await expect(pricing.getByRole('heading', { name: 'Provider Fee Proposal', exact: true }).first()).toBeVisible();
+    await expect(pricing.getByLabel('Provider / Facility Name')).toBeVisible();
+    await expect(pricing.getByLabel('Email')).toBeVisible();
+    await expect(pricing.getByText('Comprehensive dental evaluation').first()).toBeVisible();
+
+    const submit = page.getByRole('region', { name: 'Submit provider pricing proposal' });
+    await submit.scrollIntoViewIfNeeded();
+    await expect(submit.getByRole('button', { name: /Submit pricing proposal/i })).toBeVisible();
+
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(4);
     expect(errors).toEqual([]);
