@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import CasePassport from './CasePassport';
 import CaseTunnel from './CaseTunnel';
@@ -11,6 +10,7 @@ import ImmersiveArchive from './ImmersiveArchive';
 import MethodAssembler from './MethodAssembler';
 import NetworkToValuesBridge from './NetworkToValuesBridge';
 import OperationsAtlas from './OperationsAtlas';
+import OriginThreshold from './OriginThreshold';
 import ValuesPlayground from './ValuesPlayground';
 import ValuesToPartnerGateway from './ValuesToPartnerGateway';
 import styles from './ReferenceStory.module.css';
@@ -87,22 +87,7 @@ export default function ReferenceStory() {
       </nav>
       <CasePassport />
 
-      <section id="origin" className={styles.origin}>
-        <Image className={styles.originImage} src="/photos/ChatGPT%20Image%20Sep%206%2C%202026%2C%2010_15_00%20PM.png" alt="Illustrated Occu-Med headquarters" fill priority sizes="100vw" />
-        <div className={styles.originShade} />
-        <div className={styles.originFog} aria-hidden="true" />
-        <div className={styles.originGrid} aria-hidden="true" />
-        <div className={styles.originCopy}>
-          <span>1976 → TODAY</span>
-          <h1>Don’t scroll through a brochure.<br /><em>Enter the system.</em></h1>
-          <p>Research became standards. Standards became a case workflow. The workflow became a provider network. This version lets the visitor move through those things as places, objects, routes, and data.</p>
-          <button type="button" onClick={() => jump('archive-world')}>DIVE INTO THE ARCHIVE <b>↓</b></button>
-        </div>
-        <div className={styles.originTelemetry}>
-          <span>15,000+ PROVIDER LOCATIONS</span><span>50+ COUNTRIES</span><span>1M+ EMPLOYEES SUPPORTED</span>
-        </div>
-      </section>
-
+      <OriginThreshold />
       <div id="archive-world" className={styles.worldWrap}><ImmersiveArchive /></div>
       <MethodAssembler />
       <div id="operations-world" className={styles.worldWrap}><OperationsAtlas /></div>
