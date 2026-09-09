@@ -67,7 +67,10 @@ export default function ProviderJourney(){
       }
 
       scenes.forEach((scene,index)=>{
-        const rect=scene.getBoundingClientRect();const travel=Math.max(rect.height-viewport,viewport*.35);const progress=clamp((viewport*.5-rect.top)/travel);const distance=Math.abs(rect.top+rect.height*.5-viewport*.5);scene.style.setProperty('--scene-progress',progress.toFixed(4));
+        const rect=scene.getBoundingClientRect();
+        const progress=clamp((viewport-rect.top)/Math.max(viewport+rect.height,1));
+        const distance=Math.abs(rect.top+rect.height*.5-viewport*.5);
+        scene.style.setProperty('--scene-progress',progress.toFixed(4));
         if(distance<nearestDistance){nearestDistance=distance;nearest=index}
         const enter=clamp((progress-.02)/.25),leave=clamp((1-progress)/.24),visibility=Math.min(enter,leave);
         const words=Array.from(scene.querySelectorAll<HTMLElement>('[data-story-word]'));
