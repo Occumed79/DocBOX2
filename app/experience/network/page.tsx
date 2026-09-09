@@ -1,2 +1,5 @@
-import { NetworkPortal } from '@/components/experience/PortalExperience';
-export default function Page(){return <NetworkPortal/>}
+import NetworkExperience from '@/components/experience/network/NetworkExperience';
+
+export default function Page() {
+  return <NetworkExperience />;
+}
