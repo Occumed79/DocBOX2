@@ -1,2 +1,5 @@
-import { HistoryPortal } from '@/components/experience/ReferencePortals';
-export default function Page(){return <HistoryPortal/>}
+import NasdaqHistoryPortal from '@/components/experience/NasdaqHistoryPortal';
+
+export default function Page() {
+  return <NasdaqHistoryPortal />;
+}
