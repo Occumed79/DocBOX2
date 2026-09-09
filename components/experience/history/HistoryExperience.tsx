@@ -14,4 +14,17 @@ const M=[
  ['2021','Continuity.','Job relevance, clinical quality, and defensible review remain the connective tissue.','Diverse Workforce2.png'],
  ['TODAY','One connected network.','The founding question now travels through a worldwide medical and dental network.','Facilities.png'],
 ] as const;
-export default function HistoryExperience(){const root=useRef<HTMLElement>(null);const[progress,setProgress]=useState(0);useEffect(()=>{let f=0;const update=()=>{f=0;const el=root.current;if(el)setProgress(Math.max(0,Math.min(1,-el.getBoundingClientRect().top/Math.max(1,el.offsetHeight-innerHeight))))};const q=()=>{if(!f)f=requestAnimationFrame(update)};update();addEventListener('scroll',q,{passive:true});addEventListener('resize',q);return()=>{removeEventListener('scroll',q);removeEventListener('resize',q);cancelAnimationFrame(f)}},[]);const active=Math.min(M.length-1,Math.round(progress*(M.length-1)));const jump=(i:number)=>{const el=root.current;if(el)scrollTo({top:el.offsetTop+i/(M.length-1)*(el.offsetHeight-innerHeight),behavior:'smooth'})};return <main ref={root} className={styles.root}><HistoryWorld progress={progress} images={M.map(x=>x[3])}/><header className={styles.header}><a href="/experience#provider-portals">OCCU-MED / SPATIAL ARCHIVE</a><span>{String(active+1).padStart(2,'0')} / {M.length}</span></header><nav className={styles.years} aria-label="Jump to year">{M.map((x,i)=><button key={`${x[0]}${i}`} onClick={()=>jump(i)} aria-current={i===active}>{x[0]}</button>)}</nav><section className={styles.copy}><span>ARCHIVE NODE / {String(active+1).padStart(2,'0')}</span><h1>{M[active][0]}</h1><h2>{M[active][1]}</h2><p>{M[active][2]}</p></section><div className={styles.axis} aria-hidden="true"><i style={{height:`${progress*100}%`}}/></div></main>}
+export default function HistoryExperience(){
+  const root=useRef<HTMLElement>(null);const[progress,setProgress]=useState(0);
+  useEffect(()=>{let f=0;const update=()=>{f=0;const el=root.current;if(el)setProgress(Math.max(0,Math.min(1,-el.getBoundingClientRect().top/Math.max(1,el.offsetHeight-innerHeight))))};const q=()=>{if(!f)f=requestAnimationFrame(update)};update();addEventListener('scroll',q,{passive:true});addEventListener('resize',q);return()=>{removeEventListener('scroll',q);removeEventListener('resize',q);cancelAnimationFrame(f)}},[]);
+  const active=Math.min(M.length-1,Math.round(progress*(M.length-1)));
+  const jump=(i:number)=>{const el=root.current;if(el)scrollTo({top:el.offsetTop+i/(M.length-1)*(el.offsetHeight-innerHeight),behavior:'smooth'})};
+  const milestones=M.map(item=>({year:item[0],image:item[3]}));
+  return <main ref={root} className={styles.root}>
+    <HistoryWorld progress={progress} milestones={milestones}/>
+    <header className={styles.header}><a href="/experience#provider-portals">OCCU-MED / SPATIAL ARCHIVE</a><span>{String(active+1).padStart(2,'0')} / {M.length}</span></header>
+    <nav className={styles.years} aria-label="Jump to year">{M.map((x,i)=><button key={`${x[0]}${i}`} onClick={()=>jump(i)} aria-current={i===active}>{x[0]}</button>)}</nav>
+    <section className={styles.copy}><span>ARCHIVE NODE / {String(active+1).padStart(2,'0')}</span><h1>{M[active][0]}</h1><h2>{M[active][1]}</h2><p>{M[active][2]}</p></section>
+    <div className={styles.axis} aria-hidden="true"><i style={{height:`${progress*100}%`}}/></div>
+  </main>
+}
