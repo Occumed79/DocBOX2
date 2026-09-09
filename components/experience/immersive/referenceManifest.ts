@@ -9,7 +9,7 @@ export type ReferenceMechanic = {
 export const REFERENCE_MECHANICS: readonly ReferenceMechanic[] = [
   {
     id: 'oryzo-cinematic-story',
-    reference: 'Oryzo AI — Lusion',
+    reference: 'Oryzo AI — Lusion (https://oryzo.ai)',
     target: '/experience company story',
     mechanics: [
       'persistent subject-centered render world',
@@ -28,7 +28,7 @@ export const REFERENCE_MECHANICS: readonly ReferenceMechanic[] = [
   },
   {
     id: 'zero-spatial-portals',
-    reference: 'Zero Tech — Lusion',
+    reference: 'Zero Tech — Lusion (https://client-zero-tech.lusion.co/)',
     target: 'post-story Your Facility hub',
     mechanics: [
       'realtime 3D spatial environment',
@@ -46,7 +46,7 @@ export const REFERENCE_MECHANICS: readonly ReferenceMechanic[] = [
   },
   {
     id: 'lusion-world-transition',
-    reference: 'Lusion studio',
+    reference: 'Lusion studio (https://lusion.co/)',
     target: 'Resources and Agreement portal travel',
     mechanics: [
       'fixed WebGL surface behind semantic DOM',
@@ -63,26 +63,34 @@ export const REFERENCE_MECHANICS: readonly ReferenceMechanic[] = [
   },
   {
     id: 'nasdaq-history',
-    reference: 'Nasdaq 50th Anniversary — makemepulse',
+    reference: 'Nasdaq 50th Anniversary — makemepulse (https://www.makemepulse.com/case-study/nasdaq-50th-anniversary/)',
     target: '/experience/history',
     mechanics: [
-      'WebGL chronological exhibition',
-      'particle-built dates and symbols',
-      'major dates with supporting archival stories',
-      'direct chronology navigation',
+      'particle-built opening identity replacing the original Nasdaq 50 with Occu-Med history identity',
+      'enter transition into a WebGL chronological exhibition',
+      'multiple undulating point-cloud timeline bands',
+      'each timeline band maps to a content topic or milestone',
+      'hover/focus illumination at the individual particle level',
+      'prominent key dates with supporting archival stories',
+      'direct chronology navigation plus independent/random exploration',
       'searchable/filterable historical content',
-      'particle depth, blur, and subtle pointer response',
+      'particle depth, blur, subtle idle motion and pointer response',
+      'mobile-first authored exhibition behavior',
     ],
     acceptance: [
-      'history is not a vertical timeline',
+      'history begins with a particle-built Occu-Med year/identity state and explicit Enter transition',
+      'history is not a vertical timeline or row of ordinary cards',
+      'multiple particle-wave lines remain visible simultaneously as an overview of the archive',
+      'hovering or selecting a milestone visibly illuminates its associated line',
       'years are navigable in spatial/depth chronology',
       'milestones expand into accessible archive content',
+      'search and topic filters can jump independently between chapters',
       'desktop and mobile chronology both remain functional',
     ],
   },
   {
     id: 'blue-corridors-network',
-    reference: 'Protecting Blue Corridors',
+    reference: 'Protecting Blue Corridors (https://bluecorridors.org/explore/species)',
     target: '/experience/network',
     mechanics: [
       'full-screen geographic application shell',

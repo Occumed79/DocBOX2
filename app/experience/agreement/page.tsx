@@ -1,2 +1,5 @@
-import { AgreementPortal } from '@/components/experience/PortalExperience';
-export default function Page(){return <AgreementPortal/>}
+import AgreementTransitionPortal from '@/components/experience/AgreementTransitionPortal';
+
+export default function Page() {
+  return <AgreementTransitionPortal />;
+}
