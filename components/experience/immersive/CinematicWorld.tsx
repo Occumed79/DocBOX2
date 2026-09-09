@@ -123,9 +123,17 @@ function sceneProgress(index:number) {
 }
 
 function assetReveal(chapter:number, local:number, progress:number){
-  if(chapter!==0)return 1;
-  if(local===1)return clamp((progress-.10)/.30);
-  if(local===2)return clamp((progress-.62)/.24);
+  if(chapter===0){
+    if(local===1)return clamp((progress-.10)/.30);
+    if(local===2)return clamp((progress-.62)/.24);
+    return 1;
+  }
+  if(chapter===4){
+    const center=.12+local*.19;
+    const enter=clamp((progress-(center-.12))/.10);
+    const leave=1-clamp((progress-(center+.10))/.12);
+    return .06+.94*Math.min(enter,leave);
+  }
   return 1;
 }
 
@@ -169,10 +177,10 @@ export default function CinematicWorld({ sceneIndex }:{ sceneIndex:number }) {
       raf=requestAnimationFrame(render);const elapsed=clock.getElapsedTime();const targetChapter=Math.min(Math.max(chapterRef.current,0),10);chapterFloat+=(targetChapter-chapterFloat)*.045;const targetLocal=sceneProgress(targetChapter);lastLocal=local;local+=(targetLocal-local)*.08;velocity=velocity*.84+(local-lastLocal)*.16;
       const hue=CHAPTER_HUES[targetChapter]??.56;const background=new THREE.Color().setHSL(hue,.46,.035+Math.sin(local*Math.PI)*.014);renderer.setClearColor(background,1);scene.fog!.color.copy(background);
       records.forEach(({mesh,chapter,local:assetIndex})=>{
-        const chapterDistance=Math.abs(chapterFloat-chapter),visibility=clamp(1-chapterDistance*.9),chapterProgress=chapter===targetChapter?local:(chapter<targetChapter?1:0),pose=poseFor(chapter,assetIndex,chapterProgress),transition=clamp(visibility),hiddenZ=pose.z-7*Math.min(1,chapterDistance);
+        const chapterDistance=Math.abs(chapterFloat-chapter),visibility=clamp(1-chapterDistance*.9),chapterProgress=chapter===targetChapter?local:(chapter<targetChapter?1:0),pose=poseFor(chapter,assetIndex,chapterProgress),transition=clamp(visibility),reveal=assetReveal(chapter,assetIndex,chapterProgress),revealDepth=chapter===4?(1-reveal)*1.35:0,hiddenZ=pose.z-7*Math.min(1,chapterDistance)-revealDepth;
         mesh.position.x+=(pose.x-mesh.position.x)*.09;mesh.position.y+=(pose.y-mesh.position.y)*.09;mesh.position.z+=(hiddenZ-mesh.position.z)*.09;mesh.rotation.x+=(pose.rx-mesh.rotation.x)*.08;mesh.rotation.y+=(pose.ry-mesh.rotation.y)*.08;mesh.rotation.z+=(pose.rz-mesh.rotation.z)*.08;
-        const pulse=1+Math.sin(elapsed*.42+assetIndex)*.008,scale=pose.s*pulse;mesh.scale.x+=(scale-mesh.scale.x)*.09;mesh.scale.y+=(scale-mesh.scale.y)*.09;mesh.scale.z=1;
-        const uniforms=mesh.material.uniforms;uniforms.uTime.value=elapsed;uniforms.uProgress.value=chapterProgress;const reveal=assetReveal(chapter,assetIndex,chapterProgress);uniforms.uOpacity.value+=(transition*.94*reveal-uniforms.uOpacity.value)*.12;const motionIntensity=clamp(Math.abs(velocity)*120+Math.abs(chapterProgress-.5)*.12,0,1);uniforms.uIntensity.value+=(motionIntensity-uniforms.uIntensity.value)*.1;
+        const pulse=1+Math.sin(elapsed*.42+assetIndex)*.008,revealScale=chapter===4?.84+reveal*.16:1,scale=pose.s*pulse*revealScale;mesh.scale.x+=(scale-mesh.scale.x)*.09;mesh.scale.y+=(scale-mesh.scale.y)*.09;mesh.scale.z=1;
+        const uniforms=mesh.material.uniforms;uniforms.uTime.value=elapsed;uniforms.uProgress.value=chapterProgress;uniforms.uOpacity.value+=(transition*.94*reveal-uniforms.uOpacity.value)*.12;const motionIntensity=clamp(Math.abs(velocity)*120+Math.abs(chapterProgress-.5)*.12,0,1);uniforms.uIntensity.value+=(motionIntensity-uniforms.uIntensity.value)*.1;
       });
       const authored=cameraPoseFor(targetChapter,local);
       const targetX=authored.x+pointer.x*.24,targetY=authored.y-pointer.y*.16,targetZ=authored.z;
