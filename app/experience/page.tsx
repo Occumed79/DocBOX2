@@ -1,5 +1,5 @@
-import ReferenceJourney from '@/components/experience/ReferenceJourney';
+import OryzoProviderJourney from '@/components/experience/OryzoProviderJourney';
 
 export default function ProviderExperiencePage() {
-  return <ReferenceJourney />;
+  return <OryzoProviderJourney />;
 }
