@@ -52,7 +52,7 @@ jobs:
 
       - name: Commit generated data
         run: |
-          if git diff --quiet -- public/data/provider-network-points.json; then
+          if [ -z "$(git status --porcelain -- public/data/provider-network-points.json)" ]; then
             echo 'Provider network dataset is already current.'
             exit 0
           fi
