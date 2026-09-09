@@ -102,6 +102,13 @@ function sceneProgress(index:number) {
   return clamp((window.innerHeight-rect.top)/Math.max(window.innerHeight+rect.height,1));
 }
 
+function assetReveal(chapter:number, local:number, progress:number){
+  if(chapter!==0)return 1;
+  if(local===1)return clamp((progress-.10)/.30);
+  if(local===2)return clamp((progress-.42)/.30);
+  return 1;
+}
+
 export default function CinematicWorld({ sceneIndex }:{ sceneIndex:number }) {
   const host=useRef<HTMLDivElement>(null);
   const chapterRef=useRef(sceneIndex);chapterRef.current=sceneIndex;
@@ -144,7 +151,7 @@ export default function CinematicWorld({ sceneIndex }:{ sceneIndex:number }) {
         const chapterDistance=Math.abs(chapterFloat-chapter),visibility=clamp(1-chapterDistance*.9),chapterProgress=chapter===targetChapter?local:(chapter<targetChapter?1:0),pose=poseFor(chapter,assetIndex,chapterProgress),transition=clamp(visibility),hiddenZ=pose.z-7*Math.min(1,chapterDistance);
         mesh.position.x+=(pose.x-mesh.position.x)*.09;mesh.position.y+=(pose.y-mesh.position.y)*.09;mesh.position.z+=(hiddenZ-mesh.position.z)*.09;mesh.rotation.x+=(pose.rx-mesh.rotation.x)*.08;mesh.rotation.y+=(pose.ry-mesh.rotation.y)*.08;mesh.rotation.z+=(pose.rz-mesh.rotation.z)*.08;
         const pulse=1+Math.sin(elapsed*.42+assetIndex)*.008,scale=pose.s*pulse;mesh.scale.x+=(scale-mesh.scale.x)*.09;mesh.scale.y+=(scale-mesh.scale.y)*.09;mesh.scale.z=1;
-        const uniforms=mesh.material.uniforms;uniforms.uTime.value=elapsed;uniforms.uProgress.value=chapterProgress;uniforms.uOpacity.value+=(transition*.94-uniforms.uOpacity.value)*.12;const motionIntensity=clamp(Math.abs(velocity)*120+Math.abs(chapterProgress-.5)*.12,0,1);uniforms.uIntensity.value+=(motionIntensity-uniforms.uIntensity.value)*.1;
+        const uniforms=mesh.material.uniforms;uniforms.uTime.value=elapsed;uniforms.uProgress.value=chapterProgress;const reveal=assetReveal(chapter,assetIndex,chapterProgress);uniforms.uOpacity.value+=(transition*.94*reveal-uniforms.uOpacity.value)*.12;const motionIntensity=clamp(Math.abs(velocity)*120+Math.abs(chapterProgress-.5)*.12,0,1);uniforms.uIntensity.value+=(motionIntensity-uniforms.uIntensity.value)*.1;
       });
       const cameraX=pointer.x*.28+Math.sin(chapterFloat*.9)*.22,cameraY=-pointer.y*.18+Math.cos(chapterFloat*.72)*.14;camera.position.x+=(cameraX-camera.position.x)*.035;camera.position.y+=(cameraY-camera.position.y)*.035;camera.position.z=8.5-mix(0,.7,Math.sin(local*Math.PI));camera.rotation.z=Math.sin(chapterFloat*.8+local*Math.PI)*.012;camera.lookAt(pointer.x*.09,-pointer.y*.06,-1.8);
       orbitGroup.rotation.z=elapsed*.012+chapterFloat*.12;orbitGroup.rotation.y=Math.sin(elapsed*.08)*.12;orbitGroup.position.z=-4-local*1.5;dustField.rotation.y=elapsed*.006;dustField.position.z=local*-1.2;renderer.render(scene,camera);
