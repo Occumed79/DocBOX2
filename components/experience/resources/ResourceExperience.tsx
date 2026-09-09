@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import styles from './ResourceExperience.module.css';
 import DiveWorld from '../immersive/DiveWorld';
+import SpecialtyField from './SpecialtyField';
 
 type Specialty = {
   id: string;
@@ -61,32 +62,32 @@ const SPECIALTIES: Specialty[] = [
   },
   {
     id: 'Primary Care', label: 'Primary Care', color: '#ff9f8f',
-    description: 'Resting EKG, treadmill testing, specialist reports, tracings, and interpretation return requirements.',
+    description: 'General medical evaluation, medical-history review, baseline findings, vaccination support, and referral-specific documentation.',
     protocol: [
-      { title: 'Confirm the authorized study', copy: 'Verify whether the referral requires resting EKG, treadmill testing, consultation, or a combination.' },
-      { title: 'Perform the study and interpretation', copy: 'Complete the authorized cardiology service using normal clinical standards.' },
-      { title: 'Return the report and supporting tracing', copy: 'Provide the final interpretation together with any tracing or supporting material requested in the referral.' },
-      { title: 'Invoice the agreed cardiology rate', copy: 'Bill the authorized study or consultation according to the accepted pricing proposal.' },
+      { title: 'Confirm the requested visit', copy: 'Review the authorization for the exact medical examination, history review, vaccination, or supporting clinical service requested.' },
+      { title: 'Perform the authorized assessment', copy: 'Complete the requested clinical work using normal standards while staying within the written authorization.' },
+      { title: 'Return the requested documentation', copy: 'Provide the completed examination forms, findings, and supporting records identified in the referral.' },
+      { title: 'Invoice the agreed services', copy: 'Bill only the authorized services using the accepted direct-pay rates.' },
     ],
     documents: [
       { title: 'Stateside Provider Guide', meta: 'Current general provider workflow', ready: true },
-      { title: 'Cardiology Documentation Guide', meta: 'Awaiting approved upload' },
-      { title: 'Stress Test Return Checklist', meta: 'Awaiting approved upload' },
+      { title: 'Primary Care Documentation Guide', meta: 'Awaiting approved upload' },
+      { title: 'Medical Records Return Checklist', meta: 'Awaiting approved upload' },
     ],
   },
   {
     id: 'Audiology', label: 'Audiology', color: '#8cb3ff',
-    description: 'Authorized radiography and diagnostic imaging, final reports, and image-access or transfer instructions.',
+    description: 'Pure-tone audiometry, hearing-conservation testing, baseline or periodic documentation, and complete result return.',
     protocol: [
-      { title: 'Confirm the exact imaging order', copy: 'Match the authorization to the requested study and body region before scheduling or performing the service.' },
-      { title: 'Perform the authorized diagnostic study', copy: 'Use the facility’s normal clinical protocol without expanding the referral beyond the approved scope.' },
-      { title: 'Return the final report', copy: 'Provide the interpreting report and any requested image-access information to Occu-Med.' },
-      { title: 'Invoice the authorized study', copy: 'Use the accepted direct-pay fee for the study and any separately authorized interpretation.' },
+      { title: 'Confirm the requested audiogram', copy: 'Match the authorization to the required baseline, periodic, or referral-specific hearing test before the appointment.' },
+      { title: 'Perform the authorized hearing test', copy: 'Complete the requested audiometry using the facility’s normal clinical protocol and required frequencies.' },
+      { title: 'Return the tracing and report', copy: 'Provide the completed audiogram and any requested interpretation or supporting documentation to Occu-Med.' },
+      { title: 'Invoice the authorized service', copy: 'Use the accepted direct-pay fee for the completed hearing test and any separately authorized consultation.' },
     ],
     documents: [
       { title: 'Stateside Provider Guide', meta: 'Current general provider workflow', ready: true },
-      { title: 'Imaging Return Instructions', meta: 'Awaiting approved upload' },
-      { title: 'Image Access Checklist', meta: 'Awaiting approved upload' },
+      { title: 'Audiometry Return Instructions', meta: 'Awaiting approved upload' },
+      { title: 'Hearing Conservation Checklist', meta: 'Awaiting approved upload' },
     ],
   },
   {
@@ -144,6 +145,7 @@ export default function ResourceExperience() {
   }, []);
 
   const selected = useMemo(() => SPECIALTIES.find(item => item.id === selectedId) ?? SPECIALTIES[0], [selectedId]);
+  const fieldItems = useMemo(() => SPECIALTIES.map(({id,label,color}) => ({id,label,color})), []);
 
   return (
     <main className={styles.root} style={{ '--accent': selected.color, '--dive-progress': progress.toFixed(4) } as CSSProperties}>
@@ -161,13 +163,11 @@ export default function ResourceExperience() {
       <section ref={diveRef} className={styles.dive} aria-label="Portal transition into provider resources">
         <div className={styles.diveStage}>
           <div className={styles.space}><DiveWorld progress={progress}/></div>
-
           <div className={styles.diveCopy}>
             <span>PORTAL 03 / ENTER THE RESOURCE FIELD</span>
             <h1>Fall into<br />your specialty.</h1>
             <p>Keep scrolling. The portal resolves into a workspace built around the services your facility actually provides.</p>
           </div>
-
           <div className={styles.arrivalMessage}>
             <b>{selected.label}</b>
             <span>The transition is resolving into your provider workspace.</span>
@@ -178,23 +178,10 @@ export default function ResourceExperience() {
       <section className={styles.workspace}>
         <div className={styles.workspaceHead}>
           <div><span>PROVIDER CONTROL ROOM / SPECIALTY PATH</span><h2>Start with what you do.</h2></div>
-          <p>Select the provider type that best matches your facility. The workflow, resource library, and pricing handoff reconfigure around that specialty and remain selected when you continue to the agreement portal.</p>
+          <p>Select the provider type that best matches your facility. The resource field, workflow, library, and pricing handoff reconfigure around that specialty and remain selected when you continue to the agreement portal.</p>
         </div>
 
-        <div className={styles.specialties} aria-label="Provider specialties">
-          {SPECIALTIES.map(item => (
-            <button
-              key={item.id}
-              type="button"
-              aria-pressed={selected.id === item.id}
-              onClick={() => setSelectedId(item.id)}
-              style={{ '--specialty-color': item.color } as CSSProperties}
-            >
-              <span>{item.id === selected.id ? 'ACTIVE PATH' : 'SPECIALTY'}</span>
-              <b>{item.label}</b>
-            </button>
-          ))}
-        </div>
+        <SpecialtyField items={fieldItems} selectedId={selected.id} onSelect={setSelectedId}/>
 
         <div className={styles.controlGrid} style={{ '--specialty-color': selected.color } as CSSProperties}>
           <article className={styles.protocol}>
