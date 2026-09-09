@@ -24,14 +24,17 @@ const STAGES = [
 export default function AgreementExperience() {
   const [specialty, setSpecialty] = useState('Occupational Medicine');
   const [entered, setEntered] = useState(false);
+  const [launchPortal, setLaunchPortal] = useState(false);
   const workspaceRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const requested = new URLSearchParams(window.location.search).get('specialty');
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get('specialty');
     const saved = window.localStorage.getItem('docbox-provider-specialty');
     const candidate = requested && SERVICES[requested] ? requested : saved && SERVICES[saved] ? saved : 'Occupational Medicine';
     setSpecialty(candidate);
     window.localStorage.setItem('docbox-provider-specialty', candidate);
+    if (params.get('from') === 'resources') setLaunchPortal(true);
   }, []);
 
   useEffect(() => {
@@ -52,15 +55,15 @@ export default function AgreementExperience() {
       </header>
 
       <section className={styles.gateway}>
-        <PortalOrbitalNav agreementOnly onEnter={()=>setEntered(true)} portals={[{id:'agreement',href:'#forms-workspace',number:'05',title:'Agreement',note:'Enter the forms workspace',tone:'white'}]}/>
+        <PortalOrbitalNav agreementOnly autoEnter={launchPortal} onEnter={()=>setEntered(true)} portals={[{id:'agreement',href:'#forms-workspace',number:'05',title:'Agreement',note:'Enter the forms workspace',tone:'white'}]}/>
         <div className={styles.content}>
           <span>PORTAL 05 / SECURE HANDOFF</span>
           <h1>Define the<br/>relationship.</h1>
-          <p>The selected specialty and matching service list are already attached to this path. Enter the portal to carry them directly into the working Occu-Med pricing proposal.</p>
+          <p>{launchPortal ? 'Your specialty arrived with you. The portal is carrying the referral path directly into the working Occu-Med pricing proposal.' : 'The selected specialty and matching service list are already attached to this path. Enter the portal to carry them directly into the working Occu-Med pricing proposal.'}</p>
 
           <div className={styles.confirm}>
             <div><b>{specialty}</b><small>{services.length} services are preloaded for this provider path.</small></div>
-            <button type="button" onClick={()=>setEntered(true)}>ENTER AGREEMENT PORTAL ↓</button>
+            <button type="button" disabled={launchPortal} onClick={()=>setLaunchPortal(true)}>{launchPortal ? 'ENTERING PORTAL…' : 'ENTER AGREEMENT PORTAL ↓'}</button>
           </div>
 
           <div className={styles.stages} aria-label="Provider agreement stages">
