@@ -34,21 +34,23 @@ const QUESTIONS: Question[] = [
   { q: 'Who should we contact when the authorization is unclear?', topic: 'Network', stage: 'Receive', a: 'Contact Occu-Med before the appointment or before performing an uncertain service. The referral instructions and Network Management or scheduling contact should be used to resolve scope questions before care is added.' },
 ];
 
-const TOPICS: Topic[] = ['All','Preparation','Examination','Records','Billing','Network'];
-
 export default function QuestionExperience() {
   const [stage,setStage]=useState<Stage>('Receive');
   const [topic,setTopic]=useState<Topic>('All');
+  const availableTopics=useMemo(()=>Array.from(new Set(QUESTIONS.filter(item=>item.stage===stage).map(item=>item.topic))),[stage]);
   const visible=useMemo(()=>QUESTIONS.map((item,index)=>({item,index})).filter(({item})=>item.stage===stage&&(topic==='All'||item.topic===topic)),[stage,topic]);
   const [open,setOpen]=useState(0);
   const active=QUESTIONS[open] ?? QUESTIONS[0];
   const activeVisible=Math.max(0,visible.findIndex(({index})=>index===open));
-  const choose=(next:Stage)=>{setStage(next);const i=QUESTIONS.findIndex(x=>x.stage===next&&(topic==='All'||x.topic===topic));if(i>=0)setOpen(i)};
-  const toggleTopic=(next:Topic)=>{
-    const resolved=topic===next?'All':next;
-    setTopic(resolved);
-    const i=QUESTIONS.findIndex(x=>x.stage===stage&&(resolved==='All'||x.topic===resolved));
-    if(i>=0)setOpen(i);
+  const choose=(next:Stage)=>{
+    const nextTopics=Array.from(new Set(QUESTIONS.filter(item=>item.stage===next).map(item=>item.topic)));
+    const nextTopic=topic==='All'||nextTopics.includes(topic as Exclude<Topic,'All'>)?topic:'All';
+    setStage(next);setTopic(nextTopic);
+    const i=QUESTIONS.findIndex(x=>x.stage===next&&(nextTopic==='All'||x.topic===nextTopic));if(i>=0)setOpen(i);
+  };
+  const toggleTopic=(next:Exclude<Topic,'All'>)=>{
+    const resolved:Topic=topic===next?'All':next;setTopic(resolved);
+    const i=QUESTIONS.findIndex(x=>x.stage===stage&&(resolved==='All'||x.topic===resolved));if(i>=0)setOpen(i);
   };
 
   return <main className={styles.root}>
@@ -56,7 +58,7 @@ export default function QuestionExperience() {
     <aside className={styles.sidebar}><span>REFERRAL LIFECYCLE</span>{STAGES.map(x=><button key={x.stage} aria-pressed={stage===x.stage} onClick={()=>choose(x.stage)}><small>{x.number}</small><b>{x.stage}</b><em>{x.note}</em></button>)}</aside>
     <section className={styles.explorer}>
       <QuestionField count={visible.length} active={activeVisible}/>
-      <div className={styles.filters}>{TOPICS.filter(x=>x!=='All').map(x=><button key={x} aria-pressed={topic===x} onClick={()=>toggleTopic(x)}>{x}</button>)}</div>
+      <div className={styles.filters}>{availableTopics.map(x=><button key={x} aria-pressed={topic===x} onClick={()=>toggleTopic(x)}>{x}</button>)}</div>
       <div className={styles.titleBlock}><span className={styles.eyebrow}>PORTAL 04 / {stage.toUpperCase()}</span><h1>{stage}</h1><p>{STAGES.find(item=>item.stage===stage)?.note}</p></div>
       <div className={styles.nodes}>{visible.map(({item,index},i)=><button style={{'--node':i} as import('react').CSSProperties} key={item.q} aria-pressed={open===index} onClick={()=>setOpen(index)}><i/><span>{item.q}</span></button>)}</div>
       <article className={styles.detail}><small>{active.stage} / {active.topic}</small><h2>{active.q}</h2><p>{active.a}</p></article>
