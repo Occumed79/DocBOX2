@@ -202,50 +202,39 @@
 }
 .sceneAnnotation i{width:46px;height:1px;background:var(--cyan);box-shadow:0 0 10px rgba(120,232,255,.6)}
 
-/* Every chapter gets a deliberately different composition. */
 .scene[data-mode=hero] .sceneCopy{margin-left:0;width:min(88vw,1320px);justify-content:flex-end;padding-bottom:15vh}
 .scene[data-mode=hero] .sceneCopy h2{font-size:clamp(78px,12.6vw,205px)}
 .scene[data-mode=hero] .sceneSignal{margin-left:0;margin-right:auto;top:18vh;text-align:left}
-
 .scene[data-mode=split] .sceneCopy{margin-left:auto;width:min(58vw,820px);justify-content:center}
 .scene[data-mode=split] .sceneCopy h2{font-size:clamp(72px,9.2vw,148px)}
 .scene[data-mode=split] .sceneAnnotation{left:auto;right:7vw;text-align:right}
-
 .scene[data-mode=lab] .sceneCopy{width:min(92vw,1420px);justify-content:flex-start;padding-top:13vh}
 .scene[data-mode=lab] .sceneCopy h2{font-size:clamp(78px,11.5vw,184px);max-width:1200px}
 .scene[data-mode=lab] .sceneCopy p{margin-left:48vw}
 .scene[data-mode=lab] .sceneSignal{top:64vh}
-
 .scene[data-mode=editorial] .sceneCopy{margin-left:7vw;width:min(64vw,900px);justify-content:flex-end;padding-bottom:13vh}
 .scene[data-mode=editorial] .sceneCopy h2{font-size:clamp(70px,10vw,160px)}
-
 .scene[data-mode=service] .sceneCopy{width:100%;align-items:center;text-align:center}
 .scene[data-mode=service] .sceneCopy h2{font-size:clamp(86px,13.3vw,218px);max-width:1500px}
 .scene[data-mode=service] .sceneCopy p{max-width:660px}
 .scene[data-mode=service] .sceneSignal{margin-right:auto;margin-left:8vw;top:18vh;text-align:left}
 .scene[data-mode=service] .sceneAnnotation{left:50%;transform:translateX(-50%)}
-
 .scene[data-mode=report] .sceneCopy{margin-left:auto;width:min(62vw,900px);justify-content:flex-start;padding-top:18vh}
 .scene[data-mode=report] .sceneSignal{margin-right:auto;margin-left:5vw;top:68vh;text-align:left}
-
 .scene[data-mode=result] .sceneCopy{width:100%;align-items:center;text-align:center;justify-content:flex-end;padding-bottom:15vh}
 .scene[data-mode=result] .sceneCopy h2{font-size:clamp(86px,12vw,196px)}
 .scene[data-mode=result] .sceneCopy p{max-width:600px}
 .scene[data-mode=result] .sceneSignal{top:16vh}
-
 .scene[data-mode=workforce] .sceneCopy{width:min(74vw,1080px);justify-content:center}
 .scene[data-mode=workforce] .sceneCopy h2{font-size:clamp(74px,10.8vw,178px)}
 .scene[data-mode=workforce] .sceneAnnotation{left:auto;right:6vw}
-
 .scene[data-mode=deployment] .sceneCopy{margin-left:auto;width:min(70vw,1050px);justify-content:flex-start;padding-top:13vh;text-align:right;align-items:flex-end}
 .scene[data-mode=deployment] .sceneCopy p{max-width:560px}
 .scene[data-mode=deployment] .sceneSignal{margin-right:auto;margin-left:3vw;top:68vh;text-align:left}
-
 .scene[data-mode=network] .sceneCopy{width:100%;align-items:center;text-align:center;justify-content:center}
 .scene[data-mode=network] .sceneCopy h2{font-size:clamp(90px,12.8vw,210px);max-width:1450px}
 .scene[data-mode=network] .sceneCopy p{max-width:620px}
 .scene[data-mode=network] .sceneSignal{margin:0 auto;top:73vh;text-align:center}
-
 .scene[data-mode=values] .sceneCopy{width:100%;align-items:center;text-align:center;justify-content:flex-start;padding-top:17vh}
 .scene[data-mode=values] .sceneCopy h2{font-size:clamp(84px,13vw,214px)}
 .scene[data-mode=values] .sceneCopy p{font-size:clamp(20px,2vw,32px);max-width:900px;color:#e6f5fb}
@@ -299,4 +288,16 @@
   .storyFrame{display:block;position:absolute;inset:0;margin:0;border-radius:0;overflow:hidden;opacity:0}
   .storyFrame:first-child{opacity:1}
   .storyFrame img{object-fit:cover}
+}
+
+/* Desktop opening parity pass: the 3D Founders planes are the visual focal point. */
+@media(min-width:801px){
+  .prologue{align-items:end;padding:8vh max(28px,5vw) 13vh}
+  .prologue::before{z-index:1;background:linear-gradient(90deg,rgba(2,7,11,.76) 0 16%,rgba(2,7,11,.08) 44%,rgba(2,7,11,.08) 72%,rgba(2,7,11,.55)),linear-gradient(0deg,rgba(2,7,11,.82),transparent 34%)}
+  .prologueObject{display:none}
+  .prologueCopy{z-index:3;width:min(45vw,680px);max-width:none;margin-bottom:2vh}
+  .prologueCopy>span{margin-bottom:12px;font-size:9px}
+  .prologue h1{max-width:650px;font-size:clamp(48px,6.1vw,100px);line-height:.85;letter-spacing:-.074em}
+  .prologue p{max-width:450px;margin-top:20px;font-size:15px;line-height:1.6}
+  .prologueMeta{z-index:3;left:max(28px,5vw);right:max(28px,5vw);bottom:27px;font-size:8px}
 }
