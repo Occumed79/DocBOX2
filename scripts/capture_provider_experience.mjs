@@ -1,7 +1,7 @@
 import { chromium } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 
-// Screenshot-driven visual pass: verify combined Oryzo camera choreography, blended planes, clean Origin focal, first-viewport copy, and cleared traveler corridor on current main.
+// Focused portal verification: all five hub destinations plus the single-viewport Agreement gateway.
 const OUT='visual-captures';
 await mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
@@ -15,43 +15,14 @@ async function open(path){
 async function shot(name){
   await page.screenshot({path:`${OUT}/${name}.png`,animations:'allow'});
 }
-async function scrollTo(selector){
-  await page.locator(selector).first().evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-  await page.waitForTimeout(1400);
-}
 
 await open('/experience');
-await shot('01-experience-opening');
-await scrollTo('#story-1');
-await shot('02-experience-origin');
-await scrollTo('#story-5');
-await shot('03-experience-clinical');
-await scrollTo('#provider-portals');
-await page.waitForTimeout(1800);
+await page.locator('#provider-portals').first().evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+await page.waitForTimeout(2200);
 await shot('04-experience-portals');
 
-await open('/experience/history');
-await page.evaluate(()=>window.scrollTo({top:document.documentElement.scrollHeight*.46,behavior:'instant'}));
-await page.waitForTimeout(1200);
-await shot('05-history-midpoint');
-
-await open('/experience/network');
-await shot('06-network-world');
-const europe=page.getByRole('button',{name:'Europe',exact:true});
-if(await europe.count()){await europe.click();await page.waitForTimeout(1100);await shot('07-network-europe')}
-
-await open('/experience/resources');
-await shot('08-resources-dive');
-const resourceHeading=page.getByRole('heading',{name:'Start with what you do.'});
-if(await resourceHeading.count()){await resourceHeading.evaluate(el=>el.scrollIntoView({block:'start',behavior:'instant'}));await page.waitForTimeout(1300);await shot('09-resources-field')}
-
-await open('/experience/questions');
-await shot('10-questions-receive');
-const examine=page.getByRole('button',{name:/Examine/}).first();
-if(await examine.count()){await examine.click();await page.waitForTimeout(700);await shot('11-questions-examine')}
-
 await open('/experience/agreement');
-await page.waitForTimeout(1800);
+await page.waitForTimeout(2200);
 await shot('12-agreement-portal');
 
 await browser.close();
