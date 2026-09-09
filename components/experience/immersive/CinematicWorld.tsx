@@ -57,10 +57,11 @@ void main(){
   uv.x += wave;
   uv.y += sin((uv.x * 6.0) - uTime * .45) * .004 * uIntensity;
   vec4 tex = texture2D(uTexture,uv);
-  float vignette = smoothstep(.94,.38,length(vUv-.5));
-  float edge = smoothstep(.0,.035,vUv.x)*smoothstep(.0,.035,vUv.y)*smoothstep(.0,.035,1.0-vUv.x)*smoothstep(.0,.035,1.0-vUv.y);
+  float vignette = smoothstep(.98,.34,length(vUv-.5));
+  float edge = smoothstep(.0,.10,vUv.x)*smoothstep(.0,.10,vUv.y)*smoothstep(.0,.10,1.0-vUv.x)*smoothstep(.0,.10,1.0-vUv.y);
+  float organic = .93 + .07*sin(vUv.x*17.0 + vUv.y*11.0 + uTime*.08);
   vec3 lifted = mix(tex.rgb, tex.rgb * vec3(.86,.96,1.04), .12 + .12*uIntensity);
-  gl_FragColor = vec4(lifted, tex.a * uOpacity * mix(.82,1.0,vignette) * edge);
+  gl_FragColor = vec4(lifted, tex.a * uOpacity * mix(.76,1.0,vignette) * edge * organic);
 }`;
 
 type Pose = { x:number; y:number; z:number; s:number; rx:number; ry:number; rz:number };
