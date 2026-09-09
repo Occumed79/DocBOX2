@@ -6,21 +6,12 @@ import CinematicWorld from './immersive/CinematicWorld';
 import PortalOrbitalNav from './immersive/PortalOrbitalNav';
 import styles from './ProviderJourney.module.css';
 import motion from './ProviderJourneyChoreography.module.css';
+import prologueMotion from './ProviderPrologue.module.css';
 
 const P = '/photos/';
 
 type StoryMode = 'hero' | 'split' | 'lab' | 'editorial' | 'service' | 'report' | 'result' | 'workforce' | 'deployment' | 'network' | 'values';
-
-type StoryScene = {
-  chapter: string;
-  title: string;
-  body: string;
-  images: readonly string[];
-  mode: StoryMode;
-  signal: string;
-  signalLabel: string;
-  annotation: string;
-};
+type StoryScene = {chapter:string;title:string;body:string;images:readonly string[];mode:StoryMode;signal:string;signalLabel:string;annotation:string};
 
 const STORY: readonly StoryScene[] = [
   {chapter:'01 / ORIGIN',title:'A different answer, since 1979.',body:'Founded in Honolulu by attorney Jim A. Johnson and Dr. Devonna M. Kaji, Occu-Med began with one conviction: a medical finding only becomes useful when it is understood in the context of the job.',images:['Founders.png','Founders copy.png','California - Hawaii Map.png'],mode:'hero',signal:'1979',signalLabel:'Honolulu / origin',annotation:'Job context changes the meaning of medical evidence.'},
@@ -37,11 +28,11 @@ const STORY: readonly StoryScene[] = [
 ];
 
 const PORTALS = [
-  { id:'history', href:'/experience/history', number:'01', title:'Company history', note:'From Honolulu to a global medical network', tone:'gold' },
-  { id:'network', href:'/experience/network', number:'02', title:'Explore the network', note:'23,524 anonymized mapped facilities', tone:'cyan' },
-  { id:'resources', href:'/experience/resources', number:'03', title:'Provider resources', note:'Guidance organized around your specialty', tone:'violet' },
-  { id:'questions', href:'/experience/questions', number:'04', title:'Provider Q&A', note:'Clear answers before the first referral', tone:'blue' },
-  { id:'agreement', href:'/experience/agreement', number:'05', title:'Service agreement', note:'Build and submit your pricing proposal', tone:'white' },
+  {id:'history',href:'/experience/history',number:'01',title:'Company history',note:'From Honolulu to a global medical network',tone:'gold'},
+  {id:'network',href:'/experience/network',number:'02',title:'Explore the network',note:'23,524 anonymized mapped facilities',tone:'cyan'},
+  {id:'resources',href:'/experience/resources',number:'03',title:'Provider resources',note:'Guidance organized around your specialty',tone:'violet'},
+  {id:'questions',href:'/experience/questions',number:'04',title:'Provider Q&A',note:'Clear answers before the first referral',tone:'blue'},
+  {id:'agreement',href:'/experience/agreement',number:'05',title:'Service agreement',note:'Build and submit your pricing proposal',tone:'white'},
 ] as const;
 
 const clamp=(value:number,min=0,max=1)=>Math.max(min,Math.min(max,value));
@@ -51,39 +42,41 @@ function StoryTitle({title,mode}:{title:string;mode:StoryMode}){
   return <h2 className={motion.title} data-mode={mode}>{words.map((word,index)=><span key={`${word}-${index}`} className={motion.word} data-story-word data-word-index={index}>{word}</span>)}</h2>;
 }
 
-export default function ProviderJourney() {
-  const rootRef=useRef<HTMLElement|null>(null);
-  const [activeScene,setActiveScene]=useState(0);
+export default function ProviderJourney(){
+  const rootRef=useRef<HTMLElement|null>(null);const[activeScene,setActiveScene]=useState(0);
 
   useEffect(()=>{
     const root=rootRef.current;if(!root)return;
     const scenes=Array.from(root.querySelectorAll<HTMLElement>('[data-scene]'));
+    const prologue=root.querySelector<HTMLElement>('[data-prologue]');
     let frame=0;
     const updateProgress=()=>{
       frame=0;const viewport=Math.max(window.innerHeight,1);let nearest=0,nearestDistance=Number.POSITIVE_INFINITY;
+
+      if(prologue){
+        const rect=prologue.getBoundingClientRect();const travel=Math.max(prologue.offsetHeight-viewport*.55,viewport*.45);const progress=clamp(-rect.top/travel);const visibility=1-clamp(progress*1.22);
+        const words=Array.from(prologue.querySelectorAll<HTMLElement>('[data-prologue-word]'));
+        words.forEach((word,index)=>{
+          const direction=index===0?-1:index===1?1:-.35;
+          const x=progress*direction*(index===2?120:180);const y=progress*(index===1?-95:index===0?70:125);const rotation=progress*direction*(index===2?4:8);const scale=1+progress*(index===1?.12:.06);
+          word.style.transform=`translate3d(${x}px,${y}px,0) rotate(${rotation}deg) scale(${scale})`;word.style.opacity=String(clamp(visibility*(1.15-index*.08)));
+        });
+        const body=prologue.querySelector<HTMLElement>('[data-prologue-body]');if(body){body.style.transform=`translate3d(${progress*-38}px,${progress*48}px,0)`;body.style.opacity=String(clamp(1-progress*1.7))}
+        const copy=prologue.querySelector<HTMLElement>('[data-prologue-copy]');if(copy){copy.style.transform=`translate3d(0,${progress*-3}vh,0)`}
+        const meta=prologue.querySelector<HTMLElement>('[data-prologue-meta]');if(meta){meta.style.transform=`translate3d(0,${progress*24}px,0)`;meta.style.opacity=String(clamp(1-progress*1.8))}
+      }
+
       scenes.forEach((scene,index)=>{
         const rect=scene.getBoundingClientRect();const travel=Math.max(rect.height-viewport,viewport*.35);const progress=clamp((viewport*.5-rect.top)/travel);const distance=Math.abs(rect.top+rect.height*.5-viewport*.5);scene.style.setProperty('--scene-progress',progress.toFixed(4));
         if(distance<nearestDistance){nearestDistance=distance;nearest=index}
-
-        const enter=clamp((progress-.02)/.25);const leave=clamp((1-progress)/.24);const visibility=Math.min(enter,leave);
+        const enter=clamp((progress-.02)/.25),leave=clamp((1-progress)/.24),visibility=Math.min(enter,leave);
         const words=Array.from(scene.querySelectorAll<HTMLElement>('[data-story-word]'));
         words.forEach((word,wordIndex)=>{
-          const direction=wordIndex%2===0?-1:1;
-          const depth=(wordIndex%3)-1;
-          const enterX=(1-enter)*direction*(34+wordIndex*7);
-          const enterY=(1-enter)*(28+Math.abs(depth)*18)*(wordIndex%2===0?1:-1);
-          const exitX=(1-leave)*-direction*(22+wordIndex*5);
-          const exitY=(1-leave)*(-22-depth*14);
-          const rotation=(1-enter)*direction*(4+wordIndex*1.2)+(1-leave)*-direction*3;
-          const scale=.84+enter*.16+(1-leave)*.08;
-          word.style.transform=`translate3d(${enterX+exitX}px, ${enterY+exitY}px, 0) rotate(${rotation}deg) scale(${scale})`;
-          word.style.opacity=String(clamp(visibility*(.8+wordIndex*.08),0,1));
+          const direction=wordIndex%2===0?-1:1,depth=(wordIndex%3)-1;const enterX=(1-enter)*direction*(34+wordIndex*7),enterY=(1-enter)*(28+Math.abs(depth)*18)*(wordIndex%2===0?1:-1),exitX=(1-leave)*-direction*(22+wordIndex*5),exitY=(1-leave)*(-22-depth*14),rotation=(1-enter)*direction*(4+wordIndex*1.2)+(1-leave)*-direction*3,scale=.84+enter*.16+(1-leave)*.08;
+          word.style.transform=`translate3d(${enterX+exitX}px,${enterY+exitY}px,0) rotate(${rotation}deg) scale(${scale})`;word.style.opacity=String(clamp(visibility*(.8+wordIndex*.08)));
         });
-        const kicker=scene.querySelector<HTMLElement>('[data-story-kicker]');
-        if(kicker){kicker.style.transform=`translate3d(${(1-enter)*-30+(1-leave)*18}px, ${(1-enter)*16}px,0)`;kicker.style.opacity=String(clamp(visibility*1.4))}
-        const body=scene.querySelector<HTMLElement>('[data-story-body]');
-        if(body){const bodyEnter=clamp((progress-.17)/.22);const bodyLeave=clamp((.92-progress)/.18);body.style.transform=`translate3d(0, ${(1-bodyEnter)*34+(1-bodyLeave)*-22}px,0)`;body.style.opacity=String(Math.min(bodyEnter,bodyLeave))}
-        if(distance<nearestDistance){nearestDistance=distance;nearest=index}
+        const kicker=scene.querySelector<HTMLElement>('[data-story-kicker]');if(kicker){kicker.style.transform=`translate3d(${(1-enter)*-30+(1-leave)*18}px,${(1-enter)*16}px,0)`;kicker.style.opacity=String(clamp(visibility*1.4))}
+        const body=scene.querySelector<HTMLElement>('[data-story-body]');if(body){const bodyEnter=clamp((progress-.17)/.22),bodyLeave=clamp((.92-progress)/.18);body.style.transform=`translate3d(0,${(1-bodyEnter)*34+(1-bodyLeave)*-22}px,0)`;body.style.opacity=String(Math.min(bodyEnter,bodyLeave))}
       });
       setActiveScene(nearest);
     };
@@ -95,28 +88,26 @@ export default function ProviderJourney() {
   return <main ref={rootRef} className={styles.root}>
     <CinematicWorld sceneIndex={activeScene}/>
 
-    <section className={styles.prologue}>
+    <section className={styles.prologue} data-prologue>
       <div className={styles.prologueObject} aria-hidden="true"><Image src={`${P}Founders.png`} alt="" fill priority sizes="74vw"/></div>
-      <div className={styles.prologueCopy}><span>OCCU-MED / EST. 1979</span><h1>Built around<br/><em>the job.</em></h1><p>A medical network designed around one deceptively simple question: what does this person actually need to do?</p></div>
-      <div className={styles.prologueMeta}><span>MEDICAL / DENTAL / DEPLOYMENT</span><b>SCROLL TO EXPLORE ↓</b></div>
+      <div className={`${styles.prologueCopy} ${prologueMotion.copy}`} data-prologue-copy>
+        <span>OCCU-MED / EST. 1979</span>
+        <h1 className={prologueMotion.title}><span className={prologueMotion.word} data-prologue-word>Built</span><span className={prologueMotion.word} data-prologue-word>Around</span><em className={prologueMotion.word} data-prologue-word>The Job.</em></h1>
+        <p className={prologueMotion.body} data-prologue-body>A medical network designed around one deceptively simple question: what does this person actually need to do?</p>
+      </div>
+      <div className={`${styles.prologueMeta} ${prologueMotion.meta}`} data-prologue-meta><span>MEDICAL / DENTAL / DEPLOYMENT</span><b>SCROLL TO EXPLORE ↓</b></div>
     </section>
 
     <div id="cinematic-story" className={styles.story}>
       <nav className={styles.storyRail} aria-label="Company story chapters"><span>STORY</span>{STORY.map((scene,index)=><a key={scene.chapter} href={`#story-${index+1}`} aria-current={activeScene===index?'step':undefined}><i/><b>{String(index+1).padStart(2,'0')}</b><small>{scene.chapter.split('/ ')[1]}</small></a>)}</nav>
-
       {STORY.map((scene,sceneIndex)=><section id={`story-${sceneIndex+1}`} className={styles.scene} data-scene data-active={activeScene===sceneIndex?true:undefined} data-scene-index={sceneIndex} data-mode={scene.mode} data-world-chapter={scene.chapter} key={scene.chapter} style={{'--scene-index':sceneIndex} as CSSProperties}>
-        <div className={styles.sceneGhost} aria-hidden="true">{String(sceneIndex+1).padStart(2,'0')}</div>
-        <div className={styles.sceneTitleField} aria-hidden="true">{scene.title}</div>
+        <div className={styles.sceneGhost} aria-hidden="true">{String(sceneIndex+1).padStart(2,'0')}</div><div className={styles.sceneTitleField} aria-hidden="true">{scene.title}</div>
         <div className={styles.sceneMedia}>{scene.images.map((image,imageIndex)=><figure className={styles.storyFrame} data-webgl-image data-image-index={imageIndex} key={image} style={{'--image-index':imageIndex,'--image-count':scene.images.length} as CSSProperties}><Image src={`${P}${encodeURIComponent(image)}`} alt={`${scene.title} — visual ${imageIndex+1} of ${scene.images.length}`} fill sizes="(max-width: 800px) 92vw, 68vw"/></figure>)}</div>
         <div className={`${styles.sceneCopy} ${motion.copy}`}><span className={motion.kicker} data-story-kicker>{scene.chapter}</span><StoryTitle title={scene.title} mode={scene.mode}/><p className={motion.body} data-story-body>{scene.body}</p></div>
-        <aside className={styles.sceneSignal}><b>{scene.signal}</b><span>{scene.signalLabel}</span></aside>
-        <div className={styles.sceneAnnotation}><i/><span>{scene.annotation}</span></div>
+        <aside className={styles.sceneSignal}><b>{scene.signal}</b><span>{scene.signalLabel}</span></aside><div className={styles.sceneAnnotation}><i/><span>{scene.annotation}</span></div>
       </section>)}
     </div>
 
-    <section id="provider-portals" className={styles.arrival} data-scene data-scene-index={STORY.length}>
-      <header className={styles.arrivalHeader}><span>ZERO-STYLE DESTINATION FIELD / OCCU-MED</span><p>Five destinations. One connected provider world.</p></header>
-      <PortalOrbitalNav portals={PORTALS}/>
-    </section>
+    <section id="provider-portals" className={styles.arrival} data-scene data-scene-index={STORY.length}><header className={styles.arrivalHeader}><span>ZERO-STYLE DESTINATION FIELD / OCCU-MED</span><p>Five destinations. One connected provider world.</p></header><PortalOrbitalNav portals={PORTALS}/></section>
   </main>;
 }
