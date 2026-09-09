@@ -26,6 +26,7 @@ export default function ImmersiveStage({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const onFrameRef = useRef(onFrame);
   const onReadyRef = useRef(onReady);
+  const clearColorRef = useRef(clearColor);
 
   useEffect(() => {
     onFrameRef.current = onFrame;
@@ -36,30 +37,28 @@ export default function ImmersiveStage({
   }, [onReady]);
 
   useEffect(() => {
+    clearColorRef.current = clearColor;
+  }, [clearColor]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Prefer WebGL 1 because the shared shader layer deliberately targets
-    // GLSL ES 1.00 for maximum browser/device coverage. Individual future
-    // worlds can opt into WebGL2 when they ship 300-es shader variants.
-    const gl =
-      canvas.getContext('webgl', {
-        antialias: true,
-        alpha: true,
-        powerPreference: 'high-performance',
-      }) ||
-      canvas.getContext('experimental-webgl', {
-        antialias: true,
-        alpha: true,
-        powerPreference: 'high-performance',
-      });
+    // The shared scene shaders intentionally target GLSL ES 1.00 so that the
+    // cinematic layer reaches older phones and embedded browsers as well as
+    // current desktop GPUs. WebGL2-specific worlds can be introduced later
+    // behind their own renderer without changing this persistent stage.
+    const renderContext = canvas.getContext('webgl', {
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+    });
 
-    if (!gl || typeof (gl as WebGLRenderingContext).clearColor !== 'function') {
+    if (!renderContext) {
       canvas.dataset.webgl = 'unsupported';
       return;
     }
 
-    const renderContext = gl as WebGLRenderingContext;
     canvas.dataset.webgl = 'ready';
     canvas.dataset.webglMode = 'webgl1';
     const runtime = createImmersiveRuntime();
@@ -91,7 +90,7 @@ export default function ImmersiveStage({
       if (disposed) return;
       const frame = runtime.step(now);
 
-      const [r, g, b, a] = clearColor;
+      const [r, g, b, a] = clearColorRef.current;
       renderContext.clearColor(r, g, b, a);
       renderContext.clear(renderContext.COLOR_BUFFER_BIT | renderContext.DEPTH_BUFFER_BIT);
 
@@ -111,7 +110,7 @@ export default function ImmersiveStage({
       const loseContext = renderContext.getExtension('WEBGL_lose_context');
       loseContext?.loseContext();
     };
-  }, [clearColor]);
+  }, []);
 
   const style = {
     position: 'fixed',
