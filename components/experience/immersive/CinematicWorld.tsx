@@ -106,7 +106,7 @@ function sceneProgress(index:number) {
 function assetReveal(chapter:number, local:number, progress:number){
   if(chapter!==0)return 1;
   if(local===1)return clamp((progress-.10)/.30);
-  if(local===2)return clamp((progress-.42)/.30);
+  if(local===2)return clamp((progress-.62)/.24);
   return 1;
 }
 
