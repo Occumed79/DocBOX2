@@ -1,7 +1,7 @@
 import { chromium } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 
-// Screenshot-driven visual pass: verify licensed astronaut + latest Resources/Agreement composition.
+// Screenshot-driven visual pass: verify corrected story focal timing and the rail-free cinematic frame.
 const OUT='visual-captures';
 await mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
