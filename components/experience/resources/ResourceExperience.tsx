@@ -152,7 +152,7 @@ export default function ResourceExperience() {
 
   const selected = useMemo(() => SPECIALTIES.find(item => item.id === selectedId) ?? SPECIALTIES[0], [selectedId]);
   const fieldItems = useMemo(() => SPECIALTIES.map(({id,label,color}) => ({id,label,color})), []);
-  const agreementHref = `/experience/agreement?specialty=${encodeURIComponent(selected.id)}`;
+  const agreementHref = `/experience/agreement?specialty=${encodeURIComponent(selected.id)}&from=resources`;
   const beginAgreement = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     if (handoff) return;
