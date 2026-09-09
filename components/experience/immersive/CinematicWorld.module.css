@@ -1,0 +1,19 @@
+.stage {
+  z-index: 2 !important;
+  opacity: .88;
+  mix-blend-mode: screen;
+  pointer-events: none !important;
+  filter: saturate(1.08) contrast(1.03);
+}
+
+@media (max-width: 760px) {
+  .stage {
+    opacity: .62;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    opacity: .42;
+  }
+}
