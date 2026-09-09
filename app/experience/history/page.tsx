@@ -1,2 +1,5 @@
-import { HistoryPortal } from '@/components/experience/PortalExperience';
-export default function Page(){return <HistoryPortal/>}
+import HistoryExperience from '@/components/experience/history/HistoryExperience';
+
+export default function Page() {
+  return <HistoryExperience />;
+}
