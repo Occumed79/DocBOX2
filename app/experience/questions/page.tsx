@@ -1,2 +1,5 @@
-import { QuestionsPortal } from '@/components/experience/ReferencePortals';
-export default function Page(){return <QuestionsPortal/>}
+import BlueCorridorsQAPortal from '@/components/experience/BlueCorridorsQAPortal';
+
+export default function Page() {
+  return <BlueCorridorsQAPortal />;
+}
