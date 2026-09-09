@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './ResourceExperience.module.css';
 import DiveWorld from '../immersive/DiveWorld';
 import SpecialtyField from './SpecialtyField';
@@ -110,13 +111,17 @@ const SPECIALTIES: Specialty[] = [
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 
 export default function ResourceExperience() {
+  const router = useRouter();
   const diveRef = useRef<HTMLElement | null>(null);
+  const routeTimer = useRef<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [selectedId, setSelectedId] = useState('Occupational Medicine');
+  const [handoff, setHandoff] = useState(false);
 
   useEffect(() => {
     const saved = window.localStorage.getItem('docbox-provider-specialty');
     if (saved && SPECIALTIES.some(item => item.id === saved)) setSelectedId(saved);
+    return () => { if (routeTimer.current) window.clearTimeout(routeTimer.current); };
   }, []);
 
   useEffect(() => {
@@ -146,71 +151,46 @@ export default function ResourceExperience() {
 
   const selected = useMemo(() => SPECIALTIES.find(item => item.id === selectedId) ?? SPECIALTIES[0], [selectedId]);
   const fieldItems = useMemo(() => SPECIALTIES.map(({id,label,color}) => ({id,label,color})), []);
+  const agreementHref = `/experience/agreement?specialty=${encodeURIComponent(selected.id)}`;
+  const beginAgreement = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    if (handoff) return;
+    setHandoff(true);
+    routeTimer.current = window.setTimeout(() => router.push(agreementHref), 820);
+  };
 
   return (
     <main className={styles.root} style={{ '--accent': selected.color, '--dive-progress': progress.toFixed(4) } as CSSProperties}>
       <header className={styles.topbar}>
         <a href="/experience#provider-portals">OCCU-MED / PROVIDER RESOURCES</a>
         <nav aria-label="Provider portals">
-          <a href="/experience/history">History</a>
-          <a href="/experience/network">Network</a>
-          <a href="/experience/resources" aria-current="page">Resources</a>
-          <a href="/experience/questions">Q&A</a>
-          <a href="/experience/agreement">Agreement</a>
+          <a href="/experience/history">History</a><a href="/experience/network">Network</a><a href="/experience/resources" aria-current="page">Resources</a><a href="/experience/questions">Q&A</a><a href="/experience/agreement">Agreement</a>
         </nav>
       </header>
 
       <section ref={diveRef} className={styles.dive} aria-label="Portal transition into provider resources">
         <div className={styles.diveStage}>
           <div className={styles.space}><DiveWorld progress={progress}/></div>
-          <div className={styles.diveCopy}>
-            <span>PORTAL 03 / ENTER THE RESOURCE FIELD</span>
-            <h1>Fall into<br />your specialty.</h1>
-            <p>Keep scrolling. The portal resolves into a workspace built around the services your facility actually provides.</p>
-          </div>
-          <div className={styles.arrivalMessage}>
-            <b>{selected.label}</b>
-            <span>The transition is resolving into your provider workspace.</span>
-          </div>
+          <div className={styles.diveCopy}><span>PORTAL 03 / ENTER THE RESOURCE FIELD</span><h1>Fall into<br />your specialty.</h1><p>Keep scrolling. The portal resolves into a workspace built around the services your facility actually provides.</p></div>
+          <div className={styles.arrivalMessage}><b>{selected.label}</b><span>The transition is resolving into your provider workspace.</span></div>
         </div>
       </section>
 
       <section className={styles.workspace}>
-        <div className={styles.workspaceHead}>
-          <div><span>PROVIDER CONTROL ROOM / SPECIALTY PATH</span><h2>Start with what you do.</h2></div>
-          <p>Select the provider type that best matches your facility. The resource field, workflow, library, and pricing handoff reconfigure around that specialty and remain selected when you continue to the agreement portal.</p>
-        </div>
-
+        <div className={styles.workspaceHead}><div><span>PROVIDER CONTROL ROOM / SPECIALTY PATH</span><h2>Start with what you do.</h2></div><p>Select the provider type that best matches your facility. The resource field, workflow, library, and pricing handoff reconfigure around that specialty and remain selected when you continue to the agreement portal.</p></div>
         <SpecialtyField items={fieldItems} selectedId={selected.id} onSelect={setSelectedId}/>
-
         <div className={styles.controlGrid} style={{ '--specialty-color': selected.color } as CSSProperties}>
-          <article className={styles.protocol}>
-            <span className={styles.panelLabel}>REFERRAL PROTOCOL / {selected.label.toUpperCase()}</span>
-            <h3>{selected.description}</h3>
-            <ol>
-              {selected.protocol.map(step => <li key={step.title}><div><b>{step.title}</b>{step.copy}</div></li>)}
-            </ol>
-          </article>
-
-          <article className={styles.library}>
-            <span className={styles.panelLabel}>RESOURCE LIBRARY / CURRENT PATH</span>
-            <h3>Documents for {selected.label}</h3>
-            <div className={styles.docs}>
-              {selected.documents.map(document => (
-                <div className={styles.doc} key={document.title}>
-                  <div><b>{document.title}</b><small>{document.meta}</small></div>
-                  {document.ready ? <a href="/api/provider-resources/stateside-guide">Download ↓</a> : <em>Awaiting upload</em>}
-                </div>
-              ))}
-            </div>
-          </article>
+          <article className={styles.protocol}><span className={styles.panelLabel}>REFERRAL PROTOCOL / {selected.label.toUpperCase()}</span><h3>{selected.description}</h3><ol>{selected.protocol.map(step => <li key={step.title}><div><b>{step.title}</b>{step.copy}</div></li>)}</ol></article>
+          <article className={styles.library}><span className={styles.panelLabel}>RESOURCE LIBRARY / CURRENT PATH</span><h3>Documents for {selected.label}</h3><div className={styles.docs}>{selected.documents.map(document => <div className={styles.doc} key={document.title}><div><b>{document.title}</b><small>{document.meta}</small></div>{document.ready ? <a href="/api/provider-resources/stateside-guide">Download ↓</a> : <em>Awaiting upload</em>}</div>)}</div></article>
         </div>
-
-        <div className={styles.next} style={{ '--specialty-color': selected.color } as CSSProperties}>
-          <p><strong>{selected.label}</strong> will carry forward with its matching service list.</p>
-          <a href={`/experience/agreement?specialty=${encodeURIComponent(selected.id)}`}>Continue to pricing proposal →</a>
-        </div>
+        <div className={styles.next} style={{ '--specialty-color': selected.color } as CSSProperties}><p><strong>{selected.label}</strong> will carry forward with its matching service list.</p><a href={agreementHref} onClick={beginAgreement}>Enter agreement portal →</a></div>
       </section>
+
+      {handoff && <div className={styles.handoff} aria-live="polite" aria-label={`Entering agreement portal for ${selected.label}`}>
+        <div className={styles.handoffPortal} style={{'--handoff-color':selected.color} as CSSProperties}>
+          <i/><i/><i/><i/><i/><div><small>PORTAL 05</small><b>{selected.label}</b><span>Entering Agreement</span></div>
+        </div>
+      </div>}
     </main>
   );
 }
