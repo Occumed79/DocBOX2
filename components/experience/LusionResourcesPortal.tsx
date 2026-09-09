@@ -50,7 +50,7 @@ export default function LusionResourcesPortal(){
     <section ref={transitionRef} className={styles.fallWorld} style={{'--space-y':'0vh','--space-scale':'1','--ring-scale':'.38','--astronaut-y':'0vh','--astronaut-rotate':'-11deg','--astronaut-scale':'1','--copy-opacity':'1','--copy-y':'0vh'} as CSSProperties}>
       <div className={styles.sticky}>
         <div className={styles.space} style={{transform:'translateY(var(--space-y)) scale(var(--space-scale))'}} aria-hidden="true">{Array.from({length:90},(_,i)=><i key={i} style={{left:`${(i*37)%100}%`,top:`${(i*61)%100}%`,opacity:.2+(i%5)*.13}}/>)}</div>
-        <div className={styles.portalRings} style={{transform:'translate(-50%, -50%) perspective(900px) rotateX(69deg) scale(var(--ring-scale))'}} aria-hidden="true">{Array.from({length:9},(_,i)=><i key={i} style={{'--ring':i} as CSSProperties}/>)}</div>
+        <div className={styles.portalRings} style={{transform:'translate(-50%, -50%) perspective(900px) rotateX(69deg) scale(var(--ring-scale))'}} aria-hidden="true">{Array.from({length:9},(_,i)=><i key={i} style={{inset:`${i*5.3}%`,transform:`rotate(${i*17}deg)`}}/>)}</div>
         <div className={styles.fallingAstronaut} style={{transform:'translate(-50%, var(--astronaut-y)) rotate(var(--astronaut-rotate)) scale(var(--astronaut-scale))'}} aria-hidden="true"><div/><i/><b/><span/></div>
         <div className={styles.fallCopy} style={{opacity:'var(--copy-opacity)',transform:'translateY(var(--copy-y))'}}><span>STEP INTO A NEW WORLD</span><h2>Provider<br/>Resources</h2><p>Guidance organized around the specialty performing the work.</p></div>
       </div>
