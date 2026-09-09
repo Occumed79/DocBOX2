@@ -38,7 +38,7 @@ export default function OryzoProviderJourney(){
     const root=rootRef.current;if(!root)return;
     const chapters=Array.from(root.querySelectorAll<HTMLElement>('[data-story-chapter]'));
     const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
-      if(entry.isIntersecting)setActive(Number((entry.target as HTMLElement).dataset.index||0));
+      if(entry.isIntersecting)setActive(Math.min(STORY.length-1,Number((entry.target as HTMLElement).dataset.index||0)));
     }),{rootMargin:'-35% 0px -35% 0px',threshold:0});
     chapters.forEach(ch=>observer.observe(ch));
     return()=>observer.disconnect();
@@ -54,29 +54,32 @@ export default function OryzoProviderJourney(){
     setTravel(id);window.setTimeout(()=>window.location.assign(href),760);
   };
 
+  const subjectTransform=`translate(-50%, -50%) translate3d(${pointer.x*12}px, ${pointer.y*10}px, 0)`;
+  const propsTransform=`translate3d(${pointer.x*-8}px, ${pointer.y*-7}px, 0)`;
+
   return <main ref={rootRef} className={`${styles.root} ${travel?styles.traveling:''}`} data-travel={travel||undefined} onPointerMove={onPointer}>
     <section className={styles.storyWorld} id="story">
-      <div className={styles.stage} style={{'--px':pointer.x,'--py':pointer.y,'--active':active} as CSSProperties}>
+      <div className={styles.stage}>
         <div className={styles.deskWorld} aria-hidden="true"><i/><b/><span/><em/></div>
         <div className={styles.brandMark}>OCCU-MED</div>
         <div className={styles.stageIndex}>{STORY[active].label}</div>
 
         <div className={styles.sceneStack}>
           {STORY.map((scene,sceneIndex)=><div key={scene.id} className={styles.sceneLayer} data-active={active===sceneIndex||undefined} aria-hidden={active!==sceneIndex}>
-            <div className={styles.subjectGroup}>
+            <div className={styles.subjectGroup} style={{transform:subjectTransform}}>
               {scene.images.map((image,imageIndex)=><figure key={image} className={styles.subject} style={{'--image-index':imageIndex,'--image-count':scene.images.length} as CSSProperties}><Image src={`${PHOTO}${encodeURIComponent(image)}`} alt={active===sceneIndex?`${scene.title} visual ${imageIndex+1}`:''} fill priority={sceneIndex===0} sizes="(max-width:800px) 88vw,62vw"/></figure>)}
             </div>
           </div>)}
         </div>
 
-        <div className={styles.stageProps} aria-hidden="true"><div className={styles.propCard}>CASE / 001</div><div className={styles.propDisk}/><div className={styles.propNote}>JOB + MEDICAL + CONTEXT</div></div>
+        <div className={styles.stageProps} style={{transform:propsTransform}} aria-hidden="true"><div className={styles.propCard}>CASE / 001</div><div className={styles.propDisk}/><div className={styles.propNote}>JOB + MEDICAL + CONTEXT</div></div>
       </div>
 
       <div className={styles.chapterFlow}>
         <section className={styles.hero} data-story-chapter data-index="0">
           <div className={styles.heroCopy}><span>OCCU-MED / PROVIDER EXPERIENCE</span><h1>Occupational medicine,<br/><em>built around the job.</em></h1><p>Scroll to move through the company story.</p></div>
         </section>
-        {STORY.map((scene,index)=><section key={scene.id} className={styles.chapter} data-story-chapter data-index={index} id={`scene-${scene.id}`}>
+        {STORY.map((scene,index)=><section key={scene.id} className={styles.chapter} data-story-chapter data-story-scene data-index={index} id={`scene-${scene.id}`}>
           <div className={styles.chapterCopy}><span>{scene.label}</span><h2>{scene.title}</h2><p>{scene.body}</p><small>{String(index+1).padStart(2,'0')} / {STORY.length}</small></div>
         </section>)}
       </div>
