@@ -42,6 +42,10 @@ function StoryTitle({title,mode}:{title:string;mode:StoryMode}){
   return <h2 className={motion.title} data-mode={mode}>{words.map((word,index)=><span key={`${word}-${index}`} className={motion.word} data-story-word data-word-index={index}>{word}</span>)}</h2>;
 }
 
+function showSceneSignal(mode:StoryMode){
+  return mode==='report'||mode==='result'||mode==='network';
+}
+
 export default function ProviderJourney(){
   const rootRef=useRef<HTMLElement|null>(null);const[activeScene,setActiveScene]=useState(0);
 
@@ -107,7 +111,7 @@ export default function ProviderJourney(){
         <div className={styles.sceneGhost} aria-hidden="true">{String(sceneIndex+1).padStart(2,'0')}</div><div className={styles.sceneTitleField} aria-hidden="true">{scene.title}</div>
         <div className={styles.sceneMedia}>{scene.images.map((image,imageIndex)=><figure className={styles.storyFrame} data-webgl-image data-image-index={imageIndex} key={image} style={{'--image-index':imageIndex,'--image-count':scene.images.length} as CSSProperties}><Image src={`${P}${encodeURIComponent(image)}`} alt={`${scene.title} — visual ${imageIndex+1} of ${scene.images.length}`} fill sizes="(max-width: 800px) 92vw, 68vw"/></figure>)}</div>
         <div className={`${styles.sceneCopy} ${motion.copy}`}><span className={motion.kicker} data-story-kicker>{scene.chapter}</span><StoryTitle title={scene.title} mode={scene.mode}/><p className={motion.body} data-story-body>{scene.body}</p></div>
-        <aside className={styles.sceneSignal}><b>{scene.signal}</b><span>{scene.signalLabel}</span></aside><div className={styles.sceneAnnotation}><i/><span>{scene.annotation}</span></div>
+        {showSceneSignal(scene.mode)&&<aside className={styles.sceneSignal}><b>{scene.signal}</b><span>{scene.signalLabel}</span></aside>}<div className={styles.sceneAnnotation}><i/><span>{scene.annotation}</span></div>
       </section>)}
     </div>
 
