@@ -115,7 +115,13 @@ export function HistoryPortal() {
 
         <div className={styles.historyField}>
           <div className={styles.historyParticles} aria-hidden="true">
-            {Array.from({ length: 72 }, (_, i) => <i key={i} style={{ '--i': i } as CSSProperties} />)}
+            {Array.from({ length: 72 }, (_, i) => {
+              const x = (i * 37) % 100;
+              const y = (i * 61) % 100;
+              const size = 2 + (i % 3);
+              const duration = 5 + (i % 9) * .6;
+              return <i key={i} style={{ left: `${x}%`, top: `${y}%`, width: size, height: size, animationDuration: `${duration}s` }} />;
+            })}
           </div>
 
           <div className={styles.yearRail} role="list" aria-label="Occu-Med history years">
@@ -229,7 +235,13 @@ export function NetworkPortal() {
             <i /><i /><i /><i /><i /><i />
           </div>
           {layers.density && <div className={styles.densityField} aria-hidden="true" />}
-          {layers.routes && <div className={styles.routeField} aria-hidden="true">{Array.from({ length: 18 }, (_, i) => <i key={i} style={{ '--i': i } as CSSProperties} />)}</div>}
+          {layers.routes && <div className={styles.routeField} aria-hidden="true">{Array.from({ length: 18 }, (_, i) => {
+            const left = 12 + ((i * 17) % 76);
+            const top = 18 + ((i * 29) % 62);
+            const width = 100 + (i % 5) * 38;
+            const angle = -35 + (i % 9) * 9;
+            return <i key={i} style={{ left: `${left}%`, top: `${top}%`, width, transform: `rotate(${angle}deg)` }} />;
+          })}</div>}
           {layers.providers && <div className={styles.providerNodes} aria-hidden="true">{MAP_NODES.map((node, i) => <i key={i} style={{ left: `${node.x}%`, top: `${node.y}%`, width: node.size, height: node.size, '--group': node.group } as CSSProperties} />)}</div>}
 
           <div className={styles.mapStat}>
