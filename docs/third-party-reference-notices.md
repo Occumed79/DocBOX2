@@ -24,6 +24,20 @@ Lusion Ltd also publishes the ORYZO-1 model family at:
 
 That repository is MIT licensed and is referenced as technical evidence for the real-time 3D production workflow behind Oryzo AI. No ORYZO model file is currently bundled into DocBOX2.
 
+## Google model-viewer — Astronaut
+
+The portal environment may load the `Astronaut.glb` sample model published with Google's `model-viewer` shared assets:
+
+`https://modelviewer.dev/shared-assets/models/Astronaut.glb`
+
+Upstream attribution identifies the asset as **Astronaut by Poly**, licensed under **Creative Commons Attribution 2.0 (CC BY 2.0)**.
+
+Attribution source:
+
+`https://github.com/google/model-viewer/blob/master/packages/shared-assets/ATTRIBUTIONS.md`
+
+The model is used as a replaceable visual asset inside DocBOX2's original Three.js portal environment. DocBOX2's portal scene, lighting, architecture, animation, labels, camera behavior, and interaction code are original implementation work.
+
 ## Other visual references
 
 Zero Tech, the current Lusion studio website, Nasdaq 50th Anniversary, and Protecting Blue Corridors are used as visual/interaction references only. Their proprietary production assets and source bundles are not vendored into DocBOX2. Their public behavior has been re-specified into clean-room implementation requirements in `docs/reference-sites-extraction.md` and `docs/reference-source-map.md`.
