@@ -1,2 +1,2 @@
-import { ResourcesPortal } from '@/components/experience/PortalExperience';
+import { ResourcesPortal } from '@/components/experience/ReferencePortals';
 export default function Page(){return <ResourcesPortal/>}
