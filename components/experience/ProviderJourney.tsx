@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import CinematicWorld from './immersive/CinematicWorld';
+import PortalOrbitalNav from './immersive/PortalOrbitalNav';
 import styles from './ProviderJourney.module.css';
 
 const P = '/photos/';
@@ -60,7 +62,7 @@ export default function ProviderJourney() {
           nearest = index;
         }
       });
-      setActiveScene(Math.min(nearest, STORY.length - 1));
+      setActiveScene(nearest);
     };
     const queueProgress = () => {
       if (!frame) frame = window.requestAnimationFrame(updateProgress);
@@ -79,6 +81,8 @@ export default function ProviderJourney() {
 
   return (
     <main ref={rootRef} className={styles.root}>
+      <CinematicWorld sceneIndex={activeScene} />
+
       <section className={styles.prologue}>
         <Image src={`${P}Founders.png`} alt="Occu-Med founders illustration" fill priority sizes="100vw" />
         <div className={styles.prologueShade} />
@@ -93,14 +97,37 @@ export default function ProviderJourney() {
       <div id="cinematic-story" className={styles.story}>
         <nav className={styles.storyRail} aria-label="Company story chapters">
           <span>STORY</span>
-          {STORY.map((scene, index) => <a key={scene.chapter} href={`#story-${index + 1}`} aria-current={activeScene === index ? 'step' : undefined}><i /> <b>{String(index + 1).padStart(2, '0')}</b><small>{scene.chapter.split('/ ')[1]}</small></a>)}
+          {STORY.map((scene, index) => (
+            <a key={scene.chapter} href={`#story-${index + 1}`} aria-current={activeScene === index ? 'step' : undefined}>
+              <i /> <b>{String(index + 1).padStart(2, '0')}</b><small>{scene.chapter.split('/ ')[1]}</small>
+            </a>
+          ))}
         </nav>
+
         {STORY.map((scene, sceneIndex) => (
-          <section id={`story-${sceneIndex + 1}`} className={styles.scene} data-scene data-scene-index={sceneIndex} key={scene.chapter} style={{ '--scene-index': sceneIndex } as CSSProperties}>
+          <section
+            id={`story-${sceneIndex + 1}`}
+            className={styles.scene}
+            data-scene
+            data-scene-index={sceneIndex}
+            data-world-chapter={scene.chapter}
+            key={scene.chapter}
+            style={{ '--scene-index': sceneIndex } as CSSProperties}
+          >
             <div className={styles.sceneCanvas}>
               {scene.images.map((image, imageIndex) => (
-                <figure className={styles.storyFrame} key={image} style={{ '--image-index': imageIndex, '--image-count': scene.images.length } as CSSProperties}>
-                  <Image src={`${P}${encodeURIComponent(image)}`} alt={`${scene.title} — visual ${imageIndex + 1} of ${scene.images.length}`} fill sizes="(max-width: 800px) 92vw, 64vw" />
+                <figure
+                  className={styles.storyFrame}
+                  data-webgl-image
+                  key={image}
+                  style={{ '--image-index': imageIndex, '--image-count': scene.images.length } as CSSProperties}
+                >
+                  <Image
+                    src={`${P}${encodeURIComponent(image)}`}
+                    alt={`${scene.title} — visual ${imageIndex + 1} of ${scene.images.length}`}
+                    fill
+                    sizes="(max-width: 800px) 92vw, 64vw"
+                  />
                 </figure>
               ))}
               <div className={styles.orb} aria-hidden="true" />
@@ -115,20 +142,13 @@ export default function ProviderJourney() {
         ))}
       </div>
 
-      <section className={styles.arrival} data-scene>
-        <div className={styles.arrivalFigure} aria-hidden="true"><i /><b /></div>
+      <section id="provider-portals" className={styles.arrival} data-scene data-scene-index={STORY.length}>
         <div className={styles.arrivalCopy}>
           <span>YOU HAVE ARRIVED</span>
           <h2>Your facility can become<br />the next point in the network.</h2>
           <p>Choose a portal. Explore Occu-Med in the order that matters to you.</p>
         </div>
-        <div className={styles.portalOrbit}>
-          {PORTALS.map((portal, index) => (
-            <a key={portal.id} href={portal.href} className={styles.portal} data-tone={portal.tone} style={{ '--portal-index': index } as CSSProperties}>
-              <span>{portal.number}</span><strong>{portal.title}</strong><small>{portal.note}</small><b>ENTER ↘</b>
-            </a>
-          ))}
-        </div>
+        <PortalOrbitalNav portals={PORTALS} />
       </section>
     </main>
   );
