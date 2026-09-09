@@ -1,6 +1,7 @@
 import { chromium } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 
+// Screenshot-driven visual pass: recapture current main after Network/Resources/Agreement fixes.
 const OUT='visual-captures';
 await mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
