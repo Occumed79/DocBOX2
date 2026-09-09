@@ -19,8 +19,22 @@ export default function LusionResourcesPortal(){
   useEffect(()=>{
     const section=transitionRef.current;if(!section)return;
     let raf=0;
-    const update=()=>{raf=0;const r=section.getBoundingClientRect();const vh=window.innerHeight||1;const p=Math.max(0,Math.min(1,(vh-r.top)/Math.max(vh,r.height-vh*.15)));section.style.setProperty('--fall',p.toFixed(4))};
-    const queue=()=>{if(!raf)raf=requestAnimationFrame(update)};update();window.addEventListener('scroll',queue,{passive:true});window.addEventListener('resize',queue);return()=>{window.removeEventListener('scroll',queue);window.removeEventListener('resize',queue);if(raf)cancelAnimationFrame(raf)};
+    const update=()=>{
+      raf=0;
+      const r=section.getBoundingClientRect();const vh=window.innerHeight||1;
+      const p=Math.max(0,Math.min(1,(vh-r.top)/Math.max(vh,r.height-vh*.15)));
+      section.style.setProperty('--space-y',`${p*-8}vh`);
+      section.style.setProperty('--space-scale',`${1+p*.18}`);
+      section.style.setProperty('--ring-scale',`${.38+p*2.1}`);
+      section.style.setProperty('--astronaut-y',`${p*42}vh`);
+      section.style.setProperty('--astronaut-rotate',`${(p-.5)*22}deg`);
+      section.style.setProperty('--astronaut-scale',`${1-p*.25}`);
+      section.style.setProperty('--copy-opacity',`${Math.max(0,1-p*1.35)}`);
+      section.style.setProperty('--copy-y',`${p*-5}vh`);
+    };
+    const queue=()=>{if(!raf)raf=requestAnimationFrame(update)};
+    update();window.addEventListener('scroll',queue,{passive:true});window.addEventListener('resize',queue);
+    return()=>{window.removeEventListener('scroll',queue);window.removeEventListener('resize',queue);if(raf)cancelAnimationFrame(raf)};
   },[]);
 
   const active=RESOURCE[selected];
@@ -33,12 +47,12 @@ export default function LusionResourcesPortal(){
       <p>Keep scrolling. The interface gives way to the resource world.</p>
     </section>
 
-    <section ref={transitionRef} className={styles.fallWorld}>
+    <section ref={transitionRef} className={styles.fallWorld} style={{'--space-y':'0vh','--space-scale':'1','--ring-scale':'.38','--astronaut-y':'0vh','--astronaut-rotate':'-11deg','--astronaut-scale':'1','--copy-opacity':'1','--copy-y':'0vh'} as CSSProperties}>
       <div className={styles.sticky}>
-        <div className={styles.space} aria-hidden="true">{Array.from({length:90},(_,i)=><i key={i} style={{left:`${(i*37)%100}%`,top:`${(i*61)%100}%`,opacity:.2+(i%5)*.13}}/>)}</div>
-        <div className={styles.portalRings} aria-hidden="true">{Array.from({length:9},(_,i)=><i key={i} style={{'--ring':i} as CSSProperties}/>)}</div>
-        <div className={styles.fallingAstronaut} aria-hidden="true"><div/><i/><b/><span/></div>
-        <div className={styles.fallCopy}><span>STEP INTO A NEW WORLD</span><h2>Provider<br/>Resources</h2><p>Guidance organized around the specialty performing the work.</p></div>
+        <div className={styles.space} style={{transform:'translateY(var(--space-y)) scale(var(--space-scale))'}} aria-hidden="true">{Array.from({length:90},(_,i)=><i key={i} style={{left:`${(i*37)%100}%`,top:`${(i*61)%100}%`,opacity:.2+(i%5)*.13}}/>)}</div>
+        <div className={styles.portalRings} style={{transform:'translate(-50%, -50%) perspective(900px) rotateX(69deg) scale(var(--ring-scale))'}} aria-hidden="true">{Array.from({length:9},(_,i)=><i key={i} style={{'--ring':i} as CSSProperties}/>)}</div>
+        <div className={styles.fallingAstronaut} style={{transform:'translate(-50%, var(--astronaut-y)) rotate(var(--astronaut-rotate)) scale(var(--astronaut-scale))'}} aria-hidden="true"><div/><i/><b/><span/></div>
+        <div className={styles.fallCopy} style={{opacity:'var(--copy-opacity)',transform:'translateY(var(--copy-y))'}}><span>STEP INTO A NEW WORLD</span><h2>Provider<br/>Resources</h2><p>Guidance organized around the specialty performing the work.</p></div>
       </div>
     </section>
 
