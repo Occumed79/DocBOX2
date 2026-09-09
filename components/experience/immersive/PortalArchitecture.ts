@@ -1,9 +1,12 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export type PortalArchitecture = {
   group: THREE.Group;
   update: (time:number,pointerX:number) => void;
 };
+
+const ASTRONAUT_URL='https://modelviewer.dev/shared-assets/models/Astronaut.glb';
 
 export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
   const group=new THREE.Group();
@@ -25,6 +28,48 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
   innerRing.rotation.x=Math.PI/2;
   innerRing.position.y=-2.82;
   group.add(innerRing);
+
+  const astronautRoot=new THREE.Group();
+  astronautRoot.position.z=.62;
+  astronautRoot.visible=false;
+  group.add(astronautRoot);
+
+  const loader=new GLTFLoader();
+  loader.load(ASTRONAUT_URL,gltf=>{
+    const model=gltf.scene;
+    model.traverse(object=>{
+      const mesh=object as THREE.Mesh;
+      if(!mesh.isMesh)return;
+      mesh.castShadow=false;
+      mesh.receiveShadow=false;
+      const material=mesh.material;
+      const apply=(mat:THREE.Material)=>{
+        if('metalness' in mat)(mat as THREE.MeshStandardMaterial).metalness=Math.max((mat as THREE.MeshStandardMaterial).metalness??0,.08);
+        if('roughness' in mat)(mat as THREE.MeshStandardMaterial).roughness=Math.min((mat as THREE.MeshStandardMaterial).roughness??1,.72);
+      };
+      if(Array.isArray(material))material.forEach(apply);else if(material)apply(material);
+    });
+
+    const box=new THREE.Box3().setFromObject(model);
+    const size=box.getSize(new THREE.Vector3());
+    const center=box.getCenter(new THREE.Vector3());
+    const targetHeight=4.75;
+    const scale=targetHeight/Math.max(size.y,.001);
+    model.scale.setScalar(scale);
+
+    const scaledBox=new THREE.Box3().setFromObject(model);
+    const scaledCenter=scaledBox.getCenter(new THREE.Vector3());
+    const scaledSize=scaledBox.getSize(new THREE.Vector3());
+    model.position.x-=scaledCenter.x;
+    model.position.z-=scaledCenter.z;
+    model.position.y+=-2.82-(scaledCenter.y-scaledSize.y*.5);
+    model.rotation.y=Math.PI*.03;
+
+    astronautRoot.add(model);
+    astronautRoot.visible=true;
+  },undefined,()=>{
+    astronautRoot.visible=false;
+  });
 
   const monoliths:THREE.Group[]=[];
   for(let i=0;i<12;i++){
@@ -100,6 +145,10 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
       monoliths.forEach((pylon,i)=>{pylon.position.y=Math.sin(time*.22+i)*.035-1.15});
       ceiling.rotation.y=Math.sin(time*.08)*.015+pointerX*.006;
       distant.rotation.y=Math.sin(time*.035)*.01;
+      if(astronautRoot.visible){
+        astronautRoot.rotation.y=Math.sin(time*.28)*.045+pointerX*.022;
+        astronautRoot.position.y=Math.sin(time*.7)*.025;
+      }
     }
   };
 }
