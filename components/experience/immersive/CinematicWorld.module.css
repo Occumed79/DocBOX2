@@ -1,6 +1,6 @@
 .world{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9;background:#03101a}.world canvas{display:block;width:100%;height:100%}
 
-/* The company story is a cinematic scroll sequence, not a dashboard. Keep the DOM chapter links accessible in markup, but remove the persistent floating control from the visual composition. */
-:global(nav[aria-label="Company story chapters"]){display:none!important}
+/* The company story is a cinematic scroll sequence, not a dashboard. The local world selector keeps this override scoped and valid under CSS Modules. */
+.world ~ :global(#cinematic-story) :global(nav[aria-label="Company story chapters"]){display:none!important}
 
 @media(prefers-reduced-motion:reduce){.world{opacity:.55}}
