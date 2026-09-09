@@ -150,12 +150,6 @@ export default function ProviderJourney() {
     const root = rootRef.current;
     if (!root) return;
     const scenes = Array.from(root.querySelectorAll<HTMLElement>('[data-scene]'));
-    const observer = new IntersectionObserver(entries => entries.forEach(entry => {
-      entry.target.toggleAttribute('data-active', entry.isIntersecting);
-      if (entry.isIntersecting) setActiveScene(Number((entry.target as HTMLElement).dataset.sceneIndex ?? 0));
-    }), { threshold: .34 });
-    scenes.forEach(scene => observer.observe(scene));
-
     let frame = 0;
     const updateProgress = () => {
       frame = 0;
@@ -184,7 +178,6 @@ export default function ProviderJourney() {
     window.addEventListener('resize', queueProgress);
 
     return () => {
-      observer.disconnect();
       window.removeEventListener('scroll', queueProgress);
       window.removeEventListener('resize', queueProgress);
       if (frame) window.cancelAnimationFrame(frame);
@@ -225,6 +218,7 @@ export default function ProviderJourney() {
             id={`story-${sceneIndex + 1}`}
             className={styles.scene}
             data-scene
+            data-active={activeScene === sceneIndex ? true : undefined}
             data-scene-index={sceneIndex}
             data-mode={scene.mode}
             data-world-chapter={scene.chapter}

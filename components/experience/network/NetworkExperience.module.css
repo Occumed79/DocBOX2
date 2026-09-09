@@ -331,3 +331,5 @@
   .bar { grid-template-columns: 1fr 1.3fr 56px; }
   .mapFooter { flex-direction: column; }
 }
+/* The atlas is geography-first: the map is the viewport and every control floats above it. */
+.hero{display:block;padding:0;min-height:100svh;background:#020b10}.copy{position:absolute;z-index:8;left:2rem;top:7rem;width:min(340px,calc(100vw - 4rem));padding:1.5rem;background:rgba(3,18,25,.78);border-left:1px solid var(--cyan);backdrop-filter:blur(15px);pointer-events:none}.copy h1{font-family:Arial,sans-serif;font-size:clamp(3.5rem,6vw,7rem)}.copy p{font-size:.8rem}.copy .stats{display:none}.mapShell{position:absolute;inset:0;border:0;border-radius:0;padding:5rem 1.2rem 1rem 27rem;background:transparent}.mapToolbar,.mapFooter{background:rgba(3,18,25,.75);padding:.55rem;border-radius:.75rem;backdrop-filter:blur(12px)}.canvasWrap{min-height:0;height:100%;border:0;border-radius:0}.explorer{display:none}@media(max-width:800px){.copy{top:5rem;left:1rem;width:calc(100vw - 2rem)}.copy h1{font-size:3.5rem}.copy p{display:none}.mapShell{padding:18rem .5rem .5rem}.mapToolbar{align-items:flex-start}.topbar{left:8px;right:8px}}

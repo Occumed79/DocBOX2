@@ -9,10 +9,10 @@ type AggregatePoint = Point & { count: number };
 type Hover = { x: number; y: number; title: string; detail: string } | null;
 
 const TOTALS: Record<Layer, number> = {
-  all: 23544,
-  medical: 14133,
-  dental: 3143,
-  diagnostic: 2885,
+  all: 23524,
+  medical: 14207,
+  dental: 3141,
+  diagnostic: 2867,
   pharmacy: 3309,
 };
 
@@ -54,9 +54,9 @@ const AGGREGATE_GEO: AggregatePoint[] = [
 const BREAKDOWNS = [
   {
     title: 'Facility capacity',
-    total: 23544,
+    total: 23524,
     rows: [
-      ['Medical provider', 9420], ['Pharmacy', 3309], ['Dental', 3143], ['Urgent care', 2635],
+      ['Medical provider', 9420], ['Pharmacy', 3309], ['Dental', 3141], ['Urgent care', 2635],
       ['Laboratory', 1919], ['Occupational medicine', 1415], ['Hospitals', 590], ['Diagnostics & specialists', 1063],
     ] as const,
   },
@@ -78,7 +78,7 @@ const BREAKDOWNS = [
   },
   {
     title: 'Diagnostic capacity',
-    total: 2885,
+    total: 2867,
     rows: [
       ['Laboratory', 1919], ['Drug testing laboratory', 294], ['Imaging / radiology', 278],
       ['Cardiology', 267], ['Audiology / hearing', 127],
@@ -174,75 +174,18 @@ export default function NetworkExperience() {
   }, [layer, mode, points]);
 
   const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    const wrap = wrapRef.current;
-    if (!canvas || !wrap) return;
-    const rect = wrap.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = Math.max(1, Math.floor(rect.width));
-    const height = Math.max(1, Math.floor(rect.height));
-    const pixelWidth = Math.floor(width * dpr);
-    const pixelHeight = Math.floor(height * dpr);
-    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-      canvas.width = pixelWidth;
-      canvas.height = pixelHeight;
-    }
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-
-    ctx.save();
-    ctx.strokeStyle = 'rgba(111, 222, 246, .09)';
-    ctx.lineWidth = 1;
-    for (let lon = -180; lon <= 180; lon += 30) {
-      const a = project(lon, -90, width, height, zoom, pan.x, pan.y);
-      const b = project(lon, 90, width, height, zoom, pan.x, pan.y);
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    }
-    for (let lat = -60; lat <= 60; lat += 30) {
-      const a = project(-180, lat, width, height, zoom, pan.x, pan.y);
-      const b = project(180, lat, width, height, zoom, pan.x, pan.y);
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    }
-    ctx.restore();
-
-    const projected: Array<{ x: number; y: number; point: Point; radius: number; count?: number }> = [];
-    if (mode === 'coordinates') {
-      for (const point of filteredPoints) {
-        const p = project(point.lon, point.lat, width, height, zoom, pan.x, pan.y);
-        if (p.x < -10 || p.y < -10 || p.x > width + 10 || p.y > height + 10) continue;
-        const radius = clamp(1.2 * Math.sqrt(zoom), 1.1, 3.2);
-        ctx.beginPath();
-        ctx.fillStyle = COLORS[point.type] ?? COLORS.all;
-        ctx.globalAlpha = .58;
-        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        projected.push({ ...p, point, radius: radius + 5 });
-      }
-      ctx.globalAlpha = 1;
-    } else {
-      for (const point of AGGREGATE_GEO) {
-        const p = project(point.lon, point.lat, width, height, zoom, pan.x, pan.y);
-        if (p.x < -50 || p.y < -50 || p.x > width + 50 || p.y > height + 50) continue;
-        const radius = clamp(5 + Math.sqrt(point.count) * .18 * Math.sqrt(zoom), 7, 28);
-        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius * 2.4);
-        gradient.addColorStop(0, 'rgba(119, 232, 255, .9)');
-        gradient.addColorStop(.22, 'rgba(72, 196, 225, .42)');
-        gradient.addColorStop(1, 'rgba(72, 196, 225, 0)');
-        ctx.fillStyle = gradient;
-        ctx.beginPath(); ctx.arc(p.x, p.y, radius * 2.4, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#bdf5ff';
-        ctx.globalAlpha = .85;
-        ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(2.4, radius * .14), 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 1;
-        projected.push({ ...p, point, radius: Math.max(12, radius), count: point.count });
-      }
-    }
-    projectedRef.current = projected;
-  }, [filteredPoints, mode, pan.x, pan.y, zoom]);
+    const canvas=canvasRef.current,wrap=wrapRef.current;if(!canvas||!wrap)return;
+    const rect=wrap.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),width=Math.max(1,Math.floor(rect.width)),height=Math.max(1,Math.floor(rect.height));
+    canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);canvas.style.width=`${width}px`;canvas.style.height=`${height}px`;
+    const gl=canvas.getContext('webgl',{antialias:true,alpha:true});if(!gl)return;gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.01,.055,.075,1);gl.clear(gl.COLOR_BUFFER_BIT);
+    const compile=(type:number,source:string)=>{const sh=gl.createShader(type)!;gl.shaderSource(sh,source);gl.compileShader(sh);return sh};
+    const program=gl.createProgram()!;gl.attachShader(program,compile(gl.VERTEX_SHADER,'attribute vec2 p;attribute vec3 c;varying vec3 v;uniform float size;void main(){v=c;gl_Position=vec4(p,0.,1.);gl_PointSize=size;}'));gl.attachShader(program,compile(gl.FRAGMENT_SHADER,'precision mediump float;varying vec3 v;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;gl_FragColor=vec4(v,(1.-d*2.)*.82);}'));gl.linkProgram(program);gl.useProgram(program);
+    const source: Array<Point & {count?:number}>=mode==='coordinates'?filteredPoints:AGGREGATE_GEO;
+    const verts:number[]=[],colors:number[]=[];const projected:Array<{x:number;y:number;point:Point;radius:number;count?:number}>=[];
+    const rgb=(type:Layer)=>{const n=parseInt((COLORS[type]||COLORS.all).slice(1),16);return[((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255]};
+    for(const point of source){const q=project(point.lon,point.lat,width,height,zoom,pan.x,pan.y);if(q.x < -20||q.y < -20||q.x>width+20||q.y>height+20)continue;verts.push(q.x/width*2-1,1-q.y/height*2);colors.push(...rgb(point.type));projected.push({...q,point,radius:mode==='coordinates'?7:18,count:point.count})}
+    const bind=(name:string,data:number[],size:number)=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STREAM_DRAW);const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,0,0)};bind('p',verts,2);bind('c',colors,3);gl.uniform1f(gl.getUniformLocation(program,'size'),Math.min(14,(mode==='coordinates'?2.2:9)*dpr*Math.sqrt(zoom)));gl.drawArrays(gl.POINTS,0,verts.length/2);projectedRef.current=projected;
+  },[filteredPoints,mode,pan.x,pan.y,zoom]);
 
   useEffect(() => {
     draw();
@@ -334,7 +277,7 @@ export default function NetworkExperience() {
             {mode === 'coordinates' ? `${points.length.toLocaleString()} coordinate records loaded` : mode === 'loading' ? 'Loading coordinate layer…' : 'Aggregate geography active · coordinate file awaiting recovery'}
           </div>
           <div className={styles.stats}>
-            <div className={styles.stat}><b>23,544</b><small>active directory records</small></div>
+            <div className={styles.stat}><b>23,524</b><small>mapped anonymized coordinates</small></div>
             <div className={styles.stat}><b>22,678</b><small>U.S. & territories</small></div>
             <div className={styles.stat}><b>866</b><small>international records</small></div>
           </div>
