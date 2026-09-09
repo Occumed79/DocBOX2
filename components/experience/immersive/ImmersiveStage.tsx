@@ -39,24 +39,29 @@ export default function ImmersiveStage({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Prefer WebGL 1 because the shared shader layer deliberately targets
+    // GLSL ES 1.00 for maximum browser/device coverage. Individual future
+    // worlds can opt into WebGL2 when they ship 300-es shader variants.
     const gl =
-      canvas.getContext('webgl2', {
+      canvas.getContext('webgl', {
         antialias: true,
         alpha: true,
         powerPreference: 'high-performance',
       }) ||
-      canvas.getContext('webgl', {
+      canvas.getContext('experimental-webgl', {
         antialias: true,
         alpha: true,
         powerPreference: 'high-performance',
       });
 
-    if (!gl) {
+    if (!gl || typeof (gl as WebGLRenderingContext).clearColor !== 'function') {
       canvas.dataset.webgl = 'unsupported';
       return;
     }
 
+    const renderContext = gl as WebGLRenderingContext;
     canvas.dataset.webgl = 'ready';
+    canvas.dataset.webglMode = 'webgl1';
     const runtime = createImmersiveRuntime();
     let cleanupScene: void | (() => void);
     let animationFrame = 0;
@@ -74,23 +79,23 @@ export default function ImmersiveStage({
 
       canvas.style.width = `${viewport.width}px`;
       canvas.style.height = `${viewport.height}px`;
-      gl.viewport(0, 0, pixelWidth, pixelHeight);
+      renderContext.viewport(0, 0, pixelWidth, pixelHeight);
     };
 
     resize();
     window.addEventListener('resize', resize, { passive: true });
 
-    cleanupScene = onReadyRef.current?.(gl, canvas);
+    cleanupScene = onReadyRef.current?.(renderContext, canvas);
 
     const render = (now: number) => {
       if (disposed) return;
       const frame = runtime.step(now);
 
       const [r, g, b, a] = clearColor;
-      gl.clearColor(r, g, b, a);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      renderContext.clearColor(r, g, b, a);
+      renderContext.clear(renderContext.COLOR_BUFFER_BIT | renderContext.DEPTH_BUFFER_BIT);
 
-      onFrameRef.current?.({ ...frame, gl, canvas });
+      onFrameRef.current?.({ ...frame, gl: renderContext, canvas });
       animationFrame = window.requestAnimationFrame(render);
     };
 
@@ -103,7 +108,7 @@ export default function ImmersiveStage({
       runtime.destroy();
       if (typeof cleanupScene === 'function') cleanupScene();
 
-      const loseContext = gl.getExtension('WEBGL_lose_context');
+      const loseContext = renderContext.getExtension('WEBGL_lose_context');
       loseContext?.loseContext();
     };
   }, [clearColor]);
