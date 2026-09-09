@@ -142,13 +142,19 @@ export default function HistoryExperience() {
       if (!frame) frame = window.requestAnimationFrame(update);
     };
 
+    const onResize = () => {
+      measure();
+      queue();
+    };
+
     measure();
     update();
     window.addEventListener('scroll', queue, { passive: true });
-    window.addEventListener('resize', () => { measure(); queue(); }, { passive: true });
+    window.addEventListener('resize', onResize, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', queue);
+      window.removeEventListener('resize', onResize);
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
@@ -175,7 +181,7 @@ export default function HistoryExperience() {
     <main
       ref={rootRef}
       className={styles.root}
-      style={{ '--history-progress': progress.toFixed(4), '--track-distance': `${trackDistance}px` } as CSSProperties}
+      style={{ '--history-progress': progress.toFixed(4) } as CSSProperties}
     >
       <section className={styles.stage} aria-label="Occu-Med history archive">
         <header className={styles.header}>
@@ -209,7 +215,7 @@ export default function HistoryExperience() {
         </nav>
 
         <div className={styles.trackViewport}>
-          <div className={styles.track}>
+          <div className={styles.track} style={{ transform: `translate3d(${-progress * trackDistance}px, 0, 0)` }}>
             {MILESTONES.map((milestone, index) => (
               <article id={`history-${milestone.id}`} className={styles.milestone} data-active={index === active} key={milestone.id}>
                 <b className={styles.year}>{milestone.year}</b>
