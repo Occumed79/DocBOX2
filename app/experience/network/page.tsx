@@ -1,2 +1,5 @@
-import { NetworkPortal } from '@/components/experience/ReferencePortals';
-export default function Page(){return <NetworkPortal/>}
+import BlueCorridorsNetworkPortal from '@/components/experience/BlueCorridorsNetworkPortal';
+
+export default function Page() {
+  return <BlueCorridorsNetworkPortal />;
+}
