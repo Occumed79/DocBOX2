@@ -1,7 +1,7 @@
 import { chromium } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 
-// Screenshot-driven visual pass: verify delayed Origin imagery on current main, plus the corrected rail-free cinematic sequence.
+// Screenshot-driven visual pass: verify combined Oryzo camera choreography, blended planes, clean Origin focal, first-viewport copy, and cleared traveler corridor on current main.
 const OUT='visual-captures';
 await mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
