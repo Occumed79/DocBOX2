@@ -35,12 +35,14 @@ test.describe('provider journey', () => {
     expect(errors).toEqual([]);
   });
 
-  test('portal destinations expose real history, network, resources, and questions', async ({ page }) => {
+  test('portal destinations expose the Nasdaq-style history, network, resources, and questions', async ({ page }) => {
     await page.goto('/experience/history');
-    await expect(page.getByRole('button', { name: /1976.*Research/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /TODAY.*Network/i })).toBeVisible();
-    await page.getByRole('button', { name: /2016.*International/i }).click();
-    await expect(page.getByRole('heading', { name: /Infrastructure across 36\+ countries/i })).toBeVisible();
+    await expect(page.getByText('1979', { exact: true }).first()).toBeVisible();
+    await page.getByRole('button', { name: /^ENTER/i }).click();
+    await expect(page.getByRole('button', { name: /1976 The research starts/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /TODAY One connected provider network/i })).toBeVisible();
+    await page.getByRole('button', { name: /2016 Infrastructure spans/i }).click();
+    await expect(page.getByRole('heading', { name: /Infrastructure spans more than 36 countries/i })).toBeVisible();
 
     await page.goto('/experience/network');
     await expect(page.getByText('23,544', { exact: true }).first()).toBeVisible();
