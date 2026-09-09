@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './ResourceExperience.module.css';
+import handoffStyles from './ResourceHandoff.module.css';
 import DiveWorld from '../immersive/DiveWorld';
 import SpecialtyField from './SpecialtyField';
 
@@ -186,8 +187,8 @@ export default function ResourceExperience() {
         <div className={styles.next} style={{ '--specialty-color': selected.color } as CSSProperties}><p><strong>{selected.label}</strong> will carry forward with its matching service list.</p><a href={agreementHref} onClick={beginAgreement}>Enter agreement portal →</a></div>
       </section>
 
-      {handoff && <div className={styles.handoff} aria-live="polite" aria-label={`Entering agreement portal for ${selected.label}`}>
-        <div className={styles.handoffPortal} style={{'--handoff-color':selected.color} as CSSProperties}>
+      {handoff && <div className={handoffStyles.handoff} aria-live="polite" aria-label={`Entering agreement portal for ${selected.label}`}>
+        <div className={handoffStyles.portal} style={{'--handoff-color':selected.color} as CSSProperties}>
           <i/><i/><i/><i/><i/><div><small>PORTAL 05</small><b>{selected.label}</b><span>Entering Agreement</span></div>
         </div>
       </div>}
