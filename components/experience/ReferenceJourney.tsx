@@ -6,6 +6,7 @@ import ImmersiveStage, { type ImmersiveStageFrame } from './immersive/ImmersiveS
 import styles from './ReferenceJourney.module.css';
 
 const PHOTO = '/photos/';
+const STAGE_CLEAR: [number, number, number, number] = [0.008, 0.021, 0.032, 1];
 
 const STORY = [
   {
@@ -302,7 +303,7 @@ export default function ReferenceJourney() {
 
   return (
     <main ref={rootRef} className={`${styles.root} ${travel ? styles.traveling : ''}`} data-travel={travel || undefined}>
-      <ImmersiveStage className={styles.stage} clearColor={[0.008, 0.021, 0.032, 1]} onReady={handleReady} onFrame={handleFrame} />
+      <ImmersiveStage className={styles.stage} clearColor={STAGE_CLEAR} onReady={handleReady} onFrame={handleFrame} />
 
       <section className={styles.prologue}>
         <div className={styles.prologueMedia}>
