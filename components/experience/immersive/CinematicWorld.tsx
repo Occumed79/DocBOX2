@@ -65,6 +65,7 @@ void main(){
 }`;
 
 type Pose = { x:number; y:number; z:number; s:number; rx:number; ry:number; rz:number };
+type CameraPose = { x:number; y:number; z:number; lx:number; ly:number; lz:number; roll:number; fov:number };
 type PlaneRecord = { mesh:THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial>; chapter:number; local:number; texture:THREE.Texture };
 
 const clamp = (v:number,min=0,max=1) => Math.max(min,Math.min(max,v));
@@ -96,6 +97,24 @@ function poseFor(chapter:number, local:number, progress:number):Pose {
   }
 }
 
+function cameraPoseFor(chapter:number,progress:number):CameraPose{
+  const p=progress-.5;
+  switch(chapter){
+    case 0:return {x:-.45+p*1.35,y:.18-p*.42,z:8.85-p*.9,lx:-.45+p*.65,ly:.02,lz:-1.9,roll:p*.028,fov:42-p*2.2};
+    case 1:return {x:.72-p*1.4,y:-.15+p*.4,z:8.45-p*.55,lx:.42-p*.76,ly:-.06,lz:-2.0,roll:-.012+p*.028,fov:43.5};
+    case 2:return {x:-.55+p*1.05,y:.38-p*.62,z:8.2-p*.35,lx:-.25+p*.45,ly:.05-p*.15,lz:-2.1,roll:.016-p*.035,fov:44};
+    case 3:return {x:-.82+p*1.75,y:.12-p*.32,z:8.55-p*.72,lx:-.55+p*.9,ly:-.03,lz:-1.8,roll:-.018+p*.04,fov:42.5};
+    case 4:return {x:p*.78,y:.28-p*.26,z:8.15-Math.sin(progress*Math.PI)*.46,lx:p*.32,ly:-.16,lz:-2.25,roll:-p*.025,fov:45.5};
+    case 5:return {x:.58-p*1.28,y:.1+p*.3,z:8.35-p*.58,lx:.35-p*.62,ly:.02,lz:-2.05,roll:.012+p*.018,fov:43};
+    case 6:return {x:-.15+p*.42,y:.25-p*.5,z:8.6-p*1.0,lx:0,ly:-.08,lz:-2.3,roll:p*.018,fov:41.5};
+    case 7:return {x:-.5+p*1.1,y:.08+p*.18,z:8.45-p*.48,lx:-.22+p*.46,ly:0,lz:-2.05,roll:-.01+p*.026,fov:43.5};
+    case 8:return {x:.62-p*1.25,y:.34-p*.72,z:8.35-p*.45,lx:.3-p*.58,ly:-.06,lz:-2.15,roll:.018-p*.04,fov:44};
+    case 9:return {x:p*.92,y:.2-p*.18,z:8.25-Math.sin(progress*Math.PI)*.34,lx:p*.4,ly:-.05,lz:-2.45,roll:p*.032,fov:46};
+    case 10:return {x:Math.sin(progress*Math.PI*1.15)*.55,y:.18+Math.cos(progress*Math.PI)*.28,z:8.5-p*.45,lx:Math.sin(progress*Math.PI)*.18,ly:.02,lz:-2.15,roll:Math.sin(progress*Math.PI*2)*.018,fov:43};
+    default:return {x:0,y:0,z:8.5,lx:0,ly:0,lz:-1.8,roll:0,fov:43};
+  }
+}
+
 function sceneProgress(index:number) {
   const element=document.querySelector<HTMLElement>(`[data-scene-index="${index}"]`);
   if(!element) return .5;
@@ -118,6 +137,7 @@ export default function CinematicWorld({ sceneIndex }:{ sceneIndex:number }) {
     const element=host.current;if(!element)return;
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x02070b,.052);
     const camera=new THREE.PerspectiveCamera(43,window.innerWidth/window.innerHeight,.1,80);camera.position.set(0,0,8.5);
+    const lookTarget=new THREE.Vector3(0,0,-1.8);
     const renderer=new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(window.innerWidth,window.innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;element.appendChild(renderer.domElement);
     scene.add(new THREE.AmbientLight(0xffffff,.95));const key=new THREE.PointLight(0x68ddff,28,28);key.position.set(5,3,7);scene.add(key);const violet=new THREE.PointLight(0x7755ff,16,24);violet.position.set(-5,-2,3);scene.add(violet);
 
@@ -154,7 +174,11 @@ export default function CinematicWorld({ sceneIndex }:{ sceneIndex:number }) {
         const pulse=1+Math.sin(elapsed*.42+assetIndex)*.008,scale=pose.s*pulse;mesh.scale.x+=(scale-mesh.scale.x)*.09;mesh.scale.y+=(scale-mesh.scale.y)*.09;mesh.scale.z=1;
         const uniforms=mesh.material.uniforms;uniforms.uTime.value=elapsed;uniforms.uProgress.value=chapterProgress;const reveal=assetReveal(chapter,assetIndex,chapterProgress);uniforms.uOpacity.value+=(transition*.94*reveal-uniforms.uOpacity.value)*.12;const motionIntensity=clamp(Math.abs(velocity)*120+Math.abs(chapterProgress-.5)*.12,0,1);uniforms.uIntensity.value+=(motionIntensity-uniforms.uIntensity.value)*.1;
       });
-      const cameraX=pointer.x*.28+Math.sin(chapterFloat*.9)*.22,cameraY=-pointer.y*.18+Math.cos(chapterFloat*.72)*.14;camera.position.x+=(cameraX-camera.position.x)*.035;camera.position.y+=(cameraY-camera.position.y)*.035;camera.position.z=8.5-mix(0,.7,Math.sin(local*Math.PI));camera.rotation.z=Math.sin(chapterFloat*.8+local*Math.PI)*.012;camera.lookAt(pointer.x*.09,-pointer.y*.06,-1.8);
+      const authored=cameraPoseFor(targetChapter,local);
+      const targetX=authored.x+pointer.x*.24,targetY=authored.y-pointer.y*.16,targetZ=authored.z;
+      camera.position.x+=(targetX-camera.position.x)*.045;camera.position.y+=(targetY-camera.position.y)*.045;camera.position.z+=(targetZ-camera.position.z)*.045;
+      lookTarget.x+=(authored.lx+pointer.x*.08-lookTarget.x)*.05;lookTarget.y+=(authored.ly-pointer.y*.05-lookTarget.y)*.05;lookTarget.z+=(authored.lz-lookTarget.z)*.05;
+      camera.fov+=(authored.fov-camera.fov)*.04;camera.updateProjectionMatrix();camera.lookAt(lookTarget);camera.rotation.z+=(authored.roll-camera.rotation.z)*.08;
       orbitGroup.rotation.z=elapsed*.012+chapterFloat*.12;orbitGroup.rotation.y=Math.sin(elapsed*.08)*.12;orbitGroup.position.z=-4-local*1.5;dustField.rotation.y=elapsed*.006;dustField.position.z=local*-1.2;renderer.render(scene,camera);
     };render();
 
