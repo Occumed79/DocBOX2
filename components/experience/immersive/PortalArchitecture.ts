@@ -52,7 +52,6 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
 
     const box=new THREE.Box3().setFromObject(model);
     const size=box.getSize(new THREE.Vector3());
-    const center=box.getCenter(new THREE.Vector3());
     const targetHeight=4.75;
     const scale=targetHeight/Math.max(size.y,.001);
     model.scale.setScalar(scale);
@@ -73,6 +72,8 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
 
   const monoliths:THREE.Group[]=[];
   for(let i=0;i<12;i++){
+    // Keep the camera-to-traveler sightline open. The Zero-style architecture should frame the astronaut, not slice through the central silhouette.
+    if(i===3||i===9)continue;
     const angle=(i/12)*Math.PI*2;
     const radius=i%2?8.3:9.7;
     const pylon=new THREE.Group();
