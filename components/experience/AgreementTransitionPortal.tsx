@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import PricingAgreementBuilder from './PricingAgreementBuilder';
 import styles from './AgreementTransitionPortal.module.css';
 
@@ -45,7 +45,7 @@ export default function AgreementTransitionPortal(){
     <section ref={transitionRef} className={styles.threshold}>
       <div className={styles.sticky}>
         <div className={styles.stars} aria-hidden="true">{Array.from({length:78},(_,i)=><i key={i} style={{left:`${(i*41)%100}%`,top:`${(i*67)%100}%`,opacity:.18+(i%5)*.12}}/>)}</div>
-        <div className={styles.tunnel} aria-hidden="true">{Array.from({length:10},(_,i)=><i key={i} style={{'--ring':i} as CSSProperties}/>)}</div>
+        <div className={styles.tunnel} aria-hidden="true">{Array.from({length:10},(_,i)=><i key={i} style={{inset:`${i*4.6}%`,transform:`rotate(${i*14}deg)`}}/>)}</div>
         <div className={styles.gate} aria-hidden="true"><i/><b/><span/></div>
         <div className={styles.copy}><span>PORTAL 05 / PROVIDER AGREEMENT</span><h1>Define the<br/><em>relationship.</em></h1><p>The public journey ends with a Provider Fee Proposal for Network Management review. Accepted pricing can continue into the secure Occu-Med Forms agreement workflow.</p><a href="#proposal">Enter proposal ↓</a></div>
       </div>
