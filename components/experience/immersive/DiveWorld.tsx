@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { configureCinematicRenderer } from './rendererQuality';
 
 const PORTAL_VERTEX=`
 varying vec2 vUv;
@@ -35,7 +36,7 @@ export default function DiveWorld({progress}:{progress:number}){
     const el=host.current;if(!el)return;
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x02070d,.038);
     const camera=new THREE.PerspectiveCamera(56,el.clientWidth/el.clientHeight,.1,180);camera.position.set(0,0,10);
-    const renderer=new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(el.clientWidth,el.clientHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.setClearColor(0x02070d,1);el.appendChild(renderer.domElement);
+    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'}),{exposure:1.08});renderer.setSize(el.clientWidth,el.clientHeight);renderer.setClearColor(0x02070d,1);el.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0x8ddfff,0x05060b,.9));
     const cyanLight=new THREE.PointLight(0x59dff4,24,30);cyanLight.position.set(4,3,5);scene.add(cyanLight);
@@ -97,7 +98,7 @@ export default function DiveWorld({progress}:{progress:number}){
       renderer.render(scene,camera);
     };draw();
 
-    const resize=()=>{camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();renderer.setSize(el.clientWidth,el.clientHeight)};window.addEventListener('resize',resize);
+    const resize=()=>{camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(el.clientWidth,el.clientHeight)};window.addEventListener('resize',resize);
     return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);disposables.forEach(item=>item.dispose());renderer.dispose();if(renderer.domElement.parentNode===el)el.removeChild(renderer.domElement)};
   },[]);
 
