@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 type Milestone = { year:string; image:string };
+type CameraBeat = {side:number;lift:number;push:number;lookSide:number;lookLift:number;fov:number;roll:number};
 
 type Exhibit = {
   group:THREE.Group;
@@ -15,6 +16,19 @@ type Exhibit = {
   anchor:THREE.Vector3;
 };
 
+const CAMERA_BEATS:readonly CameraBeat[]=[
+  {side:-.2,lift:.16,push:.15,lookSide:.08,lookLift:.02,fov:43,roll:-.008},
+  {side:1.0,lift:.38,push:-.28,lookSide:-.46,lookLift:.12,fov:47,roll:.022},
+  {side:-.72,lift:-.08,push:.62,lookSide:.3,lookLift:-.05,fov:38.5,roll:-.016},
+  {side:.18,lift:-.32,push:.24,lookSide:-.08,lookLift:.18,fov:42,roll:.009},
+  {side:-1.18,lift:.5,push:-.42,lookSide:.52,lookLift:-.08,fov:49,roll:-.027},
+  {side:.88,lift:.08,push:.28,lookSide:-.38,lookLift:.05,fov:43,roll:.019},
+  {side:-.4,lift:.42,push:.82,lookSide:.12,lookLift:-.12,fov:37,roll:-.011},
+  {side:1.12,lift:-.18,push:-.2,lookSide:-.5,lookLift:.15,fov:47.5,roll:.024},
+  {side:-.58,lift:-.5,push:.58,lookSide:.22,lookLift:.24,fov:40,roll:-.018},
+  {side:0,lift:.2,push:.18,lookSide:0,lookLift:.04,fov:44,roll:0},
+];
+
 function yearTexture(year:string,ghost=false){
   const canvas=document.createElement('canvas');canvas.width=1400;canvas.height=520;
   const ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -25,6 +39,9 @@ function yearTexture(year:string,ghost=false){
 }
 
 function clamp(value:number,min=0,max=1){return Math.max(min,Math.min(max,value))}
+function smooth(value:number){const t=clamp(value);return t*t*(3-2*t)}
+function mix(a:number,b:number,t:number){return a+(b-a)*t}
+function beatFor(index:number){return CAMERA_BEATS[Math.min(CAMERA_BEATS.length-1,Math.max(0,index))]??CAMERA_BEATS[0]}
 
 export default function HistoryWorld({progress,milestones}:{progress:number;milestones:readonly Milestone[]}){
   const host=useRef<HTMLDivElement>(null);const value=useRef(progress);value.current=progress;
@@ -90,10 +107,14 @@ export default function HistoryWorld({progress,milestones}:{progress:number;mile
     const ribbons=new THREE.Group();for(let i=0;i<18;i++){const t=(i+.5)/18;const point=path.getPoint(t);const tangent=path.getTangent(t);const material=new THREE.MeshBasicMaterial({color:i%2?0x6d55ff:0x49d8f4,transparent:true,opacity:.065,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});const ring=new THREE.Mesh(new THREE.TorusGeometry(4.2+(i%3)*.42,.012,6,96),material);ring.position.copy(point);ring.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1),tangent);ring.rotateZ(i*.41);ribbons.add(ring);disposables.push(ring.geometry,material)}scene.add(ribbons);
 
     let raf=0;const clock=new THREE.Clock();let smoothProgress=0;
+    const right=new THREE.Vector3(),lookRight=new THREE.Vector3(),lookTarget=new THREE.Vector3();
     const draw=()=>{
-      raf=requestAnimationFrame(draw);const time=clock.getElapsedTime();smoothProgress+=(value.current-smoothProgress)*.07;const p=clamp(smoothProgress,0,.997);const position=path.getPoint(p),ahead=path.getPoint(clamp(p+.026,0,1)),tangent=path.getTangent(p);
-      camera.position.copy(position);camera.position.y+=Math.sin(p*Math.PI*9)*.18;camera.position.x+=Math.cos(p*Math.PI*7)*.18;camera.lookAt(ahead);camera.rotation.z=Math.sin(p*Math.PI*8)*.025;camera.fov=45-Math.sin(p*Math.PI)*4;camera.updateProjectionMatrix();
-      const milestoneFloat=p*Math.max(1,milestones.length-1);
+      raf=requestAnimationFrame(draw);const time=clock.getElapsedTime();smoothProgress+=(value.current-smoothProgress)*.07;const p=clamp(smoothProgress,0,.997);const position=path.getPoint(p),ahead=path.getPoint(clamp(p+.026,0,1)),tangent=path.getTangent(p).normalize();
+      const milestoneFloat=p*Math.max(1,milestones.length-1);const beatAIndex=Math.floor(milestoneFloat),beatBIndex=Math.min(milestones.length-1,beatAIndex+1),beatMix=smooth(milestoneFloat-beatAIndex);const beatA=beatFor(beatAIndex),beatB=beatFor(beatBIndex);
+      const side=mix(beatA.side,beatB.side,beatMix),lift=mix(beatA.lift,beatB.lift,beatMix),push=mix(beatA.push,beatB.push,beatMix),lookSide=mix(beatA.lookSide,beatB.lookSide,beatMix),lookLift=mix(beatA.lookLift,beatB.lookLift,beatMix),fov=mix(beatA.fov,beatB.fov,beatMix),roll=mix(beatA.roll,beatB.roll,beatMix);
+      right.set(-tangent.z,0,tangent.x).normalize();lookRight.copy(right);
+      camera.position.copy(position).addScaledVector(right,side).addScaledVector(tangent,push);camera.position.y+=lift+Math.sin(p*Math.PI*9)*.08;
+      lookTarget.copy(ahead).addScaledVector(lookRight,lookSide);lookTarget.y+=lookLift;camera.lookAt(lookTarget);camera.rotation.z+=((roll+Math.sin(p*Math.PI*8)*.006)-camera.rotation.z)*.08;camera.fov+=(fov-camera.fov)*.075;camera.updateProjectionMatrix();
       exhibits.forEach((exhibit,i)=>{
         const distance=Math.abs(milestoneFloat-i),focus=clamp(1-distance,0,1),near=clamp(1-distance*.45,0,1),targetScale=1+focus*.18;
         exhibit.group.scale.lerp(new THREE.Vector3(targetScale,targetScale,targetScale),.075);exhibit.group.position.y=exhibit.anchor.y+Math.sin(time*.35+i)*.075;exhibit.group.rotation.z=Math.sin(time*.27+i)*.01;
