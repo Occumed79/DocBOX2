@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { configureCinematicRenderer } from './rendererQuality';
 
 type Milestone = { year:string; image:string };
 type CameraBeat = {side:number;lift:number;push:number;lookSide:number;lookLift:number;fov:number;roll:number};
@@ -50,7 +51,7 @@ export default function HistoryWorld({progress,milestones}:{progress:number;mile
     const el=host.current;if(!el)return;
     const scene=new THREE.Scene();scene.background=new THREE.Color(0x02070c);scene.fog=new THREE.Fog(0x02070c,7,68);
     const camera=new THREE.PerspectiveCamera(45,el.clientWidth/el.clientHeight,.1,180);camera.position.set(0,.4,8.5);
-    const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(el.clientWidth,el.clientHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;el.appendChild(renderer.domElement);
+    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'}),{exposure:1.04});renderer.setSize(el.clientWidth,el.clientHeight);el.appendChild(renderer.domElement);
     scene.add(new THREE.HemisphereLight(0xa8eaff,0x05090d,.92));
     const cyan=new THREE.PointLight(0x4cddff,34,35);cyan.position.set(4,3,4);scene.add(cyan);
     const violet=new THREE.PointLight(0x7154ff,24,30);violet.position.set(-5,-2,-8);scene.add(violet);
@@ -127,7 +128,7 @@ export default function HistoryWorld({progress,milestones}:{progress:number;mile
       dustField.position.z=tangent.z*p*1.5;dustField.rotation.z=time*.006;ribbons.rotation.z=Math.sin(time*.09)*.018;renderer.render(scene,camera);
     };draw();
 
-    const resize=()=>{camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();renderer.setSize(el.clientWidth,el.clientHeight)};window.addEventListener('resize',resize);
+    const resize=()=>{camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(el.clientWidth,el.clientHeight)};window.addEventListener('resize',resize);
     return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);disposables.forEach(item=>item.dispose());renderer.dispose();if(renderer.domElement.parentNode===el)el.removeChild(renderer.domElement)};
   },[milestones]);
 
