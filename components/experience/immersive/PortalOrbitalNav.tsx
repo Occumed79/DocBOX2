@@ -56,6 +56,7 @@ function addDrone(scene:THREE.Scene){
 export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,autoEnter=false}:{portals:readonly Portal[];agreementOnly?:boolean;onEnter?:()=>void;autoEnter?:boolean}){
   const mount=useRef<HTMLDivElement>(null);
   const beginTravelRef=useRef<(index:number)=>void>(()=>{});
+  const onEnterRef=useRef(onEnter);onEnterRef.current=onEnter;
   const router=useRouter();
   const [labels,setLabels]=useState<Array<{x:number;y:number;visible:boolean}>>([]);
   const [active,setActive]=useState(-1);
@@ -102,7 +103,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     const interactive=nodes.flatMap(node=>[node.ring,node.inner]);
     const pointer=new THREE.Vector2(9,9),ray=new THREE.Raycaster();
     let hovered=-1,targetX=0,targetY=.6,raf=0,start=performance.now();
-    let travelIndex=-1,travelStart=0,navigationTimer=0,autoTimer=0;
+    let travelIndex=-1,travelStart=0,navigationTimer=0;
     const travelFrom=new THREE.Vector3(),travelTo=new THREE.Vector3(),travelLook=new THREE.Vector3();
 
     const beginTravel=(index:number)=>{
@@ -113,7 +114,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
       const approach=camera.position.clone().sub(portalPosition).normalize().multiplyScalar(.34);
       travelTo.copy(portalPosition).add(approach);travelLook.copy(portalPosition);
       setActive(index);
-      navigationTimer=window.setTimeout(()=>{onEnter?.();if(!onEnter)router.push(node.portal.href)},920);
+      navigationTimer=window.setTimeout(()=>{const enter=onEnterRef.current;enter?.();if(!enter)router.push(node.portal.href)},920);
     };
     beginTravelRef.current=beginTravel;
 
@@ -121,7 +122,6 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     const leave=()=>{pointer.set(9,9);if(travelIndex<0)setActive(-1)};
     const click=()=>{ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(interactive)[0];if(!hit)return;beginTravel(hit.object.userData.index as number)};
     renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerleave',leave);renderer.domElement.addEventListener('click',click);
-    if(autoEnter&&agreementOnly&&nodes.length)autoTimer=window.setTimeout(()=>beginTravel(0),320);
 
     const resize=()=>{camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight)};addEventListener('resize',resize);
     const loop=(now:number)=>{
@@ -150,11 +150,17 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     };loop(performance.now());
 
     return()=>{
-      beginTravelRef.current=()=>{};cancelAnimationFrame(raf);if(navigationTimer)window.clearTimeout(navigationTimer);if(autoTimer)window.clearTimeout(autoTimer);removeEventListener('resize',resize);
+      beginTravelRef.current=()=>{};cancelAnimationFrame(raf);if(navigationTimer)window.clearTimeout(navigationTimer);removeEventListener('resize',resize);
       renderer.domElement.removeEventListener('pointermove',move);renderer.domElement.removeEventListener('pointerleave',leave);renderer.domElement.removeEventListener('click',click);
       scene.traverse(object=>{const mesh=object as THREE.Mesh;if(mesh.geometry)mesh.geometry.dispose();const material=mesh.material;if(Array.isArray(material))material.forEach(item=>item.dispose());else material?.dispose()});renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement);
     };
-  },[agreementOnly,onEnter,portals,router,autoEnter]);
+  },[agreementOnly,portals,router]);
+
+  useEffect(()=>{
+    if(!autoEnter||!agreementOnly)return;
+    const timer=window.setTimeout(()=>beginTravelRef.current(0),80);
+    return()=>window.clearTimeout(timer);
+  },[agreementOnly,autoEnter]);
 
   const shown=agreementOnly?portals.slice(-1):portals;
   const enterFromLabel=(event:ReactMouseEvent<HTMLAnchorElement>,index:number)=>{event.preventDefault();beginTravelRef.current(index)};
