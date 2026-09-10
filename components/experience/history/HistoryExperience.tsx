@@ -22,9 +22,11 @@ export default function HistoryExperience(){
   const milestones=M.map(item=>({year:item[0],image:item[3]}));
   return <main ref={root} className={styles.root}>
     <HistoryWorld progress={progress} milestones={milestones}/>
-    <header className={styles.header}><a href="/experience#provider-portals">OCCU-MED / SPATIAL ARCHIVE</a><span>{String(active+1).padStart(2,'0')} / {M.length}</span></header>
+    <header className={styles.header}><a href="/experience#provider-portals">OCCU-MED / SPATIAL ARCHIVE</a><span>CAMERA TRAVEL&nbsp;&nbsp; {String(active+1).padStart(2,'0')} / {M.length}</span></header>
     <nav className={styles.years} aria-label="Jump to year">{M.map((x,i)=><button key={`${x[0]}${i}`} onClick={()=>jump(i)} aria-current={i===active}>{x[0]}</button>)}</nav>
-    <section className={styles.copy}><span>ARCHIVE NODE / {String(active+1).padStart(2,'0')}</span><h1>{M[active][0]}</h1><h2>{M[active][1]}</h2><p>{M[active][2]}</p></section>
+    <section className={styles.copy} key={active}><span>ARCHIVE NODE / {String(active+1).padStart(2,'0')}</span><h1>{M[active][0]}</h1><h2>{M[active][1]}</h2><p>{M[active][2]}</p></section>
     <div className={styles.axis} aria-hidden="true"><i style={{height:`${progress*100}%`}}/></div>
+    <div className={styles.coordinates} aria-hidden="true"><span>EXHIBITION PATH</span><b>{(progress*94.7).toFixed(1)} M</b></div>
+    <div className={styles.scrollCue} aria-hidden="true"><i/>SCROLL TO TRAVEL</div>
   </main>
 }

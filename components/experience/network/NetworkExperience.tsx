@@ -62,6 +62,7 @@ export default function NetworkExperience(){
   return <main className={styles.root}>
     <header className={styles.topbar}><a href="/experience#provider-portals">OCCU-MED / NETWORK ATLAS</a><nav aria-label="Provider portals"><a href="/experience/history">History</a><a href="/experience/network" aria-current="page">Network</a><a href="/experience/resources">Resources</a><a href="/experience/questions">Q&A</a><a href="/experience/agreement">Agreement</a></nav></header>
     <section className={styles.hero}>
+      <div className={styles.fieldIndex} aria-hidden="true"><span>GLOBAL PROVIDER FIELD</span><b>23,524</b><small>ANONYMIZED NODES</small></div>
       <div className={styles.copy}><span>PORTAL 02 / PROVIDER NETWORK</span><h1>Follow the<br/>network.</h1><p>Explore Occu-Med’s anonymized provider infrastructure as a geographic system. Drag the field, zoom through regions, switch clinical layers, and inspect the underlying capacity without exposing provider identities.</p><div className={styles.mode} data-mode={mode}><i/>{mode==='coordinates'?`${points.length.toLocaleString()} coordinate records loaded`:mode==='loading'?'Loading coordinate layer…':'Aggregate geography active · coordinate file awaiting recovery'}</div><div className={styles.stats}><div className={styles.stat}><b>23,524</b><small>mapped anonymized coordinates</small></div><div className={styles.stat}><b>22,678</b><small>U.S. & territories</small></div><div className={styles.stat}><b>866</b><small>international records</small></div></div></div>
       <div className={styles.mapShell}>
         <div className={styles.mapToolbar}>
@@ -70,6 +71,7 @@ export default function NetworkExperience(){
           <button className={styles.reset} type="button" onClick={reset}>Reset view</button>
         </div>
         <div ref={wrapRef} className={styles.canvasWrap} data-dragging={dragging} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={()=>{if(!dragging)setHover(null)}} onWheel={onWheel}>
+          <div className={styles.reticle} aria-hidden="true"><i/><i/><span>EXPLORE</span></div>
           <canvas ref={canvasRef} className={styles.canvas} aria-label="Interactive anonymized provider network map"/><div className={styles.instructions}>Drag to pan · wheel or trackpad to zoom · choose a layer or geographic view. Provider names and contact details are never rendered.</div>{hover&&<div className={styles.tooltip} style={{left:hover.x,top:hover.y}}><b>{hover.title}</b><small>{hover.detail}</small></div>}
         </div>
         <div className={styles.mapFooter} aria-live="polite"><span><strong>{LAYER_LABELS[layer]}</strong> selected · {TOTALS[layer].toLocaleString()} directory records</span><span>{activeRegion==='custom'?'Custom view':REGIONS.find(region=>region.id===activeRegion)?.label} · Zoom {zoom.toFixed(1)}×</span></div>
