@@ -21,6 +21,10 @@ const STAGES = [
   ['01','Facility'],['02','Services'],['03','Pricing'],['04','Acceptance'],['05','Handoff'],
 ] as const;
 
+const AGREEMENT_PORTAL = [
+  {id:'agreement',href:'#forms-workspace',number:'05',title:'Agreement',note:'Enter the forms workspace',tone:'white'},
+] as const;
+
 export default function AgreementExperience() {
   const [specialty, setSpecialty] = useState('Occupational Medicine');
   const [entered, setEntered] = useState(false);
@@ -56,7 +60,7 @@ export default function AgreementExperience() {
       </header>
 
       <section className={styles.gateway}>
-        <PortalOrbitalNav agreementOnly autoEnter={launchPortal} onEnter={()=>setEntered(true)} portals={[{id:'agreement',href:'#forms-workspace',number:'05',title:'Agreement',note:'Enter the forms workspace',tone:'white'}]}/>
+        <PortalOrbitalNav agreementOnly autoEnter={launchPortal} onEnter={()=>setEntered(true)} portals={AGREEMENT_PORTAL}/>
         <div className={styles.portalWash} aria-hidden="true"><i/><i/><i/></div>
         <div className={styles.gatewayMeta} aria-hidden="true"><span>FORMS ENVIRONMENT</span><b>05</b><small>SECURE PATH / READY</small></div>
         <div className={styles.content}>
