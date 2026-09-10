@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent, type WheelEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent, type WheelEvent } from 'react';
 import styles from './NetworkExperience.module.css';
 import regionStyles from './NetworkRegions.module.css';
+import { createNetworkPointRenderer, type NetworkPointRenderer, type NetworkRenderPoint } from './NetworkPointRenderer';
 
 type Layer='all'|'medical'|'dental'|'diagnostic'|'pharmacy';
-type Point={lat:number;lon:number;type:Layer;label?:string};
+type Point=NetworkRenderPoint&{type:Layer};
 type AggregatePoint=Point&{count:number};
 type Hover={x:number;y:number;title:string;detail:string}|null;
 type Region={id:string;label:string;lon:number;lat:number;zoom:number};
@@ -40,23 +41,36 @@ function normalizeDataset(payload:unknown):Point[]{const rows=Array.isArray(payl
 function project(lon:number,lat:number,width:number,height:number,zoom:number,panX:number,panY:number){const baseX=((lon+180)/360)*width,baseY=((90-lat)/180)*height;return{x:(baseX-width/2)*zoom+width/2+panX,y:(baseY-height/2)*zoom+height/2+panY}}
 
 export default function NetworkExperience(){
-  const canvasRef=useRef<HTMLCanvasElement|null>(null),wrapRef=useRef<HTMLDivElement|null>(null),viewAnimationRef=useRef(0);
+  const canvasRef=useRef<HTMLCanvasElement|null>(null),wrapRef=useRef<HTMLDivElement|null>(null),viewAnimationRef=useRef(0),gpuRef=useRef<NetworkPointRenderer|null>(null);
   const[layer,setLayer]=useState<Layer>('all');const[points,setPoints]=useState<Point[]>([]);const[mode,setMode]=useState<'coordinates'|'aggregate'|'loading'>('loading');const[zoom,setZoom]=useState(1);const[pan,setPan]=useState({x:0,y:0});const[dragging,setDragging]=useState(false);const[hover,setHover]=useState<Hover>(null);const[activeRegion,setActiveRegion]=useState('world');
   const dragRef=useRef<{x:number;y:number;panX:number;panY:number}|null>(null);const projectedRef=useRef<Array<{x:number;y:number;point:Point;radius:number;count?:number}>>([]);
 
   useEffect(()=>{let cancelled=false;fetch('/data/provider-network-points.json',{cache:'force-cache'}).then(response=>{if(!response.ok)throw new Error('coordinate dataset unavailable');return response.json()}).then(payload=>{if(cancelled)return;const normalized=normalizeDataset(payload);if(!normalized.length)throw new Error('coordinate dataset empty');setPoints(normalized);setMode('coordinates')}).catch(()=>{if(!cancelled)setMode('aggregate')});return()=>{cancelled=true}},[]);
   useEffect(()=>()=>{if(viewAnimationRef.current)cancelAnimationFrame(viewAnimationRef.current)},[]);
+  useEffect(()=>{const canvas=canvasRef.current;if(!canvas)return;try{gpuRef.current=createNetworkPointRenderer(canvas,COLORS)}catch{gpuRef.current=null}return()=>{gpuRef.current?.dispose();gpuRef.current=null}},[]);
 
   const filteredPoints=useMemo(()=>mode!=='coordinates'?[]:layer==='all'?points:points.filter(point=>point.type===layer),[layer,mode,points]);
-  const draw=useCallback(()=>{const canvas=canvasRef.current,wrap=wrapRef.current;if(!canvas||!wrap)return;const rect=wrap.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),width=Math.max(1,Math.floor(rect.width)),height=Math.max(1,Math.floor(rect.height));canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);canvas.style.width=`${width}px`;canvas.style.height=`${height}px`;const gl=canvas.getContext('webgl',{antialias:true,alpha:true});if(!gl)return;gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.01,.055,.075,1);gl.clear(gl.COLOR_BUFFER_BIT);const compile=(type:number,source:string)=>{const sh=gl.createShader(type)!;gl.shaderSource(sh,source);gl.compileShader(sh);return sh};const program=gl.createProgram()!;gl.attachShader(program,compile(gl.VERTEX_SHADER,'attribute vec2 p;attribute vec3 c;varying vec3 v;uniform float size;void main(){v=c;gl_Position=vec4(p,0.,1.);gl_PointSize=size;}'));gl.attachShader(program,compile(gl.FRAGMENT_SHADER,'precision mediump float;varying vec3 v;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;gl_FragColor=vec4(v,(1.-d*2.)*.82);}'));gl.linkProgram(program);gl.useProgram(program);const source:Array<Point&{count?:number}>=mode==='coordinates'?filteredPoints:AGGREGATE_GEO;const verts:number[]=[],colors:number[]=[];const projected:Array<{x:number;y:number;point:Point;radius:number;count?:number}>=[];const rgb=(type:Layer)=>{const n=parseInt((COLORS[type]||COLORS.all).slice(1),16);return[((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255]};for(const point of source){const q=project(point.lon,point.lat,width,height,zoom,pan.x,pan.y);if(q.x<-20||q.y<-20||q.x>width+20||q.y>height+20)continue;verts.push(q.x/width*2-1,1-q.y/height*2);colors.push(...rgb(point.type));projected.push({...q,point,radius:mode==='coordinates'?7:18,count:point.count})}const bind=(name:string,data:number[],size:number)=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STREAM_DRAW);const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,0,0)};bind('p',verts,2);bind('c',colors,3);gl.uniform1f(gl.getUniformLocation(program,'size'),Math.min(14,(mode==='coordinates'?2.2:9)*dpr*Math.sqrt(zoom)));gl.drawArrays(gl.POINTS,0,verts.length/2);projectedRef.current=projected},[filteredPoints,mode,pan.x,pan.y,zoom]);
-  useEffect(()=>{draw();const wrap=wrapRef.current;if(!wrap||!window.ResizeObserver)return;const observer=new ResizeObserver(draw);observer.observe(wrap);return()=>observer.disconnect()},[draw]);
+  const renderPoints=useMemo<readonly (Point&{count?:number})[]>(()=>mode==='coordinates'?filteredPoints:AGGREGATE_GEO,[filteredPoints,mode]);
+
+  useEffect(()=>{
+    const canvas=canvasRef.current,wrap=wrapRef.current,gpu=gpuRef.current;if(!canvas||!wrap||!gpu)return;
+    const draw=()=>{
+      const rect=wrap.getBoundingClientRect(),width=Math.max(1,Math.floor(rect.width)),height=Math.max(1,Math.floor(rect.height)),dpr=Math.min(devicePixelRatio||1,2);
+      gpu.setData(renderPoints,mode==='coordinates'?'coordinates':'aggregate');gpu.render(width,height,dpr,zoom,pan.x,pan.y);
+      const projected:Array<{x:number;y:number;point:Point;radius:number;count?:number}>=[];
+      for(const point of renderPoints){const q=project(point.lon,point.lat,width,height,zoom,pan.x,pan.y);if(q.x<-22||q.y<-22||q.x>width+22||q.y>height+22)continue;projected.push({...q,point,radius:mode==='coordinates'?Math.max(7,3+zoom*2):20,count:point.count})}
+      projectedRef.current=projected;
+    };
+    draw();const observer=new ResizeObserver(draw);observer.observe(wrap);return()=>observer.disconnect();
+  },[renderPoints,mode,pan.x,pan.y,zoom]);
 
   const emitView=(nextZoom:number,nextX:number,nextY:number)=>window.dispatchEvent(new CustomEvent('docbox:network-view',{detail:{zoom:nextZoom,panX:nextX,panY:nextY}}));
   const focusRegion=(region:Region)=>{const wrap=wrapRef.current;if(!wrap)return;if(viewAnimationRef.current)cancelAnimationFrame(viewAnimationRef.current);const rect=wrap.getBoundingClientRect(),width=rect.width,height=rect.height,baseX=((region.lon+180)/360)*width,baseY=((90-region.lat)/180)*height,targetX=-(baseX-width/2)*region.zoom,targetY=-(baseY-height/2)*region.zoom,startZoom=zoom,startX=pan.x,startY=pan.y,start=performance.now();setActiveRegion(region.id);setHover(null);const animate=(now:number)=>{const t=ease((now-start)/620),nextZoom=startZoom+(region.zoom-startZoom)*t,nextX=startX+(targetX-startX)*t,nextY=startY+(targetY-startY)*t;setZoom(nextZoom);setPan({x:nextX,y:nextY});emitView(nextZoom,nextX,nextY);if(t<1)viewAnimationRef.current=requestAnimationFrame(animate);else viewAnimationRef.current=0};viewAnimationRef.current=requestAnimationFrame(animate)};
+
   const onPointerDown=(event:PointerEvent<HTMLDivElement>)=>{event.currentTarget.setPointerCapture(event.pointerId);if(viewAnimationRef.current)cancelAnimationFrame(viewAnimationRef.current);viewAnimationRef.current=0;dragRef.current={x:event.clientX,y:event.clientY,panX:pan.x,panY:pan.y};setActiveRegion('custom');setDragging(true)};
-  const onPointerMove=(event:PointerEvent<HTMLDivElement>)=>{const wrap=wrapRef.current;if(!wrap)return;if(dragRef.current){setPan({x:dragRef.current.panX+event.clientX-dragRef.current.x,y:dragRef.current.panY+event.clientY-dragRef.current.y});setHover(null);return}const rect=wrap.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;let nearest:(typeof projectedRef.current)[number]|undefined,nearestDistance=Number.POSITIVE_INFINITY;for(const candidate of projectedRef.current){const distance=Math.hypot(candidate.x-x,candidate.y-y);if(distance<candidate.radius&&distance<nearestDistance){nearest=candidate;nearestDistance=distance}}if(!nearest){setHover(null);return}const title=nearest.point.label||LAYER_LABELS[nearest.point.type],detail=nearest.count?`${nearest.count.toLocaleString()} aggregate directory records`:`${nearest.point.type} · ${nearest.point.lat.toFixed(1)}°, ${nearest.point.lon.toFixed(1)}°`;setHover({x,y,title,detail})};
+  const onPointerMove=(event:PointerEvent<HTMLDivElement>)=>{const wrap=wrapRef.current;if(!wrap)return;if(dragRef.current){const next={x:dragRef.current.panX+event.clientX-dragRef.current.x,y:dragRef.current.panY+event.clientY-dragRef.current.y};setPan(next);emitView(zoom,next.x,next.y);setHover(null);return}const rect=wrap.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;let nearest:(typeof projectedRef.current)[number]|undefined,nearestDistance=Number.POSITIVE_INFINITY;for(const candidate of projectedRef.current){const distance=Math.hypot(candidate.x-x,candidate.y-y);if(distance<candidate.radius&&distance<nearestDistance){nearest=candidate;nearestDistance=distance}}if(!nearest){setHover(null);return}const title=nearest.point.label||LAYER_LABELS[nearest.point.type],detail=nearest.count?`${nearest.count.toLocaleString()} aggregate directory records`:`${nearest.point.type} · ${nearest.point.lat.toFixed(1)}°, ${nearest.point.lon.toFixed(1)}°`;setHover({x,y,title,detail})};
   const endDrag=()=>{dragRef.current=null;setDragging(false)};
-  const onWheel=(event:WheelEvent<HTMLDivElement>)=>{event.preventDefault();setActiveRegion('custom');setZoom(clamp(zoom*(event.deltaY>0?.9:1.1),.8,5))};
+  const onWheel=(event:WheelEvent<HTMLDivElement>)=>{event.preventDefault();const wrap=wrapRef.current;if(!wrap)return;setActiveRegion('custom');const rect=wrap.getBoundingClientRect(),cursorX=event.clientX-rect.left,cursorY=event.clientY-rect.top,nextZoom=clamp(zoom*(event.deltaY>0?.9:1.1),.8,5),mapX=(cursorX-rect.width/2-pan.x)/zoom,mapY=(cursorY-rect.height/2-pan.y)/zoom,nextX=cursorX-rect.width/2-mapX*nextZoom,nextY=cursorY-rect.height/2-mapY*nextZoom;setZoom(nextZoom);setPan({x:nextX,y:nextY});emitView(nextZoom,nextX,nextY)};
   const reset=()=>focusRegion(REGIONS[0]);
 
   return <main className={styles.root}>
