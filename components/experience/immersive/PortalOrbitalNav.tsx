@@ -77,7 +77,6 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     const grid=new THREE.GridHelper(38,38,0x2d6577,0x102934);grid.position.y=-3.1;scene.add(grid);
     const halo=new THREE.Mesh(new THREE.RingGeometry(1.2,4.2,96),new THREE.MeshBasicMaterial({color:0x2ecde9,transparent:true,opacity:.075,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));halo.rotation.x=-Math.PI/2;halo.position.y=-3.06;scene.add(halo);
 
-    // PortalArchitecture owns the traveler. Do not add a second astronaut here.
     const architecture=addPortalArchitecture(scene);
     const drone=addDrone(scene);
 
@@ -140,8 +139,9 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
       if(travelIndex>=0){
         const p=ease((now-travelStart)/880);camera.position.lerpVectors(travelFrom,travelTo,p);camera.fov=47-p*20;camera.updateProjectionMatrix();camera.lookAt(travelLook);
       }else{
-        const focused=active>=0?nodes[active]?.group.position:null;
-        const desiredX=focused?focused.x*.1:pointer.x*.42;const desiredY=focused?.y?focused.y*.08:.6+pointer.y*.2;
+        const focusIndex=hovered;
+        const focused=focusIndex>=0?nodes[focusIndex]?.group.position:null;
+        const desiredX=focused?focused.x*.1:pointer.x*.42;const desiredY=focused?focused.y*.08:.6+pointer.y*.2;
         targetX+=(desiredX-targetX)*.025;targetY+=(desiredY-targetY)*.025;
         camera.position.x+=(pointer.x*.25-camera.position.x)*.018;camera.position.y+=(.85-pointer.y*.12-camera.position.y)*.018;camera.lookAt(targetX,targetY,-.5);
       }
@@ -154,7 +154,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
       renderer.domElement.removeEventListener('pointermove',move);renderer.domElement.removeEventListener('pointerleave',leave);renderer.domElement.removeEventListener('click',click);
       scene.traverse(object=>{const mesh=object as THREE.Mesh;if(mesh.geometry)mesh.geometry.dispose();const material=mesh.material;if(Array.isArray(material))material.forEach(item=>item.dispose());else material?.dispose()});renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement);
     };
-  },[agreementOnly,onEnter,portals,router,autoEnter,active]);
+  },[agreementOnly,onEnter,portals,router,autoEnter]);
 
   const shown=agreementOnly?portals.slice(-1):portals;
   const enterFromLabel=(event:ReactMouseEvent<HTMLAnchorElement>,index:number)=>{event.preventDefault();beginTravelRef.current(index)};
