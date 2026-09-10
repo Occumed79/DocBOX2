@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import QuestionField from './QuestionField';
 import styles from './QuestionExperience.module.css';
+import stageMotion from './QuestionStageMotion.module.css';
 
 type Topic = 'All' | 'Preparation' | 'Examination' | 'Records' | 'Billing' | 'Network';
 type Stage = 'Receive' | 'Schedule' | 'Examine' | 'Return' | 'Invoice';
@@ -43,6 +44,7 @@ export default function QuestionExperience() {
   const active=QUESTIONS[open] ?? QUESTIONS[0];
   const activeVisible=Math.max(0,visible.findIndex(({index})=>index===open));
   const stageIndex=Math.max(0,STAGES.findIndex(item=>item.stage===stage));
+  const stageKey=stage.toLowerCase();
 
   const choose=(next:Stage)=>{
     const nextTopics=Array.from(new Set(QUESTIONS.filter(item=>item.stage===next).map(item=>item.topic)));
@@ -55,10 +57,10 @@ export default function QuestionExperience() {
     const i=QUESTIONS.findIndex(x=>x.stage===stage&&(resolved==='All'||x.topic===resolved));if(i>=0)setOpen(i);
   };
 
-  return <main className={styles.root}>
+  return <main className={`${styles.root} ${stageMotion.root}`} data-stage={stageKey}>
     <header className={styles.topbar}><a href="/experience#provider-portals">OCCU-MED / INFORMATION FIELD</a><div><a href="/experience/network">NETWORK</a> · <a href="/experience/resources">RESOURCES</a> · <a href="/experience/agreement">AGREEMENT</a></div></header>
     <aside className={styles.sidebar}><span>REFERRAL LIFECYCLE</span>{STAGES.map(x=><button key={x.stage} aria-pressed={stage===x.stage} onClick={()=>choose(x.stage)}><small>{x.number}</small><b>{x.stage}</b><em>{x.note}</em></button>)}</aside>
-    <section className={styles.explorer} data-stage={stage.toLowerCase()}>
+    <section className={`${styles.explorer} ${stageMotion.explorer}`} data-stage={stageKey}>
       <QuestionField count={visible.length} active={activeVisible} stageIndex={stageIndex}/>
       <div className={styles.fieldMeta} aria-hidden="true"><span>KNOWLEDGE FIELD / {STAGES[stageIndex].number}</span><b>{String(activeVisible+1).padStart(2,'0')}</b><small> / {String(visible.length).padStart(2,'0')}</small></div>
       <div className={styles.filters}>{availableTopics.map(x=><button key={x} aria-pressed={topic===x} onClick={()=>toggleTopic(x)}>{x}</button>)}</div>
