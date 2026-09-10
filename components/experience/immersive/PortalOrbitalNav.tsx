@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
 import styles from './PortalOrbitalNav.module.css';
 import { addPortalArchitecture } from './PortalArchitecture';
+import { configureCinematicRenderer } from './rendererQuality';
 
 type Portal = { id:string; href:string; number:string; title:string; note:string; tone:string };
 type PortalNode = {
@@ -78,7 +79,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     const shown=agreementOnly?portals.slice(-1):portals;
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x020811,.032);
     const camera=new THREE.PerspectiveCamera(47,host.clientWidth/host.clientHeight,.1,110);camera.position.set(0,.85,agreementOnly?12.5:17.4);
-    const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(host.clientWidth,host.clientHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.setClearColor(0x020810,1);host.appendChild(renderer.domElement);
+    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}),{exposure:1.12});renderer.setSize(host.clientWidth,host.clientHeight);renderer.setClearColor(0x020810,1);host.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0x7fbfff,0x061018,1.25));
     const key=new THREE.DirectionalLight(0xe0f8ff,3.8);key.position.set(5,8,7);scene.add(key);
@@ -137,7 +138,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     const click=()=>{ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(interactive)[0];if(!hit)return;beginTravel(hit.object.userData.index as number)};
     renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerleave',leave);renderer.domElement.addEventListener('click',click);
 
-    const resize=()=>{camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight)};addEventListener('resize',resize);
+    const resize=()=>{camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(host.clientWidth,host.clientHeight)};addEventListener('resize',resize);
     const loop=(now:number)=>{
       raf=requestAnimationFrame(loop);const t=(now-start)/1000;const entry=agreementOnly?1:clamp(entryRef.current);
       ray.setFromCamera(pointer,camera);const hit=travelIndex<0?ray.intersectObjects(interactive)[0]:undefined;hovered=hit?(hit.object.userData.index as number):-1;
