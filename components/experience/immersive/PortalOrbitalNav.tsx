@@ -7,7 +7,17 @@ import styles from './PortalOrbitalNav.module.css';
 import { addPortalArchitecture } from './PortalArchitecture';
 
 type Portal = { id:string; href:string; number:string; title:string; note:string; tone:string };
-type PortalNode = { group:THREE.Group; ring:THREE.Mesh; outer:THREE.Mesh; inner:THREE.Mesh; shader:THREE.ShaderMaterial; portal:Portal; index:number };
+type PortalNode = {
+  group:THREE.Group;
+  ring:THREE.Mesh;
+  outer:THREE.Mesh;
+  inner:THREE.Mesh;
+  shader:THREE.ShaderMaterial;
+  portal:Portal;
+  index:number;
+  base:THREE.Vector3;
+  target:THREE.Vector3;
+};
 
 const POS = [[-4.45,1.95,-1.3],[4.35,1.85,-2.5],[4.55,-1.5,-1.2],[-4.45,-1.55,-2.25],[0,3.55,-3.2]] as const;
 const COLORS:Record<string,number>={gold:0xe8b96c,cyan:0x78e8ff,violet:0xb18cff,blue:0x7da7ff,white:0xeefaff};
@@ -58,6 +68,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
   const beginTravelRef=useRef<(index:number)=>void>(()=>{});
   const onEnterRef=useRef(onEnter);onEnterRef.current=onEnter;
   const entryRef=useRef(entryProgress);entryRef.current=entryProgress;
+  const domFocusRef=useRef(-1);
   const router=useRouter();
   const [labels,setLabels]=useState<Array<{x:number;y:number;visible:boolean}>>([]);
   const [active,setActive]=useState(-1);
@@ -90,7 +101,9 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
 
     const nodes:PortalNode[]=shown.map((portal,i)=>{
       const color=COLORS[portal.tone]||0x78e8ff;
-      const group=new THREE.Group();const position=agreementOnly?[0,.15,-1.1]:POS[i];group.position.set(position[0],position[1],position[2]);
+      const position=agreementOnly?[0,.15,-1.1]:POS[i];
+      const base=new THREE.Vector3(position[0],position[1],position[2]);
+      const group=new THREE.Group();group.position.copy(base);
       const ringMaterial=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:2.4,metalness:.65,roughness:.16});
       const ring=new THREE.Mesh(new THREE.TorusGeometry(1.08,.095,18,96),ringMaterial);group.add(ring);
       const outer=new THREE.Mesh(new THREE.TorusGeometry(1.36,.018,8,96),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.36,blending:THREE.AdditiveBlending}));outer.rotation.z=.38;group.add(outer);
@@ -98,7 +111,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
       const shader=new THREE.ShaderMaterial({vertexShader:PORTAL_VERTEX,fragmentShader:PORTAL_FRAGMENT,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,uniforms:{uTime:{value:0},uHover:{value:0},uColor:{value:new THREE.Color(color)}}});
       const inner=new THREE.Mesh(new THREE.CircleGeometry(.98,72),shader);inner.position.z=.015;group.add(inner);
       ring.userData={index:i,href:portal.href};inner.userData={index:i,href:portal.href};rear.userData={index:i,href:portal.href};
-      scene.add(group);return{group,ring,outer,inner,shader,portal,index:i};
+      scene.add(group);return{group,ring,outer,inner,shader,portal,index:i,base,target:base.clone()};
     });
 
     const interactive=nodes.flatMap(node=>[node.ring,node.inner]);
@@ -120,7 +133,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     beginTravelRef.current=beginTravel;
 
     const move=(event:PointerEvent)=>{const rect=renderer.domElement.getBoundingClientRect();pointer.set((event.clientX-rect.left)/rect.width*2-1,-((event.clientY-rect.top)/rect.height)*2+1)};
-    const leave=()=>{pointer.set(9,9);if(travelIndex<0)setActive(-1)};
+    const leave=()=>{pointer.set(9,9);if(travelIndex<0&&domFocusRef.current<0)setActive(-1)};
     const click=()=>{ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(interactive)[0];if(!hit)return;beginTravel(hit.object.userData.index as number)};
     renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerleave',leave);renderer.domElement.addEventListener('click',click);
 
@@ -128,24 +141,63 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     const loop=(now:number)=>{
       raf=requestAnimationFrame(loop);const t=(now-start)/1000;const entry=agreementOnly?1:clamp(entryRef.current);
       ray.setFromCamera(pointer,camera);const hit=travelIndex<0?ray.intersectObjects(interactive)[0]:undefined;hovered=hit?(hit.object.userData.index as number):-1;
-      if(travelIndex<0)setActive(current=>current===hovered?current:hovered);
+      const focusIndex=travelIndex>=0?travelIndex:(domFocusRef.current>=0?domFocusRef.current:hovered);
+      if(travelIndex<0)setActive(current=>current===focusIndex?current:focusIndex);
+
       nodes.forEach((node,i)=>{
-        const isHot=i===hovered||i===travelIndex;const entryScale=.68+entry*.32;const wanted=entryScale*(isHot?1.18:1);node.group.scale.lerp(new THREE.Vector3(wanted,wanted,wanted),.085);
-        const ringMat=node.ring.material as THREE.MeshStandardMaterial;ringMat.emissiveIntensity+=(((isHot?5.3:2.4)*(.35+entry*.65))-ringMat.emissiveIntensity)*.09;
-        (node.outer.material as THREE.MeshBasicMaterial).opacity+=(((isHot?.72:.36)*entry)-(node.outer.material as THREE.MeshBasicMaterial).opacity)*.09;
-        node.shader.uniforms.uTime.value=t;node.shader.uniforms.uHover.value+=((isHot?1:0)-node.shader.uniforms.uHover.value)*.08;
-        node.ring.rotation.z=Math.sin(t*.55+i)*.07;node.outer.rotation.z=.38+t*(i%2?.055:-.048);node.inner.rotation.z=t*(i%2?.045:-.038);
+        const focused=i===focusIndex;
+        const muted=focusIndex>=0&&!focused;
+        node.target.set(
+          node.base.x*(focused?.86:muted?1.045:1),
+          node.base.y*(focused?.9:muted?1.02:1),
+          node.base.z+(focused?1.55:muted?-1.3:0)
+        );
+        node.group.position.lerp(node.target,.075);
+        const entryScale=.68+entry*.32;
+        const wanted=entryScale*(focused?1.32:muted?.84:1);
+        node.group.scale.lerp(new THREE.Vector3(wanted,wanted,wanted),.085);
+        const ringMat=node.ring.material as THREE.MeshStandardMaterial;
+        const ringEnergy=focused?5.8:muted?1.15:2.4;
+        ringMat.emissiveIntensity+=((ringEnergy*(.35+entry*.65))-ringMat.emissiveIntensity)*.09;
+        const outerMat=node.outer.material as THREE.MeshBasicMaterial;
+        const outerOpacity=focused?.76:muted?.12:.36;
+        outerMat.opacity+=((outerOpacity*entry)-outerMat.opacity)*.09;
+        node.shader.uniforms.uTime.value=t;
+        node.shader.uniforms.uHover.value+=(((focused?1:0)-node.shader.uniforms.uHover.value)*.08);
+        node.ring.rotation.z=Math.sin(t*.55+i)*.07;
+        node.outer.rotation.z=.38+t*(i%2?.055:-.048);
+        node.inner.rotation.z=t*(i%2?.045:-.038);
       });
-      drone.rotation.x=Math.sin(t*.38)*.16;drone.rotation.y=t*.22;drone.position.y=4.45+Math.sin(t*.7)*.12;drone.scale.setScalar(.48+entry*.22);stars.rotation.y=t*.003;halo.rotation.z=t*.025;architecture.update(t,pointer.x);
-      architecture.group.position.z+=(((1-entry)*-3.2)-architecture.group.position.z)*.055;const architectureScale=.86+entry*.14;architecture.group.scale.lerp(new THREE.Vector3(architectureScale,architectureScale,architectureScale),.055);(scene.fog as THREE.FogExp2).density=.044-entry*.012;
+
+      drone.rotation.x=Math.sin(t*.38)*.16;drone.rotation.y=t*.22;drone.position.y=4.45+Math.sin(t*.7)*.12;drone.scale.setScalar(.48+entry*.22);
+      stars.rotation.y=t*.003;halo.rotation.z=t*.025;architecture.update(t,pointer.x);
+      const focusedNode=focusIndex>=0?nodes[focusIndex]:undefined;
+      const focusX=focusedNode?.group.position.x??0;
+      architecture.group.position.x+=((-focusX*.08)-architecture.group.position.x)*.035;
+      architecture.group.position.z+=(((1-entry)*-3.2)-architecture.group.position.z)*.055;
+      architecture.group.rotation.y+=((focusedNode?-focusX*.018:0)-architecture.group.rotation.y)*.035;
+      const architectureScale=.86+entry*.14;architecture.group.scale.lerp(new THREE.Vector3(architectureScale,architectureScale,architectureScale),.055);
+      (scene.fog as THREE.FogExp2).density=.044-entry*.012+(focusedNode?.0015:0);
+      front.position.x+=(focusX*.18-front.position.x+2)*.03;
+      rim.position.x+=((-4-focusX*.08)-rim.position.x)*.03;
+
       if(travelIndex>=0){
         const p=ease((now-travelStart)/880);camera.position.lerpVectors(travelFrom,travelTo,p);camera.fov=47-p*20;camera.updateProjectionMatrix();camera.lookAt(travelLook);
       }else{
-        const focusIndex=hovered;const focused=focusIndex>=0?nodes[focusIndex]?.group.position:null;
-        const desiredX=focused?focused.x*.1:pointer.x*.42;const desiredY=focused?focused.y*.08:.42+entry*.18+pointer.y*.2;
-        targetX+=(desiredX-targetX)*.025;targetY+=(desiredY-targetY)*.025;
-        const baseZ=17.4-entry*3.7;camera.position.x+=(pointer.x*.25-camera.position.x)*.018;camera.position.y+=((.48+entry*.37)-pointer.y*.12-camera.position.y)*.018;camera.position.z+=(baseZ-camera.position.z)*.045;camera.fov+=(47-(1-entry)*4-camera.fov)*.04;camera.updateProjectionMatrix();camera.lookAt(targetX,targetY,-.5-entry*.2);
+        const focused=focusedNode?.group.position;
+        const desiredX=focused?focused.x*.27:pointer.x*.42;
+        const desiredY=focused?focused.y*.18:.42+entry*.18+pointer.y*.2;
+        targetX+=(desiredX-targetX)*.035;targetY+=(desiredY-targetY)*.035;
+        const baseZ=17.4-entry*3.7-(focused?.72:0);
+        const cameraX=(focused?focused.x*.065:0)+pointer.x*(focused?.08:.25);
+        const cameraY=.48+entry*.37+(focused?focused.y*.025:0)-pointer.y*(focused?.05:.12);
+        camera.position.x+=(cameraX-camera.position.x)*.025;
+        camera.position.y+=(cameraY-camera.position.y)*.025;
+        camera.position.z+=(baseZ-camera.position.z)*.045;
+        const targetFov=focused?43.2:47-(1-entry)*4;
+        camera.fov+=(targetFov-camera.fov)*.04;camera.updateProjectionMatrix();camera.lookAt(targetX,targetY,-.5-entry*.2+(focused?.18:0));
       }
+
       setLabels(nodes.map(node=>{const p=node.group.getWorldPosition(new THREE.Vector3()).project(camera);return{x:(p.x*.5+.5)*host.clientWidth,y:(-.5*p.y+.5)*host.clientHeight,visible:p.z<1&&entry>.28}}));
       renderer.render(scene,camera);
     };loop(performance.now());
@@ -165,5 +217,5 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
 
   const shown=agreementOnly?portals.slice(-1):portals;
   const enterFromLabel=(event:ReactMouseEvent<HTMLAnchorElement>,index:number)=>{event.preventDefault();beginTravelRef.current(index)};
-  return <nav className={styles.root} data-agreement-only={agreementOnly?true:undefined} aria-label="Spatial provider portals"><div ref={mount} className={styles.canvas}/><div className={styles.labels}>{shown.map((portal,i)=><a key={portal.id} href={portal.href} data-active={active===i} onClick={event=>enterFromLabel(event,i)} onFocus={()=>setActive(i)} onBlur={()=>setActive(-1)} style={{left:labels[i]?.x,top:labels[i]?.y,opacity:labels[i]?.visible?1:0}}><small>{portal.number} / PORTAL</small><strong>{portal.title}</strong><span>{portal.note}</span></a>)}</div><p className={styles.hint}>MOVE TO FOCUS · SELECT A PORTAL TO TRAVEL</p></nav>;
+  return <nav className={styles.root} data-agreement-only={agreementOnly?true:undefined} aria-label="Spatial provider portals"><div ref={mount} className={styles.canvas}/><div className={styles.labels}>{shown.map((portal,i)=><a key={portal.id} href={portal.href} data-active={active===i} data-muted={active>=0&&active!==i} data-anchor={i===4?'top':i===0||i===3?'left':'right'} onClick={event=>enterFromLabel(event,i)} onFocus={()=>{domFocusRef.current=i;setActive(i)}} onBlur={()=>{domFocusRef.current=-1;setActive(-1)}} style={{left:labels[i]?.x,top:labels[i]?.y,opacity:labels[i]?.visible?1:0}}><small>{portal.number} / PORTAL</small><strong>{portal.title}</strong><span>{portal.note}</span></a>)}</div><p className={styles.hint}>MOVE TO FOCUS · SELECT A PORTAL TO TRAVEL</p></nav>;
 }
