@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import styles from './QuestionField.module.css';
+import { configureCinematicRenderer } from '../immersive/rendererQuality';
 
 const STAGE_POSITIONS = [
   [[-3.0,1.35,-1.0],[2.25,1.7,-2.6],[3.15,-.72,-1.5],[-1.9,-1.75,-2.25]],
@@ -39,7 +40,7 @@ export default function QuestionField({count,active,stageIndex}:{count:number;ac
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x07151c,.055);
     const camera=new THREE.PerspectiveCamera(45,el.clientWidth/el.clientHeight,.1,70);camera.position.set(0,.15,10.5);
     const lookTarget=new THREE.Vector3(0,0,-1.8);
-    const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(el.clientWidth,el.clientHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;el.appendChild(renderer.domElement);
+    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'}),{exposure:1.03});renderer.setSize(el.clientWidth,el.clientHeight);el.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0xb9efff,0x061117,.8));
     const fieldLight=new THREE.PointLight(STAGE_COLORS[0],20,20);fieldLight.position.set(3,2,5);scene.add(fieldLight);
@@ -102,7 +103,7 @@ export default function QuestionField({count,active,stageIndex}:{count:number;ac
       dustField.rotation.y=t*.004+stage*.035;dustField.position.z=Math.sin(t*.12)*.25;renderer.render(scene,camera);
     };loop();
 
-    const resize=()=>{camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();renderer.setSize(el.clientWidth,el.clientHeight)};window.addEventListener('resize',resize);
+    const resize=()=>{camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(el.clientWidth,el.clientHeight)};window.addEventListener('resize',resize);
     return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);window.removeEventListener('pointermove',onPointer);scene.traverse(object=>{const mesh=object as THREE.Mesh;if(mesh.geometry)mesh.geometry.dispose();const material=mesh.material;if(Array.isArray(material))material.forEach(m=>m.dispose());else material?.dispose()});renderer.dispose();if(renderer.domElement.parentNode===el)el.removeChild(renderer.domElement)};
   },[]);
 
