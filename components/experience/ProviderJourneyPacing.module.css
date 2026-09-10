@@ -1,0 +1,3 @@
+.scene{min-height:calc(var(--scene-scroll-vh,176) * 1svh)}
+@media(max-width:800px){.scene{min-height:auto}}
+@media(prefers-reduced-motion:reduce){.scene{min-height:auto}}
