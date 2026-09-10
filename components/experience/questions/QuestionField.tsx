@@ -85,7 +85,7 @@ export default function QuestionField({count,active,stageIndex}:{count:number;ac
         if(isActive){target.x*=.86;target.y*=.82;target.z+=.72}
         node.group.position.lerp(target,.065);
         const wanted=visible?(isActive?1.42:1):.001;node.group.scale.lerp(new THREE.Vector3(wanted,wanted,wanted),.09);node.group.visible=node.group.scale.x>.01;
-        node.core.material.emissive.lerp(stageColor,.08);node.core.material.emissiveIntensity+=((isActive?3.1:.6)-node.core.material.emissiveIntensity)*.08;node.core.material.opacity+=(visible?.92:0-node.core.material.opacity)*.08;
+        node.core.material.emissive.lerp(stageColor,.08);node.core.material.emissiveIntensity+=((isActive?3.1:.6)-node.core.material.emissiveIntensity)*.08;node.core.material.opacity+=((visible?.92:0)-node.core.material.opacity)*.08;
         node.ring.material.color.lerp(stageColor,.08);node.ring.material.opacity+=((isActive?.72:.38)-node.ring.material.opacity)*.08;node.orbit.material.opacity+=((isActive?.32:.12)-node.orbit.material.opacity)*.08;
         node.group.rotation.z=Math.sin(t*.4+i+stage*.5)*.025;node.core.rotation.x=t*(i%2?.08:-.065);node.core.rotation.y=t*(i%2?.11:-.09);node.ring.rotation.z=t*(i%2?.16:-.13)+i;node.orbit.rotation.z=-t*(i%2?.09:-.075);
       });
@@ -95,7 +95,7 @@ export default function QuestionField({count,active,stageIndex}:{count:number;ac
         const a=nodes[i].group.position,b=nodes[j].group.position;
         lineArray[cursor++]=a.x;lineArray[cursor++]=a.y;lineArray[cursor++]=a.z;lineArray[cursor++]=b.x;lineArray[cursor++]=b.y;lineArray[cursor++]=b.z;
       }
-      lineGeo.setDrawRange(0,cursor/3);lineAttribute.needsUpdate=true;lineMat.opacity=.08+(activeRef.current>=0?.09:0);
+      lineGeo.setDrawRange(0,cursor/3);lineAttribute.needsUpdate=true;lineMat.opacity=.17;
 
       const pose=CAMERA_POSES[stage];camera.position.x+=(pose.x+pointer.x*.2-camera.position.x)*.035;camera.position.y+=(pose.y-pointer.y*.1-camera.position.y)*.035;camera.position.z+=(pose.z-camera.position.z)*.035;
       lookTarget.x+=(pose.lx+pointer.x*.1-lookTarget.x)*.04;lookTarget.y+=(pose.ly-pointer.y*.06-lookTarget.y)*.04;lookTarget.z+=(pose.lz-lookTarget.z)*.04;camera.fov+=(pose.fov-camera.fov)*.035;camera.updateProjectionMatrix();camera.lookAt(lookTarget);camera.rotation.z+=(Math.sin(stage*.8)*.018-camera.rotation.z)*.03;
