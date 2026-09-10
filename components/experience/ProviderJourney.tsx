@@ -115,6 +115,6 @@ export default function ProviderJourney(){
       </section>)}
     </div>
 
-    <section id="provider-portals" className={styles.arrival} data-scene data-scene-index={STORY.length}><header className={styles.arrivalHeader}><span>OCCU-MED / PROVIDER WORLD</span><p>Five destinations. One connected provider world.</p></header><PortalOrbitalNav portals={PORTALS}/></section>
+    <section id="provider-portals" className={styles.arrival} data-scene data-scene-index={STORY.length}><header className={styles.arrivalHeader}><span>OCCU-MED / PROVIDER WORLD</span><p>Five destinations. One connected provider world.</p></header><div className={styles.arrivalScale} aria-hidden="true"><span>PORTAL CONCOURSE</span><b>05</b><small>DESTINATIONS ONLINE</small></div><PortalOrbitalNav portals={PORTALS}/></section>
   </main>;
 }

@@ -46,6 +46,7 @@ export default function DiveWorld({progress}:{progress:number}){
     ],false,'catmullrom',.42);
 
     const disposables:Array<THREE.BufferGeometry|THREE.Material>=[];
+    const tunnelGeometry=new THREE.TubeGeometry(path,180,7.4,10,false);const tunnelMaterial=new THREE.MeshBasicMaterial({color:0x24556b,wireframe:true,transparent:true,opacity:.055,side:THREE.BackSide,blending:THREE.AdditiveBlending});const tunnel=new THREE.Mesh(tunnelGeometry,tunnelMaterial);scene.add(tunnel);disposables.push(tunnelGeometry,tunnelMaterial);
     const gates:THREE.Group[]=[];
     for(let i=0;i<14;i++){
       const t=(i+1)/15;const point=path.getPoint(t);const tangent=path.getTangent(t).normalize();
@@ -66,6 +67,13 @@ export default function DiveWorld({progress}:{progress:number}){
     }
     disposables.push(shardMat);
 
+    const shafts:THREE.Mesh[]=[];
+    for(let i=0;i<18;i++){
+      const t=.04+i/19*.91,center=path.getPoint(t),angle=i*2.399;
+      const material=new THREE.MeshBasicMaterial({color:i%4===0?0x8b6cff:0x64e5ff,transparent:true,opacity:.08,blending:THREE.AdditiveBlending,depthWrite:false});
+      const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.018,.11,8+(i%5)*2,6,1,true),material);shaft.position.copy(center).add(new THREE.Vector3(Math.cos(angle)*(5.4+i%3),Math.sin(angle)*(4.2+i%2),0));shaft.rotation.set(Math.PI*.5,angle,.2);scene.add(shaft);shafts.push(shaft);disposables.push(shaft.geometry,material);
+    }
+
     const dustGeo=new THREE.BufferGeometry();const dust=new Float32Array(4200);
     for(let i=0;i<dust.length;i+=3){dust[i]=(Math.random()-.5)*24;dust[i+1]=-Math.random()*42+6;dust[i+2]=14-Math.random()*112}
     dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));const dustMat=new THREE.PointsMaterial({color:0xa2eeff,size:.04,transparent:true,opacity:.58,depthWrite:false});const dustField=new THREE.Points(dustGeo,dustMat);scene.add(dustField);disposables.push(dustGeo,dustMat);
@@ -81,9 +89,10 @@ export default function DiveWorld({progress}:{progress:number}){
     let raf=0;const clock=new THREE.Clock(),smoothed={value:0};
     const draw=()=>{
       raf=requestAnimationFrame(draw);const time=clock.getElapsedTime();smoothed.value+=(progressRef.current-smoothed.value)*.065;const p=Math.max(0,Math.min(.995,smoothed.value));
-      const position=path.getPoint(p),ahead=path.getPoint(Math.min(1,p+.025));camera.position.copy(position);camera.lookAt(ahead);camera.rotation.z+=((Math.sin(p*Math.PI*7)*.08)-camera.rotation.z)*.06;camera.fov=56-Math.sin(p*Math.PI)*8;camera.updateProjectionMatrix();
+      const position=path.getPoint(p),ahead=path.getPoint(Math.min(1,p+.025));camera.position.copy(position);camera.lookAt(ahead);camera.rotation.z+=((Math.sin(p*Math.PI*7)*.13)-camera.rotation.z)*.06;camera.fov=56-Math.sin(p*Math.PI)*11;camera.updateProjectionMatrix();
       gates.forEach((gate,i)=>{gate.rotation.z=time*(i%2?.09:-.075)+i*.13;const distance=Math.abs(p-(i+1)/15);gate.scale.setScalar(1+Math.max(0,.08-distance)*2.2)});
       shards.forEach((shard,i)=>{shard.rotation.x+=.0015+(i%5)*.0003;shard.rotation.y+=.001+(i%4)*.00025});
+      shafts.forEach((shaft,i)=>{shaft.rotation.z=time*(i%2?.014:-.011)+i*.2;(shaft.material as THREE.MeshBasicMaterial).opacity=.035+Math.sin(time*.7+i)*.018+Math.max(0,p-.55)*.08});
       dustField.position.z=-p*8;dustField.rotation.y=time*.004;portalRing.rotation.z=time*.11;portalOuter.rotation.z=-time*.06;portalShader.uniforms.uTime.value=time;portalShader.uniforms.uProgress.value=Math.max(0,(p-.58)/.42);portalRingMat.emissiveIntensity=3.2+Math.max(0,(p-.72)/.28)*4.5;
       renderer.render(scene,camera);
     };draw();
