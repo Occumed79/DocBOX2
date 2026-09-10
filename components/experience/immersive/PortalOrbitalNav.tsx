@@ -53,10 +53,11 @@ function addDrone(scene:THREE.Scene){
   scene.add(drone);return drone;
 }
 
-export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,autoEnter=false}:{portals:readonly Portal[];agreementOnly?:boolean;onEnter?:()=>void;autoEnter?:boolean}){
+export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,autoEnter=false,entryProgress=1}:{portals:readonly Portal[];agreementOnly?:boolean;onEnter?:()=>void;autoEnter?:boolean;entryProgress?:number}){
   const mount=useRef<HTMLDivElement>(null);
   const beginTravelRef=useRef<(index:number)=>void>(()=>{});
   const onEnterRef=useRef(onEnter);onEnterRef.current=onEnter;
+  const entryRef=useRef(entryProgress);entryRef.current=entryProgress;
   const router=useRouter();
   const [labels,setLabels]=useState<Array<{x:number;y:number;visible:boolean}>>([]);
   const [active,setActive]=useState(-1);
@@ -65,7 +66,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     const host=mount.current;if(!host)return;
     const shown=agreementOnly?portals.slice(-1):portals;
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x020811,.032);
-    const camera=new THREE.PerspectiveCamera(47,host.clientWidth/host.clientHeight,.1,110);camera.position.set(0,.85,agreementOnly?12.5:13.7);
+    const camera=new THREE.PerspectiveCamera(47,host.clientWidth/host.clientHeight,.1,110);camera.position.set(0,.85,agreementOnly?12.5:17.4);
     const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(host.clientWidth,host.clientHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.setClearColor(0x020810,1);host.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0x7fbfff,0x061018,1.25));
@@ -125,27 +126,27 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
 
     const resize=()=>{camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight)};addEventListener('resize',resize);
     const loop=(now:number)=>{
-      raf=requestAnimationFrame(loop);const t=(now-start)/1000;
+      raf=requestAnimationFrame(loop);const t=(now-start)/1000;const entry=agreementOnly?1:clamp(entryRef.current);
       ray.setFromCamera(pointer,camera);const hit=travelIndex<0?ray.intersectObjects(interactive)[0]:undefined;hovered=hit?(hit.object.userData.index as number):-1;
       if(travelIndex<0)setActive(current=>current===hovered?current:hovered);
       nodes.forEach((node,i)=>{
-        const isHot=i===hovered||i===travelIndex;const wanted=isHot?1.18:1;node.group.scale.lerp(new THREE.Vector3(wanted,wanted,wanted),.085);
-        const ringMat=node.ring.material as THREE.MeshStandardMaterial;ringMat.emissiveIntensity+=((isHot?5.3:2.4)-ringMat.emissiveIntensity)*.09;
-        (node.outer.material as THREE.MeshBasicMaterial).opacity+=((isHot?.72:.36)-(node.outer.material as THREE.MeshBasicMaterial).opacity)*.09;
+        const isHot=i===hovered||i===travelIndex;const entryScale=.68+entry*.32;const wanted=entryScale*(isHot?1.18:1);node.group.scale.lerp(new THREE.Vector3(wanted,wanted,wanted),.085);
+        const ringMat=node.ring.material as THREE.MeshStandardMaterial;ringMat.emissiveIntensity+=(((isHot?5.3:2.4)*(.35+entry*.65))-ringMat.emissiveIntensity)*.09;
+        (node.outer.material as THREE.MeshBasicMaterial).opacity+=(((isHot?.72:.36)*entry)-(node.outer.material as THREE.MeshBasicMaterial).opacity)*.09;
         node.shader.uniforms.uTime.value=t;node.shader.uniforms.uHover.value+=((isHot?1:0)-node.shader.uniforms.uHover.value)*.08;
         node.ring.rotation.z=Math.sin(t*.55+i)*.07;node.outer.rotation.z=.38+t*(i%2?.055:-.048);node.inner.rotation.z=t*(i%2?.045:-.038);
       });
-      drone.rotation.x=Math.sin(t*.38)*.16;drone.rotation.y=t*.22;drone.position.y=4.45+Math.sin(t*.7)*.12;stars.rotation.y=t*.003;halo.rotation.z=t*.025;architecture.update(t,pointer.x);
+      drone.rotation.x=Math.sin(t*.38)*.16;drone.rotation.y=t*.22;drone.position.y=4.45+Math.sin(t*.7)*.12;drone.scale.setScalar(.48+entry*.22);stars.rotation.y=t*.003;halo.rotation.z=t*.025;architecture.update(t,pointer.x);
+      architecture.group.position.z+=(((1-entry)*-3.2)-architecture.group.position.z)*.055;const architectureScale=.86+entry*.14;architecture.group.scale.lerp(new THREE.Vector3(architectureScale,architectureScale,architectureScale),.055);(scene.fog as THREE.FogExp2).density=.044-entry*.012;
       if(travelIndex>=0){
         const p=ease((now-travelStart)/880);camera.position.lerpVectors(travelFrom,travelTo,p);camera.fov=47-p*20;camera.updateProjectionMatrix();camera.lookAt(travelLook);
       }else{
-        const focusIndex=hovered;
-        const focused=focusIndex>=0?nodes[focusIndex]?.group.position:null;
-        const desiredX=focused?focused.x*.1:pointer.x*.42;const desiredY=focused?focused.y*.08:.6+pointer.y*.2;
+        const focusIndex=hovered;const focused=focusIndex>=0?nodes[focusIndex]?.group.position:null;
+        const desiredX=focused?focused.x*.1:pointer.x*.42;const desiredY=focused?focused.y*.08:.42+entry*.18+pointer.y*.2;
         targetX+=(desiredX-targetX)*.025;targetY+=(desiredY-targetY)*.025;
-        camera.position.x+=(pointer.x*.25-camera.position.x)*.018;camera.position.y+=(.85-pointer.y*.12-camera.position.y)*.018;camera.lookAt(targetX,targetY,-.5);
+        const baseZ=17.4-entry*3.7;camera.position.x+=(pointer.x*.25-camera.position.x)*.018;camera.position.y+=((.48+entry*.37)-pointer.y*.12-camera.position.y)*.018;camera.position.z+=(baseZ-camera.position.z)*.045;camera.fov+=(47-(1-entry)*4-camera.fov)*.04;camera.updateProjectionMatrix();camera.lookAt(targetX,targetY,-.5-entry*.2);
       }
-      setLabels(nodes.map(node=>{const p=node.group.getWorldPosition(new THREE.Vector3()).project(camera);return{x:(p.x*.5+.5)*host.clientWidth,y:(-.5*p.y+.5)*host.clientHeight,visible:p.z<1}}));
+      setLabels(nodes.map(node=>{const p=node.group.getWorldPosition(new THREE.Vector3()).project(camera);return{x:(p.x*.5+.5)*host.clientWidth,y:(-.5*p.y+.5)*host.clientHeight,visible:p.z<1&&entry>.28}}));
       renderer.render(scene,camera);
     };loop(performance.now());
 
