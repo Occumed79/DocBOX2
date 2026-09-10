@@ -47,12 +47,13 @@ function showSceneSignal(mode:StoryMode){
 }
 
 export default function ProviderJourney(){
-  const rootRef=useRef<HTMLElement|null>(null);const[activeScene,setActiveScene]=useState(0);
+  const rootRef=useRef<HTMLElement|null>(null);const[activeScene,setActiveScene]=useState(0);const[portalEntry,setPortalEntry]=useState(0);
 
   useEffect(()=>{
     const root=rootRef.current;if(!root)return;
     const scenes=Array.from(root.querySelectorAll<HTMLElement>('[data-scene]'));
     const prologue=root.querySelector<HTMLElement>('[data-prologue]');
+    const arrival=root.querySelector<HTMLElement>('[data-portal-arrival]');
     let frame=0;
     const updateProgress=()=>{
       frame=0;const viewport=Math.max(window.innerHeight,1);let nearest=0,nearestDistance=Number.POSITIVE_INFINITY;
@@ -68,6 +69,11 @@ export default function ProviderJourney(){
         const body=prologue.querySelector<HTMLElement>('[data-prologue-body]');if(body){body.style.transform=`translate3d(${progress*-38}px,${progress*48}px,0)`;body.style.opacity=String(clamp(1-progress*1.7))}
         const copy=prologue.querySelector<HTMLElement>('[data-prologue-copy]');if(copy){copy.style.transform=`translate3d(0,${progress*-3}vh,0)`}
         const meta=prologue.querySelector<HTMLElement>('[data-prologue-meta]');if(meta){meta.style.transform=`translate3d(0,${progress*24}px,0)`;meta.style.opacity=String(clamp(1-progress*1.8))}
+      }
+
+      if(arrival){
+        const rect=arrival.getBoundingClientRect();const entry=clamp((viewport-rect.top)/(viewport*.92));
+        setPortalEntry(current=>Math.abs(current-entry)>.002?entry:current);
       }
 
       scenes.forEach((scene,index)=>{
@@ -115,6 +121,6 @@ export default function ProviderJourney(){
       </section>)}
     </div>
 
-    <section id="provider-portals" className={styles.arrival} data-scene data-scene-index={STORY.length}><header className={styles.arrivalHeader}><span>OCCU-MED / PROVIDER WORLD</span><p>Five destinations. One connected provider world.</p></header><div className={styles.arrivalScale} aria-hidden="true"><span>PORTAL CONCOURSE</span><b>05</b><small>DESTINATIONS ONLINE</small></div><PortalOrbitalNav portals={PORTALS}/></section>
+    <section id="provider-portals" className={styles.arrival} data-scene data-scene-index={STORY.length} data-portal-arrival><header className={styles.arrivalHeader}><span>OCCU-MED / PROVIDER WORLD</span><p>Five destinations. One connected provider world.</p></header><div className={styles.arrivalScale} aria-hidden="true"><span>PORTAL CONCOURSE</span><b>05</b><small>DESTINATIONS ONLINE</small></div><PortalOrbitalNav portals={PORTALS} entryProgress={portalEntry}/></section>
   </main>;
 }
