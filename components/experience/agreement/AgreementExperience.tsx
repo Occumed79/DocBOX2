@@ -56,6 +56,7 @@ export default function AgreementExperience() {
 
       <section className={styles.gateway}>
         <PortalOrbitalNav agreementOnly autoEnter={launchPortal} onEnter={()=>setEntered(true)} portals={[{id:'agreement',href:'#forms-workspace',number:'05',title:'Agreement',note:'Enter the forms workspace',tone:'white'}]}/>
+        <div className={styles.gatewayMeta} aria-hidden="true"><span>FORMS ENVIRONMENT</span><b>05</b><small>SECURE PATH / READY</small></div>
         <div className={styles.content}>
           <span>PORTAL 05 / SECURE HANDOFF</span>
           <h1>Define the<br/>relationship.</h1>

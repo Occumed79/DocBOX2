@@ -173,6 +173,7 @@ export default function ResourceExperience() {
         <div className={styles.diveStage}>
           <div className={styles.space}><DiveWorld progress={progress}/></div>
           <div className={styles.diveCopy}><span>PORTAL 03 / ENTER THE RESOURCE FIELD</span><h1>Fall into<br />your specialty.</h1><p>Keep scrolling. The portal resolves into a workspace built around the services your facility actually provides.</p></div>
+          <div className={styles.depthGauge} aria-hidden="true"><span>DESCENT</span><i/><b>{Math.round(progress*100).toString().padStart(2,'0')}</b></div>
           <div className={styles.arrivalMessage}><b>{selected.label}</b><span>The transition is resolving into your provider workspace.</span></div>
         </div>
       </section>

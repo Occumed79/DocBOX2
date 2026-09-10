@@ -135,6 +135,28 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
   }
   group.add(distant);
 
+  // Large, offset structural ribs create a near-camera layer without obscuring
+  // the traveler or any of the five portal hit targets.
+  const foreground=new THREE.Group();
+  for(let i=0;i<6;i++){
+    const side=i%2===0?-1:1;
+    const frame=new THREE.Group();
+    frame.position.set(side*(8.8+(i%3)*2.2),-.35,5.5-i*4.8);
+    frame.rotation.set(0,side*(.12+i*.018),side*.025);
+    const column=new THREE.Mesh(new THREE.BoxGeometry(.72,10.5,1.4),i%3===0?dark2:dark);column.position.y=.6;frame.add(column);
+    const beam=new THREE.Mesh(new THREE.BoxGeometry(8.2,.48,1.1),i%3===0?dark2:dark);beam.position.set(-side*3.7,5.55,0);frame.add(beam);
+    const edge=new THREE.Mesh(new THREE.BoxGeometry(.035,8.4,.08),i%2?violet:cyan);edge.position.set(-side*.39,.85,.72);frame.add(edge);
+    foreground.add(frame);
+  }
+  group.add(foreground);
+
+  const suspended:THREE.Mesh[]=[];
+  for(let i=0;i<9;i++){
+    const panel=new THREE.Mesh(new THREE.PlaneGeometry(.8+i%3*.5,2.1+i%2*.9),i%2?violet:cyan);
+    panel.position.set((i%2?-1:1)*(6.2+(i%4)*1.35),1.2+(i%3)*1.55,-4-i*3.4);
+    panel.rotation.y=(i%2?-1:1)*(.45+i*.035);group.add(panel);suspended.push(panel);
+  }
+
   scene.add(group);
 
   return {
@@ -146,6 +168,8 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
       monoliths.forEach((pylon,i)=>{pylon.position.y=Math.sin(time*.22+i)*.035-1.15});
       ceiling.rotation.y=Math.sin(time*.08)*.015+pointerX*.006;
       distant.rotation.y=Math.sin(time*.035)*.01;
+      foreground.position.z=Math.sin(time*.08)*.12;
+      suspended.forEach((panel,i)=>{panel.position.y+=Math.sin(time*.28+i)*.0008;panel.rotation.z=Math.sin(time*.18+i)*.025});
       if(astronautRoot.visible){
         astronautRoot.rotation.y=Math.sin(time*.28)*.045+pointerX*.022;
         astronautRoot.position.y=Math.sin(time*.7)*.025;
