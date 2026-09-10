@@ -46,9 +46,10 @@ export default function AgreementExperience() {
   }, [entered]);
 
   const services = useMemo(() => SERVICES[specialty] ?? SERVICES['Occupational Medicine'], [specialty]);
+  const entering=launchPortal&&!entered;
 
   return (
-    <main className={styles.root} data-entered={entered ? 'true' : 'false'}>
+    <main className={styles.root} data-entering={entering ? 'true' : 'false'} data-entered={entered ? 'true' : 'false'}>
       <header className={styles.topbar}>
         <a href="/experience#provider-portals">OCCU-MED / AGREEMENT GATEWAY</a>
         <div><a href="/experience/history">HISTORY</a> · <a href="/experience/network">NETWORK</a> · <a href="/experience/resources">RESOURCES</a> · <a href="/experience/questions">Q&A</a></div>
@@ -56,6 +57,7 @@ export default function AgreementExperience() {
 
       <section className={styles.gateway}>
         <PortalOrbitalNav agreementOnly autoEnter={launchPortal} onEnter={()=>setEntered(true)} portals={[{id:'agreement',href:'#forms-workspace',number:'05',title:'Agreement',note:'Enter the forms workspace',tone:'white'}]}/>
+        <div className={styles.portalWash} aria-hidden="true"><i/><i/><i/></div>
         <div className={styles.gatewayMeta} aria-hidden="true"><span>FORMS ENVIRONMENT</span><b>05</b><small>SECURE PATH / READY</small></div>
         <div className={styles.content}>
           <span>PORTAL 05 / SECURE HANDOFF</span>
