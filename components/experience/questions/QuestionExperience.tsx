@@ -42,6 +42,8 @@ export default function QuestionExperience() {
   const [open,setOpen]=useState(0);
   const active=QUESTIONS[open] ?? QUESTIONS[0];
   const activeVisible=Math.max(0,visible.findIndex(({index})=>index===open));
+  const stageIndex=Math.max(0,STAGES.findIndex(item=>item.stage===stage));
+
   const choose=(next:Stage)=>{
     const nextTopics=Array.from(new Set(QUESTIONS.filter(item=>item.stage===next).map(item=>item.topic)));
     const nextTopic=topic==='All'||nextTopics.includes(topic as Exclude<Topic,'All'>)?topic:'All';
@@ -56,11 +58,11 @@ export default function QuestionExperience() {
   return <main className={styles.root}>
     <header className={styles.topbar}><a href="/experience#provider-portals">OCCU-MED / INFORMATION FIELD</a><div><a href="/experience/network">NETWORK</a> · <a href="/experience/resources">RESOURCES</a> · <a href="/experience/agreement">AGREEMENT</a></div></header>
     <aside className={styles.sidebar}><span>REFERRAL LIFECYCLE</span>{STAGES.map(x=><button key={x.stage} aria-pressed={stage===x.stage} onClick={()=>choose(x.stage)}><small>{x.number}</small><b>{x.stage}</b><em>{x.note}</em></button>)}</aside>
-    <section className={styles.explorer}>
-      <QuestionField count={visible.length} active={activeVisible}/>
-      <div className={styles.fieldMeta} aria-hidden="true"><span>KNOWLEDGE FIELD</span><b>{String(activeVisible+1).padStart(2,'0')}</b><small> / {String(visible.length).padStart(2,'0')}</small></div>
+    <section className={styles.explorer} data-stage={stage.toLowerCase()}>
+      <QuestionField count={visible.length} active={activeVisible} stageIndex={stageIndex}/>
+      <div className={styles.fieldMeta} aria-hidden="true"><span>KNOWLEDGE FIELD / {STAGES[stageIndex].number}</span><b>{String(activeVisible+1).padStart(2,'0')}</b><small> / {String(visible.length).padStart(2,'0')}</small></div>
       <div className={styles.filters}>{availableTopics.map(x=><button key={x} aria-pressed={topic===x} onClick={()=>toggleTopic(x)}>{x}</button>)}</div>
-      <div className={styles.titleBlock}><span className={styles.eyebrow}>PORTAL 04 / {stage.toUpperCase()}</span><h1>{stage}</h1><p>{STAGES.find(item=>item.stage===stage)?.note}</p></div>
+      <div className={styles.titleBlock}><span className={styles.eyebrow}>PORTAL 04 / {stage.toUpperCase()}</span><h1>{stage}</h1><p>{STAGES[stageIndex].note}</p></div>
       <div className={styles.nodes}>{visible.map(({item,index},i)=><button style={{'--node':i} as import('react').CSSProperties} key={item.q} aria-pressed={open===index} onClick={()=>setOpen(index)}><i/><span>{item.q}</span></button>)}</div>
       <article className={styles.detail} key={open}><small>{active.stage} / {active.topic}</small><h2>{active.q}</h2><p>{active.a}</p><span className={styles.detailIndex}>{String(activeVisible+1).padStart(2,'0')}</span></article>
     </section>
