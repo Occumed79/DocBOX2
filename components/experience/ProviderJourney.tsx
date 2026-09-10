@@ -150,16 +150,12 @@ export default function ProviderJourney() {
     const root = rootRef.current;
     if (!root) return;
     const scenes = Array.from(root.querySelectorAll<HTMLElement>('[data-scene]'));
-    const observer = new IntersectionObserver(entries => entries.forEach(entry => {
-      entry.target.toggleAttribute('data-active', entry.isIntersecting);
-      if (entry.isIntersecting) setActiveScene(Number((entry.target as HTMLElement).dataset.sceneIndex ?? 0));
-    }), { threshold: .34 });
-    scenes.forEach(scene => observer.observe(scene));
-
     let frame = 0;
     const updateProgress = () => {
       frame = 0;
       const viewport = Math.max(window.innerHeight, 1);
+      const pageTravel = Math.max(root.scrollHeight - viewport, 1);
+      root.style.setProperty('--journey-progress', Math.max(0, Math.min(1, window.scrollY / pageTravel)).toFixed(4));
       let nearest = 0;
       let nearestDistance = Number.POSITIVE_INFINITY;
 
@@ -184,7 +180,6 @@ export default function ProviderJourney() {
     window.addEventListener('resize', queueProgress);
 
     return () => {
-      observer.disconnect();
       window.removeEventListener('scroll', queueProgress);
       window.removeEventListener('resize', queueProgress);
       if (frame) window.cancelAnimationFrame(frame);
@@ -211,20 +206,12 @@ export default function ProviderJourney() {
       </section>
 
       <div id="cinematic-story" className={styles.story}>
-        <nav className={styles.storyRail} aria-label="Company story chapters">
-          <span>STORY</span>
-          {STORY.map((scene, index) => (
-            <a key={scene.chapter} href={`#story-${index + 1}`} aria-current={activeScene === index ? 'step' : undefined}>
-              <i /> <b>{String(index + 1).padStart(2, '0')}</b><small>{scene.chapter.split('/ ')[1]}</small>
-            </a>
-          ))}
-        </nav>
-
         {STORY.map((scene, sceneIndex) => (
           <section
             id={`story-${sceneIndex + 1}`}
             className={styles.scene}
             data-scene
+            data-active={activeScene === sceneIndex ? true : undefined}
             data-scene-index={sceneIndex}
             data-mode={scene.mode}
             data-world-chapter={scene.chapter}
@@ -255,7 +242,7 @@ export default function ProviderJourney() {
 
             <div className={styles.sceneCopy}>
               <span>{scene.chapter}</span>
-              <h2>{scene.title}</h2>
+              <h2 aria-label={scene.title}>{scene.title.split(' ').map((word, wordIndex) => <span key={`${word}-${wordIndex}`} style={{ '--word-index': wordIndex } as CSSProperties} aria-hidden="true">{word}</span>)}</h2>
               <p>{scene.body}</p>
             </div>
 
