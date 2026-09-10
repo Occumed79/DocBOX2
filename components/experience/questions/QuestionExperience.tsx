@@ -58,10 +58,11 @@ export default function QuestionExperience() {
     <aside className={styles.sidebar}><span>REFERRAL LIFECYCLE</span>{STAGES.map(x=><button key={x.stage} aria-pressed={stage===x.stage} onClick={()=>choose(x.stage)}><small>{x.number}</small><b>{x.stage}</b><em>{x.note}</em></button>)}</aside>
     <section className={styles.explorer}>
       <QuestionField count={visible.length} active={activeVisible}/>
+      <div className={styles.fieldMeta} aria-hidden="true"><span>KNOWLEDGE FIELD</span><b>{String(activeVisible+1).padStart(2,'0')}</b><small> / {String(visible.length).padStart(2,'0')}</small></div>
       <div className={styles.filters}>{availableTopics.map(x=><button key={x} aria-pressed={topic===x} onClick={()=>toggleTopic(x)}>{x}</button>)}</div>
       <div className={styles.titleBlock}><span className={styles.eyebrow}>PORTAL 04 / {stage.toUpperCase()}</span><h1>{stage}</h1><p>{STAGES.find(item=>item.stage===stage)?.note}</p></div>
       <div className={styles.nodes}>{visible.map(({item,index},i)=><button style={{'--node':i} as import('react').CSSProperties} key={item.q} aria-pressed={open===index} onClick={()=>setOpen(index)}><i/><span>{item.q}</span></button>)}</div>
-      <article className={styles.detail}><small>{active.stage} / {active.topic}</small><h2>{active.q}</h2><p>{active.a}</p></article>
+      <article className={styles.detail} key={open}><small>{active.stage} / {active.topic}</small><h2>{active.q}</h2><p>{active.a}</p><span className={styles.detailIndex}>{String(activeVisible+1).padStart(2,'0')}</span></article>
     </section>
   </main>;
 }
