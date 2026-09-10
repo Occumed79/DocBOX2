@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import styles from './ResourceExperience.module.css';
+import DiveWorld from '../immersive/DiveWorld';
 
 type Specialty = {
   id: string;
@@ -44,7 +45,7 @@ const SPECIALTIES: Specialty[] = [
     ],
   },
   {
-    id: 'Laboratory', label: 'Laboratory', color: '#7fd4ff',
+    id: 'Laboratory / Diagnostics', label: 'Laboratory / Diagnostics', color: '#7fd4ff',
     description: 'Collection orders, requested panels, specimen handling, result transmission, and referral-specific billing.',
     protocol: [
       { title: 'Match the order to the authorization', copy: 'Confirm the exact requested panels, collection requirements, and any destination-specific testing.' },
@@ -59,7 +60,7 @@ const SPECIALTIES: Specialty[] = [
     ],
   },
   {
-    id: 'Cardiology', label: 'Cardiology', color: '#ff9f8f',
+    id: 'Primary Care', label: 'Primary Care', color: '#ff9f8f',
     description: 'Resting EKG, treadmill testing, specialist reports, tracings, and interpretation return requirements.',
     protocol: [
       { title: 'Confirm the authorized study', copy: 'Verify whether the referral requires resting EKG, treadmill testing, consultation, or a combination.' },
@@ -74,7 +75,7 @@ const SPECIALTIES: Specialty[] = [
     ],
   },
   {
-    id: 'Imaging', label: 'Imaging', color: '#8cb3ff',
+    id: 'Audiology', label: 'Audiology', color: '#8cb3ff',
     description: 'Authorized radiography and diagnostic imaging, final reports, and image-access or transfer instructions.',
     protocol: [
       { title: 'Confirm the exact imaging order', copy: 'Match the authorization to the requested study and body region before scheduling or performing the service.' },
@@ -159,14 +160,7 @@ export default function ResourceExperience() {
 
       <section ref={diveRef} className={styles.dive} aria-label="Portal transition into provider resources">
         <div className={styles.diveStage}>
-          <div className={styles.space} aria-hidden="true">
-            <div className={styles.stars} />
-            <div className={styles.rings}>
-              {Array.from({ length: 9 }, (_, index) => <i className={styles.ring} key={index} style={{ '--ring-index': index } as CSSProperties} />)}
-            </div>
-            <div className={styles.portalCore} />
-            <div className={styles.traveler} />
-          </div>
+          <div className={styles.space}><DiveWorld progress={progress}/></div>
 
           <div className={styles.diveCopy}>
             <span>PORTAL 03 / ENTER THE RESOURCE FIELD</span>

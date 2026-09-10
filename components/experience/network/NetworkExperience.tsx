@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent, type WheelEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type WheelEvent } from 'react';
 import styles from './NetworkExperience.module.css';
 
 type Layer = 'all' | 'medical' | 'dental' | 'diagnostic' | 'pharmacy';
@@ -9,10 +9,10 @@ type AggregatePoint = Point & { count: number };
 type Hover = { x: number; y: number; title: string; detail: string } | null;
 
 const TOTALS: Record<Layer, number> = {
-  all: 23544,
-  medical: 14133,
-  dental: 3143,
-  diagnostic: 2885,
+  all: 23524,
+  medical: 14207,
+  dental: 3141,
+  diagnostic: 2867,
   pharmacy: 3309,
 };
 
@@ -49,41 +49,6 @@ const AGGREGATE_GEO: AggregatePoint[] = [
   { label: 'United Kingdom', lat: 55.0, lon: -3.4, count: 29, type: 'all' },
   { label: 'Jordan', lat: 31.2, lon: 36.5, count: 22, type: 'all' },
   { label: 'Afghanistan', lat: 33.9, lon: 67.7, count: 22, type: 'all' },
-];
-
-const BREAKDOWNS = [
-  {
-    title: 'Facility capacity',
-    total: 23544,
-    rows: [
-      ['Medical provider', 9420], ['Pharmacy', 3309], ['Dental', 3143], ['Urgent care', 2635],
-      ['Laboratory', 1919], ['Occupational medicine', 1415], ['Hospitals', 590], ['Diagnostics & specialists', 1063],
-    ] as const,
-  },
-  {
-    title: 'International reach',
-    total: 866,
-    rows: [
-      ['South Africa', 160], ['India', 63], ['Australia', 42], ['Canada', 32],
-      ['Turkey', 30], ['United Kingdom', 29], ['Jordan', 22], ['Afghanistan', 22],
-    ] as const,
-  },
-  {
-    title: 'Largest U.S. states',
-    total: 22678,
-    rows: [
-      ['California', 2512], ['Texas', 2065], ['Florida', 1211], ['New York', 936],
-      ['Georgia', 808], ['Illinois', 802], ['North Carolina', 793], ['Pennsylvania', 760],
-    ] as const,
-  },
-  {
-    title: 'Diagnostic capacity',
-    total: 2885,
-    rows: [
-      ['Laboratory', 1919], ['Drug testing laboratory', 294], ['Imaging / radiology', 278],
-      ['Cardiology', 267], ['Audiology / hearing', 127],
-    ] as const,
-  },
 ];
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -144,6 +109,7 @@ export default function NetworkExperience() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [hover, setHover] = useState<Hover>(null);
+  const [selected, setSelected] = useState<Hover>(null);
   const dragRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
   const projectedRef = useRef<Array<{ x: number; y: number; point: Point; radius: number; count?: number }>>([]);
 
@@ -174,75 +140,18 @@ export default function NetworkExperience() {
   }, [layer, mode, points]);
 
   const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    const wrap = wrapRef.current;
-    if (!canvas || !wrap) return;
-    const rect = wrap.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = Math.max(1, Math.floor(rect.width));
-    const height = Math.max(1, Math.floor(rect.height));
-    const pixelWidth = Math.floor(width * dpr);
-    const pixelHeight = Math.floor(height * dpr);
-    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-      canvas.width = pixelWidth;
-      canvas.height = pixelHeight;
-    }
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-
-    ctx.save();
-    ctx.strokeStyle = 'rgba(111, 222, 246, .09)';
-    ctx.lineWidth = 1;
-    for (let lon = -180; lon <= 180; lon += 30) {
-      const a = project(lon, -90, width, height, zoom, pan.x, pan.y);
-      const b = project(lon, 90, width, height, zoom, pan.x, pan.y);
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    }
-    for (let lat = -60; lat <= 60; lat += 30) {
-      const a = project(-180, lat, width, height, zoom, pan.x, pan.y);
-      const b = project(180, lat, width, height, zoom, pan.x, pan.y);
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    }
-    ctx.restore();
-
-    const projected: Array<{ x: number; y: number; point: Point; radius: number; count?: number }> = [];
-    if (mode === 'coordinates') {
-      for (const point of filteredPoints) {
-        const p = project(point.lon, point.lat, width, height, zoom, pan.x, pan.y);
-        if (p.x < -10 || p.y < -10 || p.x > width + 10 || p.y > height + 10) continue;
-        const radius = clamp(1.2 * Math.sqrt(zoom), 1.1, 3.2);
-        ctx.beginPath();
-        ctx.fillStyle = COLORS[point.type] ?? COLORS.all;
-        ctx.globalAlpha = .58;
-        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        projected.push({ ...p, point, radius: radius + 5 });
-      }
-      ctx.globalAlpha = 1;
-    } else {
-      for (const point of AGGREGATE_GEO) {
-        const p = project(point.lon, point.lat, width, height, zoom, pan.x, pan.y);
-        if (p.x < -50 || p.y < -50 || p.x > width + 50 || p.y > height + 50) continue;
-        const radius = clamp(5 + Math.sqrt(point.count) * .18 * Math.sqrt(zoom), 7, 28);
-        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius * 2.4);
-        gradient.addColorStop(0, 'rgba(119, 232, 255, .9)');
-        gradient.addColorStop(.22, 'rgba(72, 196, 225, .42)');
-        gradient.addColorStop(1, 'rgba(72, 196, 225, 0)');
-        ctx.fillStyle = gradient;
-        ctx.beginPath(); ctx.arc(p.x, p.y, radius * 2.4, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#bdf5ff';
-        ctx.globalAlpha = .85;
-        ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(2.4, radius * .14), 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 1;
-        projected.push({ ...p, point, radius: Math.max(12, radius), count: point.count });
-      }
-    }
-    projectedRef.current = projected;
-  }, [filteredPoints, mode, pan.x, pan.y, zoom]);
+    const canvas=canvasRef.current,wrap=wrapRef.current;if(!canvas||!wrap)return;
+    const rect=wrap.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),width=Math.max(1,Math.floor(rect.width)),height=Math.max(1,Math.floor(rect.height));
+    canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);canvas.style.width=`${width}px`;canvas.style.height=`${height}px`;
+    const gl=canvas.getContext('webgl',{antialias:true,alpha:true});if(!gl)return;gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.01,.055,.075,1);gl.clear(gl.COLOR_BUFFER_BIT);
+    const compile=(type:number,source:string)=>{const sh=gl.createShader(type)!;gl.shaderSource(sh,source);gl.compileShader(sh);return sh};
+    const program=gl.createProgram()!;gl.attachShader(program,compile(gl.VERTEX_SHADER,'attribute vec2 p;attribute vec3 c;varying vec3 v;uniform float size;void main(){v=c;gl_Position=vec4(p,0.,1.);gl_PointSize=size;}'));gl.attachShader(program,compile(gl.FRAGMENT_SHADER,'precision mediump float;varying vec3 v;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;gl_FragColor=vec4(v,(1.-d*2.)*.82);}'));gl.linkProgram(program);gl.useProgram(program);
+    const source: Array<Point & {count?:number}>=mode==='coordinates'?filteredPoints:AGGREGATE_GEO;
+    const verts:number[]=[],colors:number[]=[];const projected:Array<{x:number;y:number;point:Point;radius:number;count?:number}>=[];
+    const rgb=(type:Layer)=>{const n=parseInt((COLORS[type]||COLORS.all).slice(1),16);return[((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255]};
+    for(const point of source){const q=project(point.lon,point.lat,width,height,zoom,pan.x,pan.y);if(q.x < -20||q.y < -20||q.x>width+20||q.y>height+20)continue;verts.push(q.x/width*2-1,1-q.y/height*2);colors.push(...rgb(point.type));projected.push({...q,point,radius:mode==='coordinates'?7:18,count:point.count})}
+    const bind=(name:string,data:number[],size:number)=>{const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STREAM_DRAW);const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,0,0)};bind('p',verts,2);bind('c',colors,3);gl.uniform1f(gl.getUniformLocation(program,'size'),Math.min(14,(mode==='coordinates'?2.2:9)*dpr*Math.sqrt(zoom)));gl.drawArrays(gl.POINTS,0,verts.length/2);projectedRef.current=projected;
+  },[filteredPoints,mode,pan.x,pan.y,zoom]);
 
   useEffect(() => {
     draw();
@@ -311,6 +220,17 @@ export default function NetworkExperience() {
     setHover(null);
   };
 
+  const travelTo = (point: AggregatePoint) => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const { width, height } = wrap.getBoundingClientRect();
+    const nextZoom = point.lon < -50 ? 2.6 : 2.1;
+    const raw = project(point.lon, point.lat, width, height, nextZoom, 0, 0);
+    setZoom(nextZoom);
+    setPan({ x: width / 2 - raw.x, y: height / 2 - raw.y });
+    setSelected({ x: width / 2, y: height / 2, title: point.label || 'Selected geography', detail: `${point.count.toLocaleString()} aggregate directory records` });
+  };
+
   return (
     <main className={styles.root}>
       <header className={styles.topbar}>
@@ -325,30 +245,17 @@ export default function NetworkExperience() {
       </header>
 
       <section className={styles.hero}>
-        <div className={styles.copy}>
-          <span>PORTAL 02 / PROVIDER NETWORK</span>
-          <h1>Follow the<br />network.</h1>
-          <p>Explore Occu-Med’s anonymized provider infrastructure as a geographic system. Drag the field, zoom through regions, switch clinical layers, and inspect the underlying capacity without exposing provider identities.</p>
-          <div className={styles.mode} data-mode={mode}>
-            <i />
-            {mode === 'coordinates' ? `${points.length.toLocaleString()} coordinate records loaded` : mode === 'loading' ? 'Loading coordinate layer…' : 'Aggregate geography active · coordinate file awaiting recovery'}
-          </div>
-          <div className={styles.stats}>
-            <div className={styles.stat}><b>23,544</b><small>active directory records</small></div>
-            <div className={styles.stat}><b>22,678</b><small>U.S. & territories</small></div>
-            <div className={styles.stat}><b>866</b><small>international records</small></div>
-          </div>
-        </div>
-
+        <aside className={styles.sidebar}>
+          <span>PORTAL 02 / NETWORK</span><h1>Provider<br/>atlas.</h1><p>Explore 23,524 anonymized coordinates. Geography leads; controls remain secondary.</p>
+          <div className={styles.sectionLabel}>CLINICAL LAYERS</div>
+          <div className={styles.layers} aria-label="Network layers">{(Object.keys(LAYER_LABELS) as Layer[]).map((key,index)=><button key={key} type="button" aria-pressed={layer===key} onClick={()=>setLayer(key)}><i>{String(index+1).padStart(2,'0')}</i><span>{LAYER_LABELS[key]}</span><b>{TOTALS[key].toLocaleString()}</b></button>)}</div>
+          <div className={styles.sectionLabel}>GEOGRAPHIC INDEX</div>
+          <div className={styles.geographies}>{AGGREGATE_GEO.slice(0,8).map(point=><button key={point.label} onClick={()=>travelTo(point)}><span>{point.label}</span><b>{point.count.toLocaleString()}</b></button>)}</div>
+          <div className={styles.mode} data-mode={mode}><i/>{mode==='coordinates'?`${points.length.toLocaleString()} coordinates live`:mode==='loading'?'Loading geographic layer…':'Aggregate layer active'}</div>
+        </aside>
         <div className={styles.mapShell}>
           <div className={styles.mapToolbar}>
-            <div className={styles.layers} aria-label="Network layers">
-              {(Object.keys(LAYER_LABELS) as Layer[]).map(key => (
-                <button key={key} type="button" aria-pressed={layer === key} onClick={() => setLayer(key)}>
-                  {LAYER_LABELS[key]} · {TOTALS[key].toLocaleString()}
-                </button>
-              ))}
-            </div>
+            <div><span>WORLD / DIRECTORY FIELD</span><b>{LAYER_LABELS[layer]}</b></div>
             <button className={styles.reset} type="button" onClick={reset}>Reset view</button>
           </div>
 
@@ -363,11 +270,15 @@ export default function NetworkExperience() {
             onPointerLeave={() => { if (!dragging) setHover(null); }}
             onWheel={onWheel}
           >
+            <svg className={styles.geography} viewBox="0 0 1000 500" preserveAspectRatio="none" style={{'--map-x':`${pan.x}px`,'--map-y':`${pan.y}px`,'--map-zoom':zoom} as CSSProperties} aria-hidden="true">
+              <g><path d="M55 105L110 55 205 50 275 85 257 137 205 158 188 220 143 238 105 190 72 170Z"/><path d="M205 242L270 262 292 340 255 446 220 404 205 320 178 275Z"/><path d="M430 85L490 58 545 72 565 110 530 130 490 125 468 165 430 145Z"/><path d="M452 168L538 155 585 220 565 330 510 410 470 335 438 255Z"/><path d="M550 87L640 48 765 62 865 115 832 175 740 180 690 235 620 206 570 145Z"/><path d="M795 330L875 310 925 350 900 414 835 420 788 375Z"/><path d="M15 227L39 207 57 225 43 248Z"/></g>
+              <g className={styles.routes}><path d="M150 145Q430 15 710 130"/><path d="M250 300Q505 115 855 365"/><path d="M180 130Q310 180 510 245"/></g>
+            </svg>
             <canvas ref={canvasRef} className={styles.canvas} aria-label="Interactive anonymized provider network map" />
             <div className={styles.instructions}>Drag to pan · wheel or trackpad to zoom · choose a clinical layer above. Provider names and contact details are never rendered.</div>
-            {hover && (
-              <div className={styles.tooltip} style={{ left: hover.x, top: hover.y }}>
-                <b>{hover.title}</b><small>{hover.detail}</small>
+            {(hover || selected) && (
+              <div className={styles.tooltip} style={{ left: (hover||selected)!.x, top: (hover||selected)!.y }}>
+                <b>{(hover||selected)!.title}</b><small>{(hover||selected)!.detail}</small>
               </div>
             )}
           </div>
@@ -379,28 +290,6 @@ export default function NetworkExperience() {
         </div>
       </section>
 
-      <section className={styles.explorer}>
-        <div className={styles.explorerHead}>
-          <div><span className={styles.panelLabel}>NETWORK INTELLIGENCE / ACCESSIBLE DETAIL</span><h2>The map has a second language.</h2></div>
-          <p>The geographic view is paired with equivalent aggregate results so the network remains understandable without relying on pointer interaction or color alone.</p>
-        </div>
-
-        <div className={styles.breakdown}>
-          {BREAKDOWNS.map(group => {
-            const max = Math.max(...group.rows.map(([, count]) => count));
-            return (
-              <article key={group.title}>
-                <header><h3>{group.title}</h3><b>{group.total.toLocaleString()}</b></header>
-                {group.rows.map(([name, count]) => (
-                  <div className={styles.bar} key={name}>
-                    <span>{name}</span><i style={{ transform: `scaleX(${count / max})` }} /><b>{count.toLocaleString()}</b>
-                  </div>
-                ))}
-              </article>
-            );
-          })}
-        </div>
-      </section>
     </main>
   );
 }

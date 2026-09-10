@@ -1,268 +1,45 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import ImmersiveStage, { type ImmersiveStageFrame } from './ImmersiveStage';
+import * as THREE from 'three';
 import styles from './CinematicWorld.module.css';
 
-type GL = WebGLRenderingContext | WebGL2RenderingContext;
+const ASSETS = ['Founders.png','Founders copy.png','California - Hawaii Map.png','Concerned provider.png','EMPLOYEE ID.png','Diverse Healthcare Team Portrait (1).png','Friendly Medical Appointment Call.png','Medical Eval.png','Calm Clinic Blood Draw (1).png','Dental Eval.png','Audiometry.png','Pharmacist Administering a Vaccine(1) (1).png','EXAM REPORT.png','Fitness Determination.png','Diverse Workforce.png','Diverse Workforce2.png','International Certification.png','Vaccine Schedule.png','Facilities.png','International Network.png','Corevalue.png','Corevalue2.png','Corevalue3.png','Corevalue4.png','Corevalue5.png','Corevalue6.png'] as const;
+const CHAPTERS = [[0,3],[3,4],[4,6],[6,7],[7,12],[12,13],[13,14],[14,16],[16,18],[18,20],[20,26]] as const;
+const PALETTES = [0x07141c,0x170d12,0x061821,0x101324,0x051a20,0x161109,0x071b18,0x11131a,0x081526,0x031a22,0x17120d];
 
-type WorldResources = {
-  program: WebGLProgram;
-  buffer: WebGLBuffer;
-  positionLocation: number;
-  uniforms: {
-    time: WebGLUniformLocation | null;
-    progress: WebGLUniformLocation | null;
-    velocity: WebGLUniformLocation | null;
-    pointer: WebGLUniformLocation | null;
-    resolution: WebGLUniformLocation | null;
-    scene: WebGLUniformLocation | null;
-    arrival: WebGLUniformLocation | null;
-    portalFocus: WebGLUniformLocation | null;
-  };
-};
-
-const VERTEX_100 = `
-attribute vec2 a_position;
-varying vec2 v_uv;
-void main() {
-  v_uv = a_position * 0.5 + 0.5;
-  gl_Position = vec4(a_position, 0.0, 1.0);
-}
-`;
-
-const FRAGMENT_100 = `
-precision highp float;
-varying vec2 v_uv;
-uniform float u_time;
-uniform float u_progress;
-uniform float u_velocity;
-uniform vec2 u_pointer;
-uniform vec2 u_resolution;
-uniform float u_scene;
-uniform float u_arrival;
-uniform float u_portalFocus;
-
-float hash21(vec2 p) {
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 45.32);
-  return fract(p.x * p.y);
-}
-
-float noise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  float a = hash21(i);
-  float b = hash21(i + vec2(1.0, 0.0));
-  float c = hash21(i + vec2(0.0, 1.0));
-  float d = hash21(i + vec2(1.0, 1.0));
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-}
-
-vec3 palette(float t) {
-  vec3 a = vec3(0.03, 0.08, 0.12);
-  vec3 b = vec3(0.16, 0.38, 0.58);
-  vec3 c = vec3(0.44, 0.90, 1.00);
-  vec3 d = vec3(0.18, 0.08, 0.32);
-  float phase = u_scene * 0.071 + t;
-  return a + b * 0.28 + c * (0.22 + 0.20 * sin(phase * 6.2831)) + d * (0.18 + 0.12 * cos(phase * 4.0));
-}
-
-float ring(vec2 p, vec2 center, float radius, float width) {
-  float d = abs(length(p - center) - radius);
-  return 1.0 - smoothstep(width, width * 2.4, d);
-}
-
-void main() {
-  vec2 uv = v_uv - 0.5;
-  float aspect = u_resolution.x / max(u_resolution.y, 1.0);
-  uv.x *= aspect;
-
-  float velocity = clamp(abs(u_velocity) / 1800.0, 0.0, 1.0);
-  vec2 pointerWarp = u_pointer * vec2(0.045, 0.035);
-  uv += pointerWarp * (0.35 + 0.65 * (1.0 - u_arrival));
-
-  float travel = u_progress * 10.0 + u_time * 0.035;
-  float radial = length(uv);
-  float angle = atan(uv.y, uv.x);
-
-  float tunnel = 0.0;
-  for (int i = 0; i < 7; i++) {
-    float fi = float(i);
-    float z = fract(travel * 0.18 + fi * 0.142857);
-    float radius = mix(0.04, 0.82, z);
-    float width = mix(0.006, 0.018, z) + velocity * 0.012;
-    tunnel += ring(uv, vec2(0.0), radius, width) * (1.0 - z) * 0.22;
+type Target = { x:number;y:number;z:number;rx?:number;ry?:number;rz?:number;s?:number;opacity?:number };
+function targetFor(chapter:number, local:number, count:number, p:number):Target {
+  const center=local-(count-1)/2;
+  switch(chapter){
+    case 0:return [{x:-3.8+p*1.5,y:.3,z:-1+p*2,ry:.38,s:1.25},{x:2.8-p,y:-.7,z:-3+p*3,ry:-.32,s:.86},{x:3.7,y:2.2-p*2,z:-6+p*5,rz:.12,s:.58}][local];
+    case 1:return{x:2.8-p*6.2,y:0,z:-2+p*4,ry:-.48+p*.8,s:1.65};
+    case 2:return local===0?{x:-3.6+p*2.5,y:1.1,z:-1+p*2,ry:.5,s:.8}:{x:2.5-p*1.2,y:-.4,z:-4+p*3,ry:-.34,s:1.35};
+    case 3:return{x:-2.8+p*5.5,y:.2-p*.8,z:-2+p*3,rz:-.12+p*.2,s:1.48};
+    case 4:{const phase=Math.max(0,Math.min(1,p*count-local));return{x:(local%2?1:-1)*(4.8-phase*2.2),y:(local-2)*1.25,z:-local*3+phase*3.8,ry:(local%2?-.45:.45)*(1-phase),rz:center*.07,s:.72+phase*.56,opacity:Math.max(.08,1-Math.abs(p*(count-1)-local)*.5)}}
+    case 5:return{x:1.8-p*3.4,y:0,z:-2+p*4,ry:-.1+p*.3,rz:-.08,s:1.75};
+    case 6:return{x:0,y:.3,z:-5+p*7,rx:-.05,ry:(p-.5)*.25,s:1.35+p*.55};
+    case 7:return{x:center*5.2+(p-.5)*(local? -2:2),y:local?1.1:-.8,z:-2+local*1.2,ry:center*-.35,s:1.15};
+    case 8:return{x:center*4.3,y:center*1.7,z:-2+center*-2+p*2,ry:center*-.4,rz:center*.1,s:1.15};
+    case 9:return{x:center*4.6-p*center*2,y:center*1.2,z:-3+local*1.8,ry:center*-.45,s:1.2};
+    default:{const angle=local/count*Math.PI*2+p*.65;return{x:Math.cos(angle)*4.4,y:Math.sin(angle)*2.5,z:-3+Math.sin(angle)*2,ry:-angle+Math.PI/2,rz:angle*.08,s:.7+(local===Math.round(p*(count-1))?.35:0),opacity:.42+(local===Math.round(p*(count-1))?.58:0)}}
   }
-
-  vec2 gridUv = uv * mix(75.0, 125.0, velocity * 0.35);
-  vec2 cell = floor(gridUv);
-  vec2 local = fract(gridUv) - 0.5;
-  float rnd = hash21(cell);
-  float stars = step(0.986, rnd) * smoothstep(0.16, 0.0, length(local));
-  stars *= 0.5 + 0.5 * sin(u_time * (1.5 + rnd * 2.4) + rnd * 40.0);
-
-  float nebula = 0.0;
-  vec2 nUv = uv * 1.4;
-  for (int i = 0; i < 4; i++) {
-    nebula += noise(nUv + vec2(u_time * 0.018, -u_time * 0.012)) / pow(2.0, float(i));
-    nUv *= 2.07;
-  }
-  nebula *= smoothstep(1.15, 0.08, radial) * 0.20;
-
-  float scenePulse = 0.5 + 0.5 * sin((u_scene + 1.0) * 0.83 + u_time * 0.22);
-  vec3 color = palette(scenePulse) * (nebula + tunnel * 0.42);
-  color += vec3(0.50, 0.88, 1.0) * stars * 0.85;
-
-  if (u_arrival > 0.5) {
-    float orbital = 0.0;
-    float selected = 0.0;
-    for (int i = 0; i < 5; i++) {
-      float fi = float(i);
-      float theta = fi * 1.256637 + u_time * (0.085 + fi * 0.006);
-      vec2 center = vec2(cos(theta), sin(theta) * 0.58) * (0.34 + 0.04 * sin(u_time * 0.22 + fi));
-      float glow = smoothstep(0.115, 0.0, length(uv - center));
-      float shell = ring(uv, center, 0.065, 0.008);
-      float focus = 1.0 - step(0.25, abs(u_portalFocus - fi));
-      orbital += shell * (0.28 + focus * 0.92) + glow * (0.035 + focus * 0.16);
-      selected += focus * glow;
-    }
-
-    float orbitA = ring(vec2(uv.x, uv.y / 0.58), vec2(0.0), 0.40, 0.004);
-    float orbitB = ring(vec2(uv.x, uv.y / 0.58), vec2(0.0), 0.29, 0.003);
-    color += vec3(0.28, 0.82, 1.0) * (orbital + orbitA * 0.20 + orbitB * 0.12);
-    color += vec3(0.62, 0.44, 1.0) * selected * 0.55;
-
-    float body = smoothstep(0.11, 0.08, length(vec2(uv.x, uv.y + 0.02) / vec2(0.75, 1.25)));
-    float helmet = smoothstep(0.072, 0.055, length(uv - vec2(0.0, 0.095)));
-    float visor = smoothstep(0.055, 0.038, length((uv - vec2(0.0, 0.102)) / vec2(1.15, 0.72)));
-    color += vec3(0.26, 0.62, 0.76) * body * 0.10;
-    color += vec3(0.75, 0.95, 1.0) * helmet * 0.16;
-    color -= vec3(0.08, 0.18, 0.24) * visor * 0.55;
-  }
-
-  float vignette = smoothstep(1.12, 0.20, radial);
-  color *= vignette;
-  color += vec3(0.02, 0.07, 0.10) * velocity * smoothstep(0.9, 0.0, radial) * 0.5;
-
-  gl_FragColor = vec4(color, clamp(0.25 + tunnel * 0.4 + stars * 0.7 + u_arrival * 0.16, 0.0, 0.92));
-}
-`;
-
-function compileShader(gl: GL, type: number, source: string) {
-  const shader = gl.createShader(type);
-  if (!shader) throw new Error('Unable to create WebGL shader.');
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const error = gl.getShaderInfoLog(shader) || 'Unknown WebGL shader compilation error.';
-    gl.deleteShader(shader);
-    throw new Error(error);
-  }
-  return shader;
 }
 
-function createWorld(gl: GL): WorldResources {
-  const vertexShader = compileShader(gl, gl.VERTEX_SHADER, VERTEX_100);
-  const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_100);
-  const program = gl.createProgram();
-  if (!program) throw new Error('Unable to create WebGL program.');
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-  gl.deleteShader(vertexShader);
-  gl.deleteShader(fragmentShader);
+const vertex=`varying vec2 vUv;uniform float uTime;uniform float uBend;uniform float uProgress;void main(){vUv=uv;vec3 p=position;float edge=pow(abs(uv.x-.5)*2.,2.);p.z+=edge*uBend;p.z+=sin(uv.y*8.+uTime*1.2+uProgress*5.)*.035*uBend;p.x+=sin(uv.y*3.14159)*uBend*.08;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`;
+const fragment=`varying vec2 vUv;uniform sampler2D uMap;uniform float uOpacity;uniform float uProgress;uniform float uReveal;void main(){vec2 uv=vUv;uv.x+=(uv.y-.5)*sin(uProgress*3.14159)*.025;float aperture=smoothstep(0.,.12,uReveal-abs(uv.y-.5)*.18);vec4 c=texture2D(uMap,uv);float edge=smoothstep(.01,.09,uv.x)*smoothstep(.01,.09,1.-uv.x)*smoothstep(.01,.09,uv.y)*smoothstep(.01,.09,1.-uv.y);float grain=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);c.rgb*=.9+grain*.1;gl_FragColor=vec4(c.rgb,c.a*uOpacity*edge*aperture);}`;
 
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const error = gl.getProgramInfoLog(program) || 'Unknown WebGL program link error.';
-    gl.deleteProgram(program);
-    throw new Error(error);
-  }
-
-  const buffer = gl.createBuffer();
-  if (!buffer) throw new Error('Unable to create WebGL geometry buffer.');
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-
-  const positionLocation = gl.getAttribLocation(program, 'a_position');
-  return {
-    program,
-    buffer,
-    positionLocation,
-    uniforms: {
-      time: gl.getUniformLocation(program, 'u_time'),
-      progress: gl.getUniformLocation(program, 'u_progress'),
-      velocity: gl.getUniformLocation(program, 'u_velocity'),
-      pointer: gl.getUniformLocation(program, 'u_pointer'),
-      resolution: gl.getUniformLocation(program, 'u_resolution'),
-      scene: gl.getUniformLocation(program, 'u_scene'),
-      arrival: gl.getUniformLocation(program, 'u_arrival'),
-      portalFocus: gl.getUniformLocation(program, 'u_portalFocus'),
-    },
-  };
-}
-
-export default function CinematicWorld({ sceneIndex }: { sceneIndex: number }) {
-  const resourcesRef = useRef<WorldResources | null>(null);
-  const sceneRef = useRef(sceneIndex);
-  const portalFocusRef = useRef(-1);
-
-  useEffect(() => {
-    sceneRef.current = sceneIndex;
-  }, [sceneIndex]);
-
-  useEffect(() => {
-    const onPortalFocus = (event: Event) => {
-      const detail = (event as CustomEvent<{ index?: number }>).detail;
-      portalFocusRef.current = typeof detail?.index === 'number' ? detail.index : -1;
-    };
-    window.addEventListener('docbox:portal-focus', onPortalFocus);
-    return () => window.removeEventListener('docbox:portal-focus', onPortalFocus);
-  }, []);
-
-  const onReady = (gl: GL) => {
-    const resources = createWorld(gl);
-    resourcesRef.current = resources;
-    gl.disable(gl.DEPTH_TEST);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    return () => {
-      gl.deleteBuffer(resources.buffer);
-      gl.deleteProgram(resources.program);
-      resourcesRef.current = null;
-    };
-  };
-
-  const onFrame = (frame: ImmersiveStageFrame) => {
-    const resources = resourcesRef.current;
-    if (!resources) return;
-
-    const { gl, canvas, elapsed, progress, scrollVelocity, pointer, reducedMotion } = frame;
-    const arrival = sceneRef.current >= 11 ? 1 : 0;
-    const time = reducedMotion ? 0 : elapsed;
-
-    gl.useProgram(resources.program);
-    gl.bindBuffer(gl.ARRAY_BUFFER, resources.buffer);
-    gl.enableVertexAttribArray(resources.positionLocation);
-    gl.vertexAttribPointer(resources.positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-    gl.uniform1f(resources.uniforms.time, time);
-    gl.uniform1f(resources.uniforms.progress, progress);
-    gl.uniform1f(resources.uniforms.velocity, reducedMotion ? 0 : scrollVelocity);
-    gl.uniform2f(resources.uniforms.pointer, reducedMotion ? 0 : pointer.x, reducedMotion ? 0 : pointer.y);
-    gl.uniform2f(resources.uniforms.resolution, canvas.width, canvas.height);
-    gl.uniform1f(resources.uniforms.scene, Math.min(sceneRef.current, 10));
-    gl.uniform1f(resources.uniforms.arrival, arrival);
-    gl.uniform1f(resources.uniforms.portalFocus, portalFocusRef.current);
-
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  };
-
-  return (
-    <div data-cinematic-world aria-hidden="true">
-      <ImmersiveStage className={styles.stage} clearColor={[0, 0, 0, 0]} onReady={onReady} onFrame={onFrame} />
-    </div>
-  );
+export default function CinematicWorld({sceneIndex}:{sceneIndex:number}){
+  const host=useRef<HTMLDivElement>(null),chapterRef=useRef(sceneIndex);chapterRef.current=Math.min(10,sceneIndex);
+  useEffect(()=>{const el=host.current;if(!el)return;const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(PALETTES[0],.043);const camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,.1,80);camera.position.z=10;
+    const renderer=new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;el.appendChild(renderer.domElement);
+    const loader=new THREE.TextureLoader();const meshes=ASSETS.map((asset,i)=>{const uniforms={uMap:{value:loader.load('/photos/'+encodeURIComponent(asset))},uTime:{value:0},uBend:{value:.38},uProgress:{value:0},uOpacity:{value:0},uReveal:{value:0}};uniforms.uMap.value.colorSpace=THREE.SRGBColorSpace;const material=new THREE.ShaderMaterial({uniforms,vertexShader:vertex,fragmentShader:fragment,transparent:true,depthWrite:false,side:THREE.DoubleSide});const mesh=new THREE.Mesh(new THREE.PlaneGeometry(5.4,3.45,28,18),material);mesh.position.z=-30;scene.add(mesh);return mesh});
+    const dustGeo=new THREE.BufferGeometry(),dust=new Float32Array(2400);for(let i=0;i<dust.length;i+=3){dust[i]=(Math.random()-.5)*24;dust[i+1]=(Math.random()-.5)*14;dust[i+2]=(Math.random()-.5)*32}dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));const dustField=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:0x8deaff,size:.022,transparent:true,opacity:.45,depthWrite:false}));scene.add(dustField);
+    const veil=new THREE.Mesh(new THREE.PlaneGeometry(30,18,20,12),new THREE.MeshBasicMaterial({color:0x071923,transparent:true,opacity:.13,wireframe:true}));veil.position.z=-8;scene.add(veil);
+    let raf=0,currentChapter=0,localProgress=0;const read=()=>{currentChapter=chapterRef.current;const active=document.querySelector<HTMLElement>('[data-scene][data-active]');localProgress=Number(active?.style.getPropertyValue('--scene-progress')||0)};
+    const render=(now:number)=>{raf=requestAnimationFrame(render);read();const range=CHAPTERS[currentChapter]??CHAPTERS[10],count=range[1]-range[0];const bg=new THREE.Color(PALETTES[currentChapter]);renderer.setClearColor(bg,1);scene.fog!.color.lerp(bg,.08);const eased=localProgress*localProgress*(3-2*localProgress);
+      meshes.forEach((mesh,i)=>{const material=mesh.material as THREE.ShaderMaterial,inside=i>=range[0]&&i<range[1];material.uniforms.uTime.value=now*.001;material.uniforms.uProgress.value=eased;if(!inside){material.uniforms.uOpacity.value*=.86;mesh.position.z-=.05;return}const local=i-range[0],target=targetFor(currentChapter,local,count,eased);mesh.position.lerp(new THREE.Vector3(target.x,target.y,target.z),.075);mesh.rotation.x+=( (target.rx??0)-mesh.rotation.x)*.07;mesh.rotation.y+=( (target.ry??0)-mesh.rotation.y)*.07;mesh.rotation.z+=( (target.rz??0)-mesh.rotation.z)*.07;const scale=target.s??1;mesh.scale.lerp(new THREE.Vector3(scale,scale,scale),.07);material.uniforms.uOpacity.value+=((target.opacity??.92)-material.uniforms.uOpacity.value)*.08;material.uniforms.uReveal.value=Math.min(1,material.uniforms.uReveal.value+.035);material.uniforms.uBend.value=.18+Math.abs(Math.sin(eased*Math.PI))*((currentChapter===4||currentChapter===10)?.85:.36)});
+      camera.position.x+=(Math.sin(currentChapter*1.71)*.45+(eased-.5)*(currentChapter%3-1)*.9-camera.position.x)*.035;camera.position.y+=(Math.cos(currentChapter*.9)*.25+(eased-.5)*.7-camera.position.y)*.035;camera.position.z=10-Math.sin(eased*Math.PI)*.7;camera.rotation.z+=(Math.sin(currentChapter*2.2)*(eased-.5)*.035-camera.rotation.z)*.04;dustField.rotation.y=now*.000025+currentChapter*.08;dustField.position.z=(eased-.5)*5;veil.rotation.z=Math.sin(now*.00008+currentChapter)*.1;renderer.render(scene,camera)};render(0);
+    const resize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)};addEventListener('resize',resize);return()=>{cancelAnimationFrame(raf);removeEventListener('resize',resize);meshes.forEach(mesh=>(mesh.material as THREE.Material).dispose());renderer.dispose();el.removeChild(renderer.domElement)};
+  },[]);return <div ref={host} className={styles.world} aria-hidden="true"/>;
 }

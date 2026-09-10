@@ -36,74 +36,23 @@ const QUESTIONS: Question[] = [
 const TOPICS: Topic[] = ['All','Preparation','Examination','Records','Billing','Network'];
 
 export default function QuestionExperience() {
-  const [stage, setStage] = useState<Stage | 'All'>('All');
-  const [topic, setTopic] = useState<Topic>('All');
-  const [query, setQuery] = useState('');
-  const [open, setOpen] = useState<number>(0);
-
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return QUESTIONS.map((item,index)=>({item,index})).filter(({item}) => {
-      if (stage !== 'All' && item.stage !== stage) return false;
-      if (topic !== 'All' && item.topic !== topic) return false;
-      if (!needle) return true;
-      return `${item.q} ${item.a} ${item.topic} ${item.stage}`.toLowerCase().includes(needle);
-    });
-  }, [query, stage, topic]);
-
-  const chooseStage = (next: Stage) => {
-    setStage(current => current === next ? 'All' : next);
-    const first = QUESTIONS.findIndex(item => item.stage === next);
-    if (first >= 0) setOpen(first);
-  };
-
-  return (
-    <main className={styles.root}>
-      <header className={styles.topbar}>
-        <a href="/experience#provider-portals">OCCU-MED / PROVIDER FIELD GUIDE</a>
-        <div><a href="/experience/history">HISTORY</a> · <a href="/experience/network">NETWORK</a> · <a href="/experience/resources">RESOURCES</a> · <a href="/experience/agreement">AGREEMENT</a></div>
-      </header>
-
-      <section className={styles.hero}>
-        <span>PORTAL 04 / PROVIDER Q&A</span>
-        <h1>Follow a referral<br />from start to finish.</h1>
-        <p>Use the referral current to jump into the part of the workflow you need, or search the complete operational guide.</p>
-
-        <div className={styles.current} aria-label="Referral lifecycle">
-          {STAGES.map(item => (
-            <button key={item.stage} type="button" aria-pressed={stage === item.stage} onClick={() => chooseStage(item.stage)}>
-              <span>{item.number} / {item.stage.toUpperCase()}</span><b>{item.note}</b>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className={styles.workspace}>
-        <div className={styles.controls}>
-          <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search provider guidance…" aria-label="Search provider guidance" />
-          <div className={styles.filters} aria-label="Question topics">
-            {TOPICS.map(item => <button key={item} type="button" aria-pressed={topic === item} onClick={() => setTopic(item)}>{item}</button>)}
-          </div>
-        </div>
-
-        <div className={styles.count} aria-live="polite">{filtered.length} of {QUESTIONS.length} answers shown{stage !== 'All' ? ` · ${stage} stage` : ''}</div>
-
-        <div className={styles.faq}>
-          {filtered.length ? filtered.map(({item,index}) => (
-            <article className={styles.item} key={item.q}>
-              <button type="button" aria-expanded={open === index} onClick={() => setOpen(open === index ? -1 : index)}>
-                <span>{item.stage.toUpperCase()}</span><strong>{item.q}</strong><b>{open === index ? '−' : '+'}</b>
-              </button>
-              {open === index && <div className={styles.answer}>{item.a}</div>}
-            </article>
-          )) : <div className={styles.empty}>No provider guidance matches the current search and filters.</div>}
-        </div>
-
-        <div className={styles.guide}>
-          <p><strong>Need the complete source guide?</strong><br/>The supplied Occu-Med Stateside Providers document remains available from the resource endpoint.</p>
-          <a href="/api/provider-resources/stateside-guide">Download provider guide ↓</a>
-        </div>
-      </section>
-    </main>
-  );
+  const [stage,setStage]=useState<Stage>('Receive');
+  const [topic,setTopic]=useState<Topic>('All');
+  const [open,setOpen]=useState(0);
+  const visible=useMemo(()=>QUESTIONS.map((item,index)=>({item,index})).filter(({item})=>item.stage===stage&&(topic==='All'||item.topic===topic)),[stage,topic]);
+  const active=QUESTIONS[open] ?? QUESTIONS[0];
+  const chooseStage=(next:Stage)=>{setStage(next);const index=QUESTIONS.findIndex(item=>item.stage===next&&(topic==='All'||item.topic===topic));if(index>=0)setOpen(index)};
+  const chooseTopic=(next:Topic)=>{const value=topic===next?'All':next;setTopic(value);const index=QUESTIONS.findIndex(item=>item.stage===stage&&(value==='All'||item.topic===value));if(index>=0)setOpen(index)};
+  return <main className={styles.root}>
+    <header className={styles.topbar}><a href="/experience#provider-portals">OCCU-MED® <span>/ PROVIDER FIELD GUIDE</span></a><nav><a href="/experience/history">HISTORY</a><a href="/experience/network">NETWORK</a><a href="/experience/resources">RESOURCES</a><a href="/experience/questions" aria-current="page">Q&amp;A</a><a href="/experience/agreement">AGREEMENT</a></nav></header>
+    <aside className={styles.sidebar}><div className={styles.sideIntro}><span>PORTAL 04 / EXPLORE</span><h1>Referral<br/>current.</h1><p>Move through the provider lifecycle and inspect each operational question in place.</p></div><div className={styles.stageNav}><span>LIFECYCLE</span>{STAGES.map(item=><button key={item.stage} aria-pressed={stage===item.stage} onClick={()=>chooseStage(item.stage)}><i>{item.number}</i><b>{item.stage}</b><small>{item.note}</small></button>)}</div><div className={styles.stageProgress}><i style={{height:`${((STAGES.findIndex(item=>item.stage===stage)+1)/STAGES.length)*100}%`}}/></div></aside>
+    <section className={styles.explorer} data-stage={stage.toLowerCase()}>
+      <div className={styles.ambient} aria-hidden="true"><i/><i/><i/><b>{STAGES.findIndex(item=>item.stage===stage)+1}</b></div>
+      <div className={styles.filters}><span>INFORMATION LAYERS</span>{TOPICS.filter(item=>item!=='All').map(item=><button key={item} aria-pressed={topic===item} onClick={()=>chooseTopic(item)}>{item}</button>)}</div>
+      <div className={styles.fieldTitle}><span>REFERRAL PHASE / {String(STAGES.findIndex(item=>item.stage===stage)+1).padStart(2,'0')}</span><h2>{stage}</h2><p>{STAGES.find(item=>item.stage===stage)?.note}</p></div>
+      <div className={styles.nodes} aria-label={`${stage} questions`}>{visible.length?visible.map(({item,index},position)=><button style={{'--node-x':`${(position%2)*47}%`,'--node-y':`${position*24}%`} as import('react').CSSProperties} key={item.q} aria-pressed={open===index} onClick={()=>setOpen(index)}><i/><span>{item.q}</span><small>{item.topic}</small></button>):<div className={styles.empty}>No questions in this layer.<button onClick={()=>setTopic('All')}>Show all {stage} questions</button></div>}</div>
+      <article className={styles.detail} key={active.q}><header><span>{active.stage} / {active.topic}</span><b>{String(open+1).padStart(2,'0')}</b></header><h3>{active.q}</h3><p>{active.a}</p><footer><i/><span>OCCU-MED PROVIDER GUIDANCE</span></footer></article>
+      <div className={styles.legend}><span><i/> SELECTABLE QUESTION</span><span><i/> ACTIVE DETAIL</span></div>
+    </section>
+  </main>
 }

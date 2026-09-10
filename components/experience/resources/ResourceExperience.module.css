@@ -372,3 +372,5 @@
   .diveCopy p,
   .arrivalMessage { opacity: 1; }
 }
+/* Arrival destinations read as a spatial field rather than a card grid. */
+.specialties{perspective:1200px;gap:0!important;background:#02090e;padding:8vh 2vw}.specialties button{min-height:24vh!important;border-radius:50%!important;border:1px solid color-mix(in srgb,var(--specialty-color) 55%,transparent)!important;background:radial-gradient(circle,var(--specialty-color) 0 2%,transparent 55%)!important;color:white!important;transform:rotateX(8deg) translateZ(0);transition:transform .6s,filter .6s!important}.specialties button:hover,.specialties button[aria-pressed=true]{transform:rotateX(0) translateZ(80px) scale(1.08);filter:drop-shadow(0 0 32px var(--specialty-color))}
