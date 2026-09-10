@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import styles from './SpecialtyField.module.css';
+import { configureCinematicRenderer } from '../immersive/rendererQuality';
 
 type Item={id:string;label:string;color:string};
 type NodeRecord={group:THREE.Group;mesh:THREE.Mesh<THREE.BufferGeometry,THREE.MeshStandardMaterial>;ring:THREE.Mesh;orbit:THREE.Mesh;item:Item;base:THREE.Vector3};
@@ -28,7 +29,7 @@ export default function SpecialtyField({items,selectedId,onSelect}:{items:readon
     const host=mount.current;if(!host)return;
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x071017,.045);
     const camera=new THREE.PerspectiveCamera(48,host.clientWidth/host.clientHeight,.1,80);camera.position.set(0,.35,16);
-    const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(host.clientWidth,host.clientHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;host.appendChild(renderer.domElement);
+    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'}),{exposure:1.05});renderer.setSize(host.clientWidth,host.clientHeight);host.appendChild(renderer.domElement);
     scene.add(new THREE.HemisphereLight(0xb7edff,0x061018,1.05));const key=new THREE.PointLight(0x79e8ff,22,22);key.position.set(0,4,5);scene.add(key);
 
     const nodes:NodeRecord[]=items.map((item,i)=>{
@@ -64,7 +65,7 @@ export default function SpecialtyField({items,selectedId,onSelect}:{items:readon
       setLabels(nodes.map(node=>{const p=node.group.getWorldPosition(new THREE.Vector3()).project(camera);return{x:(p.x*.5+.5)*host.clientWidth,y:(-.5*p.y+.5)*host.clientHeight,visible:p.z<1}}));renderer.render(scene,camera)
     };loop(performance.now());
 
-    const resize=()=>{camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight)};addEventListener('resize',resize);
+    const resize=()=>{camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(host.clientWidth,host.clientHeight)};addEventListener('resize',resize);
     return()=>{cancelAnimationFrame(raf);removeEventListener('resize',resize);renderer.domElement.removeEventListener('pointermove',move);renderer.domElement.removeEventListener('pointerleave',leave);renderer.domElement.removeEventListener('click',click);scene.traverse(object=>{const mesh=object as THREE.Mesh;if(mesh.geometry)mesh.geometry.dispose();const material=mesh.material;if(Array.isArray(material))material.forEach(x=>x.dispose());else material?.dispose()});renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement)};
   },[items]);
 
