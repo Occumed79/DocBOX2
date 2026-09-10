@@ -17,12 +17,14 @@ const ASSETS = [
 const CHAPTER_STARTS = [0,3,4,6,7,12,13,14,16,18,20] as const;
 const CHAPTER_COUNTS = [3,1,2,1,5,1,1,2,2,2,6] as const;
 const CHAPTER_HUES = [.54,.57,.61,.49,.53,.58,.46,.63,.59,.52,.66] as const;
+const CHAPTER_COLORS = [0x79e7f7,0xff7e7a,0x7de6ff,0x98eddb,0x69e0f5,0xb69cff,0x85f0c8,0xb5a0ff,0x7ea8ff,0x64e3f1,0xe1c077] as const;
 
 const IMAGE_VERTEX = `
 varying vec2 vUv;
 uniform float uTime;
 uniform float uIntensity;
 uniform float uProgress;
+uniform float uDepthWarp;
 void main(){
   vUv = uv;
   vec3 p = position;
@@ -31,7 +33,8 @@ void main(){
   p.z += sin((uv.x * 3.14159265) + uTime * .35) * .065 * uIntensity;
   p.x += centeredY * .16 * uIntensity;
   p.y += sin((uv.x + uProgress * .35) * 3.14159265) * .045 * uIntensity;
-  p.z += centeredX * centeredY * .08 * uIntensity;
+  p.z += centeredX * centeredY * (.08 + uDepthWarp * .18) * uIntensity;
+  p.z += sin((uv.y * 3.14159265) + uProgress * 4.0) * uDepthWarp * .06;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0);
 }`;
 
@@ -45,6 +48,52 @@ uniform float uIntensity;
 uniform float uImageAspect;
 uniform float uPlaneAspect;
 uniform float uProgress;
+uniform float uMaskMode;
+uniform vec3 uAccent;
+
+float rectMask(vec2 uv,float feather){
+  return smoothstep(0.0,feather,uv.x)*smoothstep(0.0,feather,uv.y)*smoothstep(0.0,feather,1.0-uv.x)*smoothstep(0.0,feather,1.0-uv.y);
+}
+
+float authoredMask(vec2 uv,float mode,float progress){
+  vec2 p=uv-.5;
+  float mask=rectMask(uv,.08);
+  if(mode<.5){
+    float skewA=smoothstep(-.07,.03,uv.x+uv.y*.16-.05);
+    float skewB=smoothstep(-.07,.03,1.02-uv.x+(1.0-uv.y)*.13-.05);
+    mask*=skewA*skewB;
+  }else if(mode<1.5){
+    float aperture=mix(.34,.73,smoothstep(.08,.72,progress));
+    mask*=smoothstep(aperture+.14,aperture,length(p*vec2(.86,1.0)));
+  }else if(mode<2.5){
+    float diagonal=smoothstep(-.04,.05,uv.x+uv.y*.28-.11)*smoothstep(-.04,.05,1.08-uv.x+(1.0-uv.y)*.18-.1);
+    mask*=diagonal;
+  }else if(mode<3.5){
+    float slice=smoothstep(.04,.14,uv.x)*smoothstep(.04,.14,1.0-uv.x);
+    mask*=slice*smoothstep(-.12,.02,uv.y+uv.x*.18-.05);
+  }else if(mode<4.5){
+    vec2 ellipse=p*vec2(.82,1.05);
+    mask*=smoothstep(.55,.43,length(ellipse));
+  }else if(mode<5.5){
+    float page=smoothstep(-.03,.045,uv.x+uv.y*.055-.025)*smoothstep(-.03,.045,1.0-uv.x+(1.0-uv.y)*.04-.025);
+    mask*=page;
+  }else if(mode<6.5){
+    float iris=mix(.22,.72,smoothstep(.08,.72,progress));
+    mask*=smoothstep(iris+.09,iris,length(p));
+  }else if(mode<7.5){
+    float wing=smoothstep(-.05,.04,uv.y+uv.x*.12-.04)*smoothstep(-.05,.04,1.04-uv.y+(1.0-uv.x)*.10-.04);
+    mask*=wing;
+  }else if(mode<8.5){
+    float deployment=smoothstep(-.06,.04,uv.x+uv.y*.2-.08)*smoothstep(-.06,.04,1.0-uv.x+uv.y*.12-.05);
+    mask*=deployment;
+  }else if(mode<9.5){
+    mask*=smoothstep(.58,.46,length(p*vec2(.72,1.15)));
+  }else{
+    mask*=smoothstep(.54,.43,length(p));
+  }
+  return clamp(mask,0.0,1.0);
+}
+
 void main(){
   vec2 uv = vUv - .5;
   if(uImageAspect > uPlaneAspect){
@@ -58,18 +107,20 @@ void main(){
   uv.y += sin((uv.x * 6.0) - uTime * .45) * .004 * uIntensity;
   vec4 tex = texture2D(uTexture,uv);
   float vignette = smoothstep(.98,.34,length(vUv-.5));
-  float edge = smoothstep(.0,.10,vUv.x)*smoothstep(.0,.10,vUv.y)*smoothstep(.0,.10,1.0-vUv.x)*smoothstep(.0,.10,1.0-vUv.y);
+  float mask = authoredMask(vUv,uMaskMode,uProgress);
   float organic = .93 + .07*sin(vUv.x*17.0 + vUv.y*11.0 + uTime*.08);
   vec3 lifted = mix(tex.rgb, tex.rgb * vec3(.86,.96,1.04), .12 + .12*uIntensity);
-  gl_FragColor = vec4(lifted, tex.a * uOpacity * mix(.76,1.0,vignette) * edge * organic);
+  float accentEdge=pow(1.0-mask,.45)*mask;
+  lifted += uAccent * accentEdge * .18;
+  gl_FragColor = vec4(lifted, tex.a * uOpacity * mix(.76,1.0,vignette) * mask * organic);
 }`;
 
 type Pose = { x:number; y:number; z:number; s:number; rx:number; ry:number; rz:number };
 type CameraPose = { x:number; y:number; z:number; lx:number; ly:number; lz:number; roll:number; fov:number };
 type PlaneRecord = { mesh:THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial>; chapter:number; local:number; texture:THREE.Texture };
+type Structure = { group:THREE.Group; materials:Array<THREE.Material & {opacity:number}>; baseOpacity:number };
 
 const clamp = (v:number,min=0,max=1) => Math.max(min,Math.min(max,v));
-const mix = (a:number,b:number,t:number) => a + (b-a)*t;
 
 function poseFor(chapter:number, local:number, progress:number):Pose {
   const p = progress - .5;
@@ -137,6 +188,40 @@ function assetReveal(chapter:number, local:number, progress:number){
   return 1;
 }
 
+function makeLineFrame(width:number,height:number,color:number,opacity:number){
+  const geometry=new THREE.EdgesGeometry(new THREE.BoxGeometry(width,height,.08));
+  const material=new THREE.LineBasicMaterial({color,transparent:true,opacity});
+  const lines=new THREE.LineSegments(geometry,material);
+  return {object:lines,material};
+}
+
+function buildStructures(scene:THREE.Scene):Structure[]{
+  return CHAPTER_COLORS.map((color,chapter)=>{
+    const group=new THREE.Group();
+    const materials:Array<THREE.Material & {opacity:number}>=[];
+    const addFrame=(w:number,h:number,x:number,y:number,z:number,ry=0,rz=0,opacity=.18)=>{
+      const {object,material}=makeLineFrame(w,h,color,opacity);object.position.set(x,y,z);object.rotation.y=ry;object.rotation.z=rz;group.add(object);materials.push(material);
+    };
+    const addRing=(radius:number,x:number,y:number,z:number,rx:number,ry:number,rz:number,opacity=.16)=>{
+      const material=new THREE.MeshBasicMaterial({color,transparent:true,opacity,blending:THREE.AdditiveBlending,depthWrite:false});
+      const mesh=new THREE.Mesh(new THREE.TorusGeometry(radius,.018,6,110),material);mesh.position.set(x,y,z);mesh.rotation.set(rx,ry,rz);group.add(mesh);materials.push(material);
+    };
+    if(chapter===0){addFrame(8.4,5.3,-1.4,.2,-5,-.08,-.03,.12);addFrame(4.0,2.7,3.0,1.5,-3,.2,.08,.22);addRing(4.6,1,-.3,-7,Math.PI*.48,.15,.2,.09)}
+    if(chapter===1){addRing(4.7,.5,.1,-5,Math.PI*.5,.18,.2,.2);addRing(3.4,.5,.1,-4.9,Math.PI*.5,-.12,-.18,.1);addFrame(11,6,1,0,-7,-.1,.04,.08)}
+    if(chapter===2){addFrame(5.2,3.5,-3,1,-4,.28,-.08,.18);addFrame(5.2,3.5,2.8,-1,-5,-.28,.08,.18);addFrame(2.2,7.5,0,0,-7,.02,.03,.08)}
+    if(chapter===3){for(let i=-3;i<=3;i++)addFrame(.18,8.5,i*1.65,0,-5-Math.abs(i)*.35,i*.02,0,i===0?.25:.08)}
+    if(chapter===4){for(let i=0;i<8;i++)addRing(2.5+i*.48,0,-.8,-2-i*1.45,Math.PI*.5+i*.025,i*.035,i*.18,.11+i*.008)}
+    if(chapter===5){addFrame(5.7,7.4,2,.15,-4,-.1,.02,.23);addFrame(6.2,8.0,2,.15,-5.2,-.1,-.03,.08);for(let i=0;i<4;i++)addFrame(4.4,.08,2,1.8-i*.9,-3.7,-.1,0,.11)}
+    if(chapter===6){for(let i=0;i<6;i++)addRing(1.3+i*.72,0,0,-3-i*.32,Math.PI*.5,i*.04,i*.22,.12+i*.012)}
+    if(chapter===7){addFrame(6.2,5.1,-3,0,-4,.28,-.06,.16);addFrame(6.2,5.1,3,0,-4,-.28,.06,.16);addRing(5.4,0,-.2,-8,Math.PI*.5,.04,.1,.08)}
+    if(chapter===8){addRing(3.0,-1,.5,-4,Math.PI*.5,.38,-.2,.2);addRing(4.2,1,-.3,-6,Math.PI*.44,-.32,.55,.13);addFrame(9,5.2,0,0,-8,.08,.02,.07)}
+    if(chapter===9){for(let i=0;i<5;i++)addRing(2.1+i*.7,0,0,-4-i*.6,Math.PI*.5,i*.13,i*.32,.1);addFrame(10,4.6,0,0,-8,0,0,.08)}
+    if(chapter===10){for(let i=0;i<6;i++){const a=i/6*Math.PI*2;addRing(1.15,Math.cos(a)*3.8,Math.sin(a)*2.2,-4-(i%2),Math.PI*.5,a*.22,a,.18)}addRing(5.2,0,0,-8,Math.PI*.5,.18,.2,.08)}
+    group.visible=false;scene.add(group);
+    return {group,materials,baseOpacity:1};
+  });
+}
+
 export default function CinematicWorld({ sceneIndex }:{ sceneIndex:number }) {
   const host=useRef<HTMLDivElement>(null);
   const chapterRef=useRef(sceneIndex);chapterRef.current=sceneIndex;
@@ -149,6 +234,7 @@ export default function CinematicWorld({ sceneIndex }:{ sceneIndex:number }) {
     const renderer=new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(window.innerWidth,window.innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;element.appendChild(renderer.domElement);
     scene.add(new THREE.AmbientLight(0xffffff,.95));const key=new THREE.PointLight(0x68ddff,28,28);key.position.set(5,3,7);scene.add(key);const violet=new THREE.PointLight(0x7755ff,16,24);violet.position.set(-5,-2,3);scene.add(violet);
 
+    const structures=buildStructures(scene);
     const textureLoader=new THREE.TextureLoader();const records:PlaneRecord[]=[];const planeAspect=4.7/3.05;
     for(let chapter=0;chapter<CHAPTER_STARTS.length;chapter++){
       const start=CHAPTER_STARTS[chapter],count=CHAPTER_COUNTS[chapter];
@@ -157,19 +243,19 @@ export default function CinematicWorld({ sceneIndex }:{ sceneIndex:number }) {
         const texture=textureLoader.load('/photos/'+encodeURIComponent(asset));texture.colorSpace=THREE.SRGBColorSpace;
         const material=new THREE.ShaderMaterial({
           vertexShader:IMAGE_VERTEX,fragmentShader:IMAGE_FRAGMENT,transparent:true,side:THREE.DoubleSide,depthWrite:false,
-          uniforms:{uTexture:{value:texture},uTime:{value:0},uOpacity:{value:0},uIntensity:{value:0},uImageAspect:{value:planeAspect},uPlaneAspect:{value:planeAspect},uProgress:{value:.5}},
+          uniforms:{uTexture:{value:texture},uTime:{value:0},uOpacity:{value:0},uIntensity:{value:0},uImageAspect:{value:planeAspect},uPlaneAspect:{value:planeAspect},uProgress:{value:.5},uMaskMode:{value:chapter},uAccent:{value:new THREE.Color(CHAPTER_COLORS[chapter])},uDepthWarp:{value:chapter===4||chapter===10?.7:.28}},
         });
         texture.onUpdate=()=>{
           const image=texture.image as {naturalWidth?:number;naturalHeight?:number;width?:number;height?:number}|undefined;
           const width=image?.naturalWidth??image?.width??0,height=image?.naturalHeight??image?.height??0;
           if(width&&height)material.uniforms.uImageAspect.value=width/height;
         };
-        const geometry=new THREE.PlaneGeometry(4.7,3.05,24,16);const mesh=new THREE.Mesh(geometry,material);mesh.renderOrder=10+local;scene.add(mesh);records.push({mesh,chapter,local,texture});
+        const geometry=new THREE.PlaneGeometry(4.7,3.05,28,18);const mesh=new THREE.Mesh(geometry,material);mesh.renderOrder=10+local;scene.add(mesh);records.push({mesh,chapter,local,texture});
       }
     }
 
     const dustGeometry=new THREE.BufferGeometry();const dust=new Float32Array(2400);for(let i=0;i<dust.length;i+=3){dust[i]=(Math.random()-.5)*30;dust[i+1]=(Math.random()-.5)*18;dust[i+2]=-Math.random()*35+5}dustGeometry.setAttribute('position',new THREE.BufferAttribute(dust,3));const dustField=new THREE.Points(dustGeometry,new THREE.PointsMaterial({color:0x83e6ff,size:.025,transparent:true,opacity:.42,depthWrite:false}));scene.add(dustField);
-    const orbitGroup=new THREE.Group();for(let i=0;i<4;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(3.6+i*1.35,.012,6,120),new THREE.MeshBasicMaterial({color:i%2?0x7656ff:0x4ecbe8,transparent:true,opacity:.11}));ring.rotation.set(Math.PI*.5+i*.11,i*.17,i*.3);orbitGroup.add(ring)}scene.add(orbitGroup);
+    const orbitGroup=new THREE.Group();for(let i=0;i<4;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(3.6+i*1.35,.012,6,120),new THREE.MeshBasicMaterial({color:i%2?0x7656ff:0x4ecbe8,transparent:true,opacity:.06}));ring.rotation.set(Math.PI*.5+i*.11,i*.17,i*.3);orbitGroup.add(ring)}scene.add(orbitGroup);
 
     const pointer={x:0,y:0};const onPointer=(event:PointerEvent)=>{pointer.x=(event.clientX/window.innerWidth-.5)*2;pointer.y=(event.clientY/window.innerHeight-.5)*2};window.addEventListener('pointermove',onPointer,{passive:true});
     let chapterFloat=0,local=.5,lastLocal=.5,velocity=0,raf=0;const clock=new THREE.Clock();
@@ -180,18 +266,25 @@ export default function CinematicWorld({ sceneIndex }:{ sceneIndex:number }) {
         const chapterDistance=Math.abs(chapterFloat-chapter),visibility=clamp(1-chapterDistance*.9),chapterProgress=chapter===targetChapter?local:(chapter<targetChapter?1:0),pose=poseFor(chapter,assetIndex,chapterProgress),transition=clamp(visibility),reveal=assetReveal(chapter,assetIndex,chapterProgress),revealDepth=chapter===4?(1-reveal)*1.35:0,hiddenZ=pose.z-7*Math.min(1,chapterDistance)-revealDepth;
         mesh.position.x+=(pose.x-mesh.position.x)*.09;mesh.position.y+=(pose.y-mesh.position.y)*.09;mesh.position.z+=(hiddenZ-mesh.position.z)*.09;mesh.rotation.x+=(pose.rx-mesh.rotation.x)*.08;mesh.rotation.y+=(pose.ry-mesh.rotation.y)*.08;mesh.rotation.z+=(pose.rz-mesh.rotation.z)*.08;
         const pulse=1+Math.sin(elapsed*.42+assetIndex)*.008,revealScale=chapter===4?.84+reveal*.16:1,scale=pose.s*pulse*revealScale;mesh.scale.x+=(scale-mesh.scale.x)*.09;mesh.scale.y+=(scale-mesh.scale.y)*.09;mesh.scale.z=1;
-        const uniforms=mesh.material.uniforms;uniforms.uTime.value=elapsed;uniforms.uProgress.value=chapterProgress;uniforms.uOpacity.value+=(transition*.94*reveal-uniforms.uOpacity.value)*.12;const motionIntensity=clamp(Math.abs(velocity)*120+Math.abs(chapterProgress-.5)*.12,0,1);uniforms.uIntensity.value+=(motionIntensity-uniforms.uIntensity.value)*.1;
+        const uniforms=mesh.material.uniforms;uniforms.uTime.value=elapsed;uniforms.uProgress.value=chapterProgress;uniforms.uOpacity.value+=(transition*.96*reveal-uniforms.uOpacity.value)*.12;const motionIntensity=clamp(Math.abs(velocity)*140+Math.abs(chapterProgress-.5)*.16,0,1);uniforms.uIntensity.value+=(motionIntensity-uniforms.uIntensity.value)*.1;
+      });
+      structures.forEach((structure,index)=>{
+        const weight=clamp(1-Math.abs(chapterFloat-index)*1.18);structure.group.visible=weight>.015;
+        structure.materials.forEach((material,materialIndex)=>{const targetOpacity=weight*(.07+(materialIndex%4)*.035);material.opacity+=(targetOpacity-material.opacity)*.12});
+        structure.group.rotation.z=Math.sin(elapsed*.08+index)*.018+local*.025*(index%2?1:-1);
+        structure.group.rotation.y=Math.sin(elapsed*.06+index*.5)*.025;
+        structure.group.position.z=(local-.5)*(index===4?-2.4:-.7);
       });
       const authored=cameraPoseFor(targetChapter,local);
       const targetX=authored.x+pointer.x*.24,targetY=authored.y-pointer.y*.16,targetZ=authored.z;
       camera.position.x+=(targetX-camera.position.x)*.045;camera.position.y+=(targetY-camera.position.y)*.045;camera.position.z+=(targetZ-camera.position.z)*.045;
       lookTarget.x+=(authored.lx+pointer.x*.08-lookTarget.x)*.05;lookTarget.y+=(authored.ly-pointer.y*.05-lookTarget.y)*.05;lookTarget.z+=(authored.lz-lookTarget.z)*.05;
       camera.fov+=(authored.fov-camera.fov)*.04;camera.updateProjectionMatrix();camera.lookAt(lookTarget);camera.rotation.z+=(authored.roll-camera.rotation.z)*.08;
-      orbitGroup.rotation.z=elapsed*.012+chapterFloat*.12;orbitGroup.rotation.y=Math.sin(elapsed*.08)*.12;orbitGroup.position.z=-4-local*1.5;dustField.rotation.y=elapsed*.006;dustField.position.z=local*-1.2;renderer.render(scene,camera);
+      orbitGroup.rotation.z=elapsed*.012+chapterFloat*.12;orbitGroup.rotation.y=Math.sin(elapsed*.08)*.12;orbitGroup.position.z=-5-local*1.5;dustField.rotation.y=elapsed*.006;dustField.position.z=local*-1.2;renderer.render(scene,camera);
     };render();
 
     const resize=()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(window.innerWidth,window.innerHeight)};window.addEventListener('resize',resize);
-    return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);window.removeEventListener('pointermove',onPointer);records.forEach(({mesh,texture})=>{mesh.geometry.dispose();texture.dispose();mesh.material.dispose()});dustGeometry.dispose();(dustField.material as THREE.PointsMaterial).dispose();orbitGroup.children.forEach(child=>{const mesh=child as THREE.Mesh;mesh.geometry?.dispose();(mesh.material as THREE.Material)?.dispose()});renderer.dispose();if(renderer.domElement.parentNode===element)element.removeChild(renderer.domElement)};
+    return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);window.removeEventListener('pointermove',onPointer);records.forEach(({mesh,texture})=>{mesh.geometry.dispose();texture.dispose();mesh.material.dispose()});scene.traverse(object=>{const candidate=object as THREE.Mesh|THREE.LineSegments;if(candidate.geometry&&!records.some(record=>record.mesh===candidate))candidate.geometry.dispose();const material=(candidate as THREE.Mesh).material;if(material){if(Array.isArray(material))material.forEach(item=>item.dispose());else material.dispose()}});renderer.dispose();if(renderer.domElement.parentNode===element)element.removeChild(renderer.domElement)};
   },[]);
 
   return <div ref={host} className={styles.world} aria-hidden="true"/>;
