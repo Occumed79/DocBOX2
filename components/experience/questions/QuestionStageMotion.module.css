@@ -1,0 +1,21 @@
+.root{transition:background .9s ease}
+.root[data-stage='receive']{--cyan:#6ee8ff}
+.root[data-stage='schedule']{--cyan:#7aa8ff}
+.root[data-stage='examine']{--cyan:#70e8c5}
+.root[data-stage='return']{--cyan:#b18cff}
+.root[data-stage='invoice']{--cyan:#e6bd73}
+
+.explorer{transition:background 1s cubic-bezier(.2,.75,.2,1),filter .7s ease}
+.explorer[data-stage='receive']{background:radial-gradient(circle at 61% 43%,rgba(29,101,119,.2),transparent 31%),linear-gradient(135deg,#071821,#040d12 64%)}
+.explorer[data-stage='schedule']{background:radial-gradient(circle at 61% 40%,rgba(65,91,162,.22),transparent 32%),linear-gradient(145deg,#0a1425,#050b14 65%)}
+.explorer[data-stage='examine']{background:radial-gradient(circle at 58% 44%,rgba(40,128,108,.2),transparent 31%),linear-gradient(145deg,#071d1b,#040e11 66%)}
+.explorer[data-stage='return']{background:radial-gradient(circle at 62% 42%,rgba(105,74,158,.22),transparent 32%),linear-gradient(145deg,#151326,#070b14 66%)}
+.explorer[data-stage='invoice']{background:radial-gradient(circle at 59% 44%,rgba(151,112,53,.2),transparent 31%),linear-gradient(145deg,#21180d,#0c0b09 66%)}
+
+.explorer::after{content:'';position:absolute;z-index:2;inset:58px 0 0;pointer-events:none;opacity:.24;background:linear-gradient(105deg,transparent 24%,color-mix(in srgb,var(--cyan) 16%,transparent) 50%,transparent 76%);transform:translateX(-60%);transition:opacity .4s}
+.root[data-stage='schedule'] .explorer::after,.root[data-stage='return'] .explorer::after{animation:fieldSweep .9s cubic-bezier(.18,.72,.2,1)}
+.root[data-stage='examine'] .explorer::after,.root[data-stage='invoice'] .explorer::after{animation:fieldSweepReverse .9s cubic-bezier(.18,.72,.2,1)}
+
+@keyframes fieldSweep{from{transform:translateX(-70%);opacity:.5}to{transform:translateX(70%);opacity:0}}
+@keyframes fieldSweepReverse{from{transform:translateX(70%);opacity:.5}to{transform:translateX(-70%);opacity:0}}
+@media(prefers-reduced-motion:reduce){.root,.explorer{transition:none}.explorer::after{display:none}}
