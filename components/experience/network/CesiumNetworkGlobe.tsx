@@ -68,7 +68,8 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
       handler.setInputAction((movement:any)=>{
         const picked=scene.pick(movement.endPosition);const meta=picked?.id??picked?.primitive?.id;
         if(!meta||meta.kind!=='provider'){setHover(null);return}
-        setHover({x:movement.endPosition.x,y:movement.endPosition.y,title:`${LABELS[meta.type]} node`,detail:`${meta.lat.toFixed(2)}°, ${meta.lon.toFixed(2)}°${meta.count?` · ${meta.count.toLocaleString()} records`:''}`});
+        const type=pointType(meta.type as Layer);
+        setHover({x:movement.endPosition.x,y:movement.endPosition.y,title:`${LABELS[type]} node`,detail:`${meta.lat.toFixed(2)}°, ${meta.lon.toFixed(2)}°${meta.count?` · ${meta.count.toLocaleString()} records`:''}`});
       },Cesium.ScreenSpaceEventType.MOUSE_MOVE);
       handler.setInputAction(()=>pauseAutoplay(),Cesium.ScreenSpaceEventType.LEFT_DOWN);
       handler.setInputAction(()=>pauseAutoplay(),Cesium.ScreenSpaceEventType.WHEEL);
