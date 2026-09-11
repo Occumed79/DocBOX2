@@ -42,6 +42,10 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
   const buildingsRef=useRef<any>(null);
   const interactionTimerRef=useRef<ReturnType<typeof setTimeout>|null>(null);
   const autoRotateRef=useRef(true);
+  const pointsRef=useRef<readonly Point[]>(points);
+  const modeRef=useRef(mode);
+  const selectionRef=useRef<Selection>(null);
+  const onExploreRef=useRef(onExplore);
   const[loaded,setLoaded]=useState(Boolean(typeof window!=='undefined'&&window.Cesium));
   const[ready,setReady]=useState(false);
   const[error,setError]=useState(false);
@@ -49,6 +53,10 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
   const[selection,setSelection]=useState<Selection>(null);
   const[visibleCount,setVisibleCount]=useState(0);
   const token=process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN?.trim()||'';
+
+  useEffect(()=>{pointsRef.current=points},[points]);
+  useEffect(()=>{modeRef.current=mode},[mode]);
+  useEffect(()=>{onExploreRef.current=onExplore},[onExplore]);
 
   useEffect(()=>{
     if(document.querySelector('link[data-docbox-cesium]'))return;
@@ -86,9 +94,9 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
       }
 
       const handler=new Cesium.ScreenSpaceEventHandler(scene.canvas);
-      const pauseAutoplay=()=>{onExplore?.();autoRotateRef.current=false;if(interactionTimerRef.current)clearTimeout(interactionTimerRef.current);interactionTimerRef.current=setTimeout(()=>{if(!selection)autoRotateRef.current=true},6500)};
+      const pauseAutoplay=()=>{onExploreRef.current?.();autoRotateRef.current=false;if(interactionTimerRef.current)clearTimeout(interactionTimerRef.current);interactionTimerRef.current=setTimeout(()=>{if(!selectionRef.current)autoRotateRef.current=true},6500)};
       const returnToOrbit=(lat:number,lon:number)=>{
-        autoRotateRef.current=false;selectionCollection.removeAll();setSelection(null);setHover(null);
+        autoRotateRef.current=false;selectionRef.current=null;selectionCollection.removeAll();setSelection(null);setHover(null);
         viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lon,lat,2200000),orientation:{heading:viewer.camera.heading+Cesium.Math.toRadians(8),pitch:Cesium.Math.toRadians(-70),roll:0},duration:1.25,easingFunction:Cesium.EasingFunction.CUBIC_IN_OUT,complete:()=>{autoRotateRef.current=true}});
       };
       (viewer as any).__docboxReturnToOrbit=returnToOrbit;
@@ -105,10 +113,10 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
         const picked=scene.pick(movement.position);const meta=picked?.id??picked?.primitive?.id;
         if(!meta||meta.kind!=='provider')return;
         pauseAutoplay();autoRotateRef.current=false;setHover(null);
-        const type=meta.type as Layer,nearby=nearbyCount(points,meta.lat,meta.lon);
-        setSelection({type,lat:meta.lat,lon:meta.lon,nearby});
+        const type=meta.type as Layer,nearby=nearbyCount(pointsRef.current,meta.lat,meta.lon);
+        const nextSelection={type,lat:meta.lat,lon:meta.lon,nearby};selectionRef.current=nextSelection;setSelection(nextSelection);
         selectionCollection.removeAll();
-        const position=Cesium.Cartesian3.fromDegrees(meta.lon,meta.lat,mode==='aggregate'?19000:5600);
+        const aggregate=modeRef.current==='aggregate',position=Cesium.Cartesian3.fromDegrees(meta.lon,meta.lat,aggregate?19000:5600);
         selectionCollection.add({position,pixelSize:19,color:Cesium.Color.fromCssColorString(COLORS[type]).withAlpha(.18),outlineColor:Cesium.Color.fromCssColorString(COLORS[type]).withAlpha(.92),outlineWidth:2,disableDepthTestDistance:Number.POSITIVE_INFINITY});
         selectionCollection.add({position,pixelSize:7,color:Cesium.Color.WHITE.withAlpha(.98),outlineColor:Cesium.Color.fromCssColorString(COLORS[type]),outlineWidth:2,disableDepthTestDistance:Number.POSITIVE_INFINITY});
         viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(meta.lon,meta.lat,850000),orientation:{heading:viewer.camera.heading+Cesium.Math.toRadians(14),pitch:Cesium.Math.toRadians(-63),roll:Cesium.Math.toRadians(1.5)},duration:1.0,easingFunction:Cesium.EasingFunction.CUBIC_IN_OUT,complete:()=>{
@@ -124,7 +132,7 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
         if(!viewer.isDestroyed())viewer.destroy();viewerRef.current=null;
       };
     }catch{setError(true);setReady(false)}
-  },[loaded,onExplore,points,selection,token,mode]);
+  },[loaded,token]);
 
   useEffect(()=>{
     const collection=pointCollectionRef.current,Cesium=window.Cesium;
@@ -160,7 +168,7 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
   useEffect(()=>{
     const viewer=viewerRef.current,Cesium=window.Cesium;
     if(!ready||!viewer||!Cesium||!focus)return;
-    autoRotateRef.current=false;selectionCollectionRef.current?.removeAll();setSelection(null);setHover(null);
+    autoRotateRef.current=false;selectionRef.current=null;selectionCollectionRef.current?.removeAll();setSelection(null);setHover(null);
     viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(focus.lon,focus.lat,focus.height),orientation:{heading:Cesium.Math.toRadians(focus.lon*.035),pitch:Cesium.Math.toRadians(focus.height>12000000?-72:-78),roll:0},duration:1.65,easingFunction:Cesium.EasingFunction.CUBIC_IN_OUT,complete:()=>{autoRotateRef.current=true}});
   },[focus,ready]);
 
