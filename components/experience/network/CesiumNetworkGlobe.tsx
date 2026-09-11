@@ -15,10 +15,8 @@ type Props={points:readonly Point[];layer:Layer;mode:'coordinates'|'aggregate'|'
 const BASE='https://cesium.com/downloads/cesiumjs/releases/1.143/Build/Cesium/';
 const SOURCE=`${BASE}Cesium.js`;
 const WIDGET_CSS=`${BASE}Widgets/widgets.css`;
-const COLORS:Record<Exclude<Layer,'all'>,string>={medical:'#7fe8ff',dental:'#b48bff',diagnostic:'#8ab5ff',pharmacy:'#e7be74'};
-const LABELS:Record<Exclude<Layer,'all'>,string>={medical:'Medical',dental:'Dental',diagnostic:'Diagnostics',pharmacy:'Pharmacy'};
-
-function pointType(type:Layer):Exclude<Layer,'all'>{return type==='all'?'medical':type}
+const COLORS:Record<Layer,string>={all:'#82ebff',medical:'#7fe8ff',dental:'#b48bff',diagnostic:'#8ab5ff',pharmacy:'#e7be74'};
+const LABELS:Record<Layer,string>={all:'Regional aggregate',medical:'Medical',dental:'Dental',diagnostic:'Diagnostics',pharmacy:'Pharmacy'};
 
 if(typeof window!=='undefined')window.CESIUM_BASE_URL=BASE;
 
@@ -26,6 +24,7 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
   const hostRef=useRef<HTMLDivElement|null>(null);
   const viewerRef=useRef<any>(null);
   const pointCollectionRef=useRef<any>(null);
+  const buildingsRef=useRef<any>(null);
   const interactionTimerRef=useRef<ReturnType<typeof setTimeout>|null>(null);
   const autoRotateRef=useRef(true);
   const[loaded,setLoaded]=useState(Boolean(typeof window!=='undefined'&&window.Cesium));
@@ -63,22 +62,32 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
 
       const collection=scene.primitives.add(new Cesium.PointPrimitiveCollection());
       pointCollectionRef.current=collection;
+      if(token&&typeof Cesium.createOsmBuildingsAsync==='function'){
+        Cesium.createOsmBuildingsAsync().then((tileset:any)=>{if(!viewer.isDestroyed()){buildingsRef.current=scene.primitives.add(tileset)}}).catch(()=>{});
+      }
+
       const handler=new Cesium.ScreenSpaceEventHandler(scene.canvas);
       const pauseAutoplay=()=>{onExplore?.();autoRotateRef.current=false;if(interactionTimerRef.current)clearTimeout(interactionTimerRef.current);interactionTimerRef.current=setTimeout(()=>{autoRotateRef.current=true},6500)};
       handler.setInputAction((movement:any)=>{
         const picked=scene.pick(movement.endPosition);const meta=picked?.id??picked?.primitive?.id;
         if(!meta||meta.kind!=='provider'){setHover(null);return}
-        const type=pointType(meta.type as Layer);
-        setHover({x:movement.endPosition.x,y:movement.endPosition.y,title:`${LABELS[type]} node`,detail:`${meta.lat.toFixed(2)}°, ${meta.lon.toFixed(2)}°${meta.count?` · ${meta.count.toLocaleString()} records`:''}`});
+        const type=meta.type as Layer;
+        setHover({x:movement.endPosition.x,y:movement.endPosition.y,title:type==='all'?LABELS.all:`${LABELS[type]} node`,detail:`${meta.lat.toFixed(2)}°, ${meta.lon.toFixed(2)}°${meta.count?` · ${meta.count.toLocaleString()} records`:''}`});
       },Cesium.ScreenSpaceEventType.MOUSE_MOVE);
       handler.setInputAction(()=>pauseAutoplay(),Cesium.ScreenSpaceEventType.LEFT_DOWN);
       handler.setInputAction(()=>pauseAutoplay(),Cesium.ScreenSpaceEventType.WHEEL);
+      handler.setInputAction((movement:any)=>{
+        const picked=scene.pick(movement.position);const meta=picked?.id??picked?.primitive?.id;
+        if(!meta||meta.kind!=='provider')return;
+        pauseAutoplay();
+        viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(meta.lon,meta.lat,620000),orientation:{heading:viewer.camera.heading,pitch:Cesium.Math.toRadians(-72),roll:0},duration:1.25,easingFunction:Cesium.EasingFunction.CUBIC_IN_OUT});
+      },Cesium.ScreenSpaceEventType.LEFT_CLICK);
       const tick=()=>{if(autoRotateRef.current&&viewer.camera.positionCartographic.height>7200000&&!viewer.camera._currentFlight)viewer.camera.rotate(Cesium.Cartesian3.UNIT_Z,-.000055)};
       viewer.clock.onTick.addEventListener(tick);
       setReady(true);setError(false);
       return()=>{
         if(interactionTimerRef.current)clearTimeout(interactionTimerRef.current);
-        handler.destroy();viewer.clock.onTick.removeEventListener(tick);pointCollectionRef.current=null;
+        handler.destroy();viewer.clock.onTick.removeEventListener(tick);pointCollectionRef.current=null;buildingsRef.current=null;
         if(!viewer.isDestroyed())viewer.destroy();viewerRef.current=null;
       };
     }catch{setError(true);setReady(false)}
@@ -88,24 +97,31 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
     const collection=pointCollectionRef.current,Cesium=window.Cesium;
     if(!ready||!collection||!Cesium)return;
     collection.removeAll();
-    const showAll=layer==='all';let count=0;
     for(const point of points){
-      if(!showAll&&point.type!==layer)continue;
-      const type=pointType(point.type),aggregate=mode==='aggregate';
-      const pixelSize=aggregate?Math.min(15,6+Math.log10((point.count??1)+1)*2):4.4;
+      const aggregate=mode==='aggregate',pixelSize=aggregate?Math.min(15,6+Math.log10((point.count??1)+1)*2):4.4;
       collection.add({
         position:Cesium.Cartesian3.fromDegrees(point.lon,point.lat,aggregate?18000:5200),
         pixelSize,
-        color:Cesium.Color.fromCssColorString(COLORS[type]).withAlpha(aggregate?.96:.82),
+        color:Cesium.Color.fromCssColorString(COLORS[point.type]).withAlpha(aggregate?.96:.82),
         outlineColor:Cesium.Color.fromCssColorString('#031017').withAlpha(.8),
         outlineWidth:aggregate?1.5:.65,
         scaleByDistance:new Cesium.NearFarScalar(250000,1.75,22000000,.48),
         translucencyByDistance:new Cesium.NearFarScalar(300000,.98,24000000,.42),
-        id:{kind:'provider',type,lat:point.lat,lon:point.lon,count:point.count??0}
+        id:{kind:'provider',type:point.type,lat:point.lat,lon:point.lon,count:point.count??0}
       });
-      count++;
     }
-    setVisibleCount(count);
+  },[mode,points,ready]);
+
+  useEffect(()=>{
+    const collection=pointCollectionRef.current;
+    if(!ready||!collection)return;
+    let count=0;
+    for(let i=0;i<collection.length;i++){
+      const primitive=collection.get(i),type=primitive.id?.type as Layer|undefined;
+      primitive.show=layer==='all'||type===layer||type==='all';
+      if(primitive.show)count++;
+    }
+    setVisibleCount(count);setHover(null);
   },[layer,mode,points,ready]);
 
   useEffect(()=>{
@@ -122,6 +138,6 @@ export default function CesiumNetworkGlobe({points,layer,mode,focus,onExplore}:P
     {!ready&&!error&&<div className={styles.loading}><i/><span>INITIALIZING GLOBAL NETWORK</span></div>}
     {error&&<div className={styles.error}><b>3D globe unavailable</b><span>The provider dataset remains intact. Reload to retry the Cesium scene.</span></div>}
     {hover&&<div className={styles.tooltip} style={{left:hover.x,top:hover.y}}><b>{hover.title}</b><small>{hover.detail}</small></div>}
-    <div className={styles.status}><span>{token?'CESIUM ION / WORLD TERRAIN':'CESIUMJS / GLOBAL NETWORK'}</span><b>{visibleCount.toLocaleString()}</b><small>VISIBLE NODES</small></div>
+    <div className={styles.status}><span>{token?'CESIUM ION / TERRAIN + 3D':'CESIUMJS / GLOBAL NETWORK'}</span><b>{visibleCount.toLocaleString()}</b><small>VISIBLE NODES</small></div>
   </div>;
 }
