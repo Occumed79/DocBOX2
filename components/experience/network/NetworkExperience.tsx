@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent, type WheelEven
 import styles from './NetworkExperience.module.css';
 import regionStyles from './NetworkRegions.module.css';
 import { createNetworkPointRenderer, type NetworkPointRenderer, type NetworkRenderPoint } from './NetworkPointRenderer';
+import CesiumNetworkGlobe from './CesiumNetworkGlobe';
 
 type Layer='all'|'medical'|'dental'|'diagnostic'|'pharmacy';
 type Point=NetworkRenderPoint&{type:Layer};
@@ -86,7 +87,9 @@ export default function NetworkExperience(){
         </div>
         <div ref={wrapRef} className={styles.canvasWrap} data-dragging={dragging} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={()=>{if(!dragging)setHover(null)}} onWheel={onWheel}>
           <div className={styles.reticle} aria-hidden="true"><i/><i/><span>EXPLORE</span></div>
-          <canvas ref={canvasRef} className={styles.canvas} aria-label="Interactive anonymized provider network map"/><div className={styles.instructions}>Drag to pan · wheel or trackpad to zoom · choose a layer or geographic view. Provider names and contact details are never rendered.</div>{hover&&<div className={styles.tooltip} style={{left:hover.x,top:hover.y}}><b>{hover.title}</b><small>{hover.detail}</small></div>}
+          <canvas ref={canvasRef} className={styles.canvas} aria-label="Interactive anonymized provider network map"/>
+          <CesiumNetworkGlobe points={renderPoints} layer={layer} mode={mode}/>
+          <div className={styles.instructions}>Drag to pan · wheel or trackpad to zoom · choose a layer or geographic view. Provider names and contact details are never rendered.</div>{hover&&<div className={styles.tooltip} style={{left:hover.x,top:hover.y}}><b>{hover.title}</b><small>{hover.detail}</small></div>}
         </div>
         <div className={styles.mapFooter} aria-live="polite"><span><strong>{LAYER_LABELS[layer]}</strong> selected · {TOTALS[layer].toLocaleString()} directory records</span><span>{activeRegion==='custom'?'Custom view':REGIONS.find(region=>region.id===activeRegion)?.label} · Zoom {zoom.toFixed(1)}×</span></div>
       </div>
