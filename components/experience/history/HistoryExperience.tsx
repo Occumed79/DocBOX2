@@ -14,11 +14,41 @@ const M=[
  ['2021','Continuity.','Job relevance, clinical quality, and defensible review remain the connective tissue.','Diverse Workforce2.png'],
  ['TODAY','One connected network.','The founding question now travels through a worldwide medical and dental network.','Facilities.png'],
 ] as const;
+const clamp=(value:number)=>Math.max(0,Math.min(1,value));
 export default function HistoryExperience(){
-  const root=useRef<HTMLElement>(null);const[progress,setProgress]=useState(0);
-  useEffect(()=>{let f=0;const update=()=>{f=0;const el=root.current;if(el)setProgress(Math.max(0,Math.min(1,-el.getBoundingClientRect().top/Math.max(1,el.offsetHeight-innerHeight))))};const q=()=>{if(!f)f=requestAnimationFrame(update)};update();addEventListener('scroll',q,{passive:true});addEventListener('resize',q);return()=>{removeEventListener('scroll',q);removeEventListener('resize',q);cancelAnimationFrame(f)}},[]);
-  const active=Math.min(M.length-1,Math.round(progress*(M.length-1)));
-  const jump=(i:number)=>{const el=root.current;if(el)scrollTo({top:el.offsetTop+i/(M.length-1)*(el.offsetHeight-innerHeight),behavior:'smooth'})};
+  const root=useRef<HTMLElement>(null);
+  const target=useRef(0);
+  const rendered=useRef(0);
+  const frame=useRef(0);
+  const[progress,setProgress]=useState(0);
+  useEffect(()=>{
+    const measure=()=>{
+      const el=root.current;if(!el)return;
+      const travel=Math.max(1,el.offsetHeight-innerHeight);
+      const documentTop=scrollY+el.getBoundingClientRect().top;
+      target.current=clamp((scrollY-documentTop)/travel);
+    };
+    const animate=()=>{
+      frame.current=0;
+      const delta=target.current-rendered.current;
+      if(Math.abs(delta)<.00012){rendered.current=target.current;setProgress(target.current);return}
+      rendered.current+=delta*.14;
+      setProgress(rendered.current);
+      frame.current=requestAnimationFrame(animate);
+    };
+    const queue=()=>{measure();if(!frame.current)frame.current=requestAnimationFrame(animate)};
+    measure();rendered.current=target.current;setProgress(target.current);
+    addEventListener('scroll',queue,{passive:true});addEventListener('resize',queue);
+    return()=>{removeEventListener('scroll',queue);removeEventListener('resize',queue);if(frame.current)cancelAnimationFrame(frame.current)};
+  },[]);
+  const active=Math.min(M.length-1,Math.max(0,Math.round(progress*(M.length-1))));
+  const jump=(i:number)=>{
+    const el=root.current;if(!el)return;
+    const documentTop=scrollY+el.getBoundingClientRect().top;
+    const travel=Math.max(1,el.offsetHeight-innerHeight);
+    const destination=documentTop+(i/(M.length-1))*travel;
+    scrollTo({top:destination,behavior:'smooth'});
+  };
   const milestones=M.map(item=>({year:item[0],image:item[3]}));
   return <main ref={root} className={styles.root}>
     <HistoryWorld progress={progress} milestones={milestones}/>
