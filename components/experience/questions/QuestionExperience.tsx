@@ -44,42 +44,47 @@ const QUESTIONS:Question[]=[
 export default function QuestionExperience(){
   const[stage,setStage]=useState<Stage>('Receive');
   const[topic,setTopic]=useState<Topic>('All');
+  const[open,setOpen]=useState(0);
   const availableTopics=useMemo(()=>Array.from(new Set(QUESTIONS.filter(item=>item.stage===stage).map(item=>item.topic))),[stage]);
   const visible=useMemo(()=>QUESTIONS.map((item,index)=>({item,index})).filter(({item})=>item.stage===stage&&(topic==='All'||item.topic===topic)),[stage,topic]);
-  const[open,setOpen]=useState(0);
   const active=QUESTIONS[open]??QUESTIONS[0];
   const activeVisible=Math.max(0,visible.findIndex(({index})=>index===open));
   const stageIndex=Math.max(0,STAGES.findIndex(item=>item.stage===stage));
 
-  const choose=(next:Stage)=>{
+  const chooseStage=(next:Stage)=>{
     const nextTopics=Array.from(new Set(QUESTIONS.filter(item=>item.stage===next).map(item=>item.topic)));
     const nextTopic=topic==='All'||nextTopics.includes(topic as Exclude<Topic,'All'>)?topic:'All';
     setStage(next);setTopic(nextTopic);
-    const i=QUESTIONS.findIndex(x=>x.stage===next&&(nextTopic==='All'||x.topic===nextTopic));if(i>=0)setOpen(i);
+    const i=QUESTIONS.findIndex(item=>item.stage===next&&(nextTopic==='All'||item.topic===nextTopic));if(i>=0)setOpen(i);
   };
-  const setTopicFilter=(next:Topic)=>{
+  const chooseTopic=(next:Topic)=>{
     setTopic(next);
-    const i=QUESTIONS.findIndex(x=>x.stage===stage&&(next==='All'||x.topic===next));if(i>=0)setOpen(i);
+    const i=QUESTIONS.findIndex(item=>item.stage===stage&&(next==='All'||item.topic===next));if(i>=0)setOpen(i);
   };
 
   return <main className={styles.root}>
-    <header className={styles.topbar}><a href="/experience#provider-portals">OCCU-MED / PROVIDER Q&A</a><nav aria-label="Provider portals"><a href="/experience/network">NETWORK</a><a href="/experience/resources">RESOURCES</a><a href="/experience/questions" aria-current="page">Q&A</a><a href="/experience/agreement">AGREEMENT</a></nav></header>
+    <header className={styles.topbar}>
+      <a href="/experience#provider-portals">OCCU-MED / PROVIDER Q&A</a>
+      <nav aria-label="Provider portals"><a href="/experience/network">NETWORK</a><a href="/experience/resources">RESOURCES</a><a href="/experience/questions" aria-current="page">Q&A</a><a href="/experience/agreement">AGREEMENT</a></nav>
+    </header>
 
-    <aside className={styles.sidebar}>
-      <span className={styles.railLabel}>REFERRAL LIFECYCLE</span>
-      <nav className={styles.stageRail} aria-label="Referral lifecycle">{STAGES.map(x=><button key={x.stage} aria-pressed={stage===x.stage} onClick={()=>choose(x.stage)}><small>{x.number}</small><b>{x.stage}</b><em>{x.note}</em></button>)}</nav>
-      <div className={styles.questionRail}>
-        <span>QUESTIONS / {stage.toUpperCase()}</span>
-        {visible.map(({item,index},i)=><button key={item.q} aria-pressed={open===index} onClick={()=>setOpen(index)}><small>{String(i+1).padStart(2,'0')}</small><b>{item.q}</b></button>)}
-      </div>
+    <aside className={styles.sidebar} aria-label="Provider Q&A explorer">
+      <div className={styles.railLabel}><span>REFERRAL LIFECYCLE</span><b>{STAGES[stageIndex].number}</b></div>
+      <nav className={styles.stageRail}>{STAGES.map(item=><button key={item.stage} aria-pressed={stage===item.stage} onClick={()=>chooseStage(item.stage)}><small>{item.number}</small><span><b>{item.stage}</b><em>{item.note}</em></span><i>→</i></button>)}</nav>
+      <div className={styles.topicRail}><span>LAYERS</span><div><button aria-pressed={topic==='All'} onClick={()=>chooseTopic('All')}>All</button>{availableTopics.map(item=><button key={item} aria-pressed={topic===item} onClick={()=>chooseTopic(item)}>{item}</button>)}</div></div>
+      <div className={styles.questionRail}><span>QUESTIONS / {String(visible.length).padStart(2,'0')}</span>{visible.map(({item,index},position)=><button key={item.q} aria-pressed={open===index} onClick={()=>setOpen(index)}><small>{String(position+1).padStart(2,'0')}</small><b>{item.q}</b><i>→</i></button>)}</div>
     </aside>
 
-    <section className={styles.explorer}>
-      <QuestionField count={Math.min(4,Math.max(1,visible.length))} active={activeVisible%4} stageIndex={stageIndex}/>
-      <div className={styles.explorerHeading}><span>PORTAL 04 / KNOWLEDGE FIELD</span><h1>{STAGES[stageIndex].note}</h1></div>
-      <div className={styles.filters}><span>LAYERS</span><button aria-pressed={topic==='All'} onClick={()=>setTopicFilter('All')}>All</button>{availableTopics.map(x=><button key={x} aria-pressed={topic===x} onClick={()=>setTopicFilter(x)}>{x}</button>)}</div>
-      <div className={styles.fieldMeta} aria-hidden="true"><span>KNOWLEDGE FIELD / {STAGES[stageIndex].number}</span><b>{String(activeVisible+1).padStart(2,'0')}</b><small> / {String(visible.length).padStart(2,'0')}</small></div>
-      <article className={styles.detail} key={open}><small>{active.stage} / {active.topic}</small><h2>{active.q}</h2><p>{active.a}</p><span className={styles.detailIndex}>{String(activeVisible+1).padStart(2,'0')}</span></article>
+    <section className={styles.explorer} aria-label={`${stage} knowledge field`}>
+      <QuestionField count={Math.min(visible.length,6)} active={Math.min(activeVisible,5)} stageIndex={stageIndex}/>
+      <div className={styles.explorerHeading}><span>PORTAL 04 / KNOWLEDGE FIELD</span><b>{stage}</b><small>{STAGES[stageIndex].note}</small></div>
+      <div className={styles.fieldMeta} aria-hidden="true"><span>ACTIVE QUESTION</span><b>{String(activeVisible+1).padStart(2,'0')}</b><small>/ {String(visible.length).padStart(2,'0')}</small></div>
     </section>
+
+    <article className={styles.detail} key={open}>
+      <header><span>{active.stage} / {active.topic}</span><b>{String(activeVisible+1).padStart(2,'0')}</b></header>
+      <h2>{active.q}</h2><p>{active.a}</p>
+      <footer><span>SELECT ANOTHER QUESTION FROM THE EXPLORER</span><a href="/experience/agreement">Agreement →</a></footer>
+    </article>
   </main>;
 }
