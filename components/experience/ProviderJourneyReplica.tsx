@@ -52,7 +52,6 @@ export default function ProviderJourneyReplica(){
       <div className={styles.heroTag}>OCCU-MED / EST. 1979</div>
       <div className={styles.heroTitle} aria-label="Built around the job"><span>Built</span><span>Around</span><em>The Job.</em></div>
       <p className={styles.heroCopy}>From one research question to a global medical network: what does this person actually need to do?</p>
-      <div className={styles.heroCard}><b>Designed around the work.</b><span>Medical evidence only becomes useful when it is read against the job.</span></div>
       <div className={styles.heroMeta}><span>MEDICAL / DENTAL / DEPLOYMENT</span><span>SCROLL ↓</span></div>
     </section>
 
