@@ -7,13 +7,14 @@ export type PortalArchitecture = {
 };
 
 const ASTRONAUT_URL='https://modelviewer.dev/shared-assets/models/Astronaut.glb';
+const ZERO_CYAN=0x0df6ff;
 
 function buildFallbackTraveler(){
   const traveler=new THREE.Group();
-  const suit=new THREE.MeshStandardMaterial({color:0xdce8ed,roughness:.42,metalness:.18});
-  const dark=new THREE.MeshStandardMaterial({color:0x213844,roughness:.48,metalness:.24});
-  const visorMat=new THREE.MeshStandardMaterial({color:0x06141d,metalness:.88,roughness:.08,emissive:0x124b63,emissiveIntensity:.7});
-  const glow=new THREE.MeshStandardMaterial({color:0xc9f7ff,emissive:0x58dfff,emissiveIntensity:2.5,roughness:.18,metalness:.28});
+  const suit=new THREE.MeshStandardMaterial({color:0xe5ebed,roughness:.42,metalness:.18});
+  const dark=new THREE.MeshStandardMaterial({color:0x101415,roughness:.48,metalness:.3});
+  const visorMat=new THREE.MeshStandardMaterial({color:0x020303,metalness:.9,roughness:.06,emissive:0x05484c,emissiveIntensity:.82});
+  const glow=new THREE.MeshStandardMaterial({color:0xeaffff,emissive:ZERO_CYAN,emissiveIntensity:2.8,roughness:.16,metalness:.3});
 
   const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.62,1.1,8,20),suit);torso.position.y=-.35;traveler.add(torso);
   const chest=new THREE.Mesh(new THREE.BoxGeometry(.72,.38,.14),dark);chest.position.set(0,-.12,.58);traveler.add(chest);
@@ -31,21 +32,21 @@ function buildFallbackTraveler(){
     const boot=new THREE.Mesh(new THREE.BoxGeometry(.4,.25,.65),dark);boot.position.set(side*.3,-2.32,.12);traveler.add(boot);
   });
 
-  const hose=new THREE.Mesh(new THREE.TorusGeometry(.52,.03,8,36,Math.PI*1.25),new THREE.MeshStandardMaterial({color:0x6d8793,metalness:.45,roughness:.4}));hose.position.set(.56,-.08,-.2);hose.rotation.set(.2,1.05,.5);traveler.add(hose);
+  const hose=new THREE.Mesh(new THREE.TorusGeometry(.52,.03,8,36,Math.PI*1.25),new THREE.MeshStandardMaterial({color:0x435052,metalness:.48,roughness:.38}));hose.position.set(.56,-.08,-.2);hose.rotation.set(.2,1.05,.5);traveler.add(hose);
   traveler.scale.setScalar(.98);
   return traveler;
 }
 
 export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
   const group=new THREE.Group();
-  const dark=new THREE.MeshStandardMaterial({color:0x07141c,metalness:.56,roughness:.36});
-  const dark2=new THREE.MeshStandardMaterial({color:0x0c202a,metalness:.46,roughness:.42});
-  const cyan=new THREE.MeshBasicMaterial({color:0x62e6ff,transparent:true,opacity:.35,blending:THREE.AdditiveBlending});
-  const violet=new THREE.MeshBasicMaterial({color:0x8067ff,transparent:true,opacity:.22,blending:THREE.AdditiveBlending});
+  const dark=new THREE.MeshStandardMaterial({color:0x040606,metalness:.62,roughness:.34});
+  const dark2=new THREE.MeshStandardMaterial({color:0x090d0e,metalness:.5,roughness:.4});
+  const cyan=new THREE.MeshBasicMaterial({color:ZERO_CYAN,transparent:true,opacity:.34,blending:THREE.AdditiveBlending});
+  const cyanSoft=new THREE.MeshBasicMaterial({color:ZERO_CYAN,transparent:true,opacity:.17,blending:THREE.AdditiveBlending});
 
   const platform=new THREE.Mesh(new THREE.CylinderGeometry(4.15,4.65,.38,72),dark);platform.position.y=-3.06;group.add(platform);
   const platformRing=new THREE.Mesh(new THREE.TorusGeometry(3.55,.035,10,128),cyan);platformRing.rotation.x=Math.PI/2;platformRing.position.y=-2.84;group.add(platformRing);
-  const innerRing=new THREE.Mesh(new THREE.TorusGeometry(2.35,.018,8,120),violet);innerRing.rotation.x=Math.PI/2;innerRing.position.y=-2.82;group.add(innerRing);
+  const innerRing=new THREE.Mesh(new THREE.TorusGeometry(2.35,.018,8,120),cyanSoft);innerRing.rotation.x=Math.PI/2;innerRing.position.y=-2.82;group.add(innerRing);
 
   const travelerRoot=new THREE.Group();travelerRoot.position.z=.62;group.add(travelerRoot);
   const fallback=buildFallbackTraveler();fallback.position.y=-.38;travelerRoot.add(fallback);
@@ -78,20 +79,20 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
     if(i===3||i===9)continue;
     const angle=(i/12)*Math.PI*2;const radius=i%2?8.3:9.7;const pylon=new THREE.Group();pylon.position.set(Math.cos(angle)*radius,-1.15,Math.sin(angle)*radius-4.2);pylon.rotation.y=-angle+Math.PI/2;
     const height=3.7+(i%4)*.72;const body=new THREE.Mesh(new THREE.BoxGeometry(.38,height,.86),i%3===0?dark2:dark);body.position.y=height*.5-1.65;pylon.add(body);
-    const slit=new THREE.Mesh(new THREE.BoxGeometry(.025,height*.62,.38),i%3===0?violet:cyan);slit.position.set(.205,height*.5-1.5,.02);pylon.add(slit);
+    const slit=new THREE.Mesh(new THREE.BoxGeometry(.025,height*.62,.38),i%3===0?cyanSoft:cyan);slit.position.set(.205,height*.5-1.5,.02);pylon.add(slit);
     const cap=new THREE.Mesh(new THREE.BoxGeometry(.62,.12,1.05),dark2);cap.position.y=height-1.62;pylon.add(cap);group.add(pylon);monoliths.push(pylon);
   }
 
   const arches:THREE.Mesh[]=[];
   for(let i=0;i<5;i++){
-    const material=i%2?violet:cyan;const arch=new THREE.Mesh(new THREE.TorusGeometry(6.4+i*.82,.018,8,128,Math.PI*1.12),material);arch.position.set(0,1.1,-5.5-i*2.7);arch.rotation.set(0,i*.09,Math.PI*.94);group.add(arch);arches.push(arch);
+    const material=i%2?cyanSoft:cyan;const arch=new THREE.Mesh(new THREE.TorusGeometry(6.4+i*.82,.018,8,128,Math.PI*1.12),material);arch.position.set(0,1.1,-5.5-i*2.7);arch.rotation.set(0,i*.09,Math.PI*.94);group.add(arch);arches.push(arch);
   }
 
-  const pathMaterial=new THREE.MeshBasicMaterial({color:0x66e4fa,transparent:true,opacity:.16,blending:THREE.AdditiveBlending});
+  const pathMaterial=new THREE.MeshBasicMaterial({color:ZERO_CYAN,transparent:true,opacity:.15,blending:THREE.AdditiveBlending});
   for(let i=0;i<7;i++){const strip=new THREE.Mesh(new THREE.BoxGeometry(.018,.008,13+i*1.8),pathMaterial);strip.position.set((i-3)*.42,-2.79,-3.5-i*.45);strip.rotation.x=.01;group.add(strip)}
 
   const ceiling=new THREE.Group();
-  for(let i=0;i<8;i++){const blade=new THREE.Mesh(new THREE.BoxGeometry(.045,.45,6.5),i%2?violet:cyan);blade.position.set((i-3.5)*1.05,5.4,-6.5-i*.65);blade.rotation.z=(i-3.5)*.015;ceiling.add(blade)}
+  for(let i=0;i<8;i++){const blade=new THREE.Mesh(new THREE.BoxGeometry(.045,.45,6.5),i%2?cyanSoft:cyan);blade.position.set((i-3.5)*1.05,5.4,-6.5-i*.65);blade.rotation.z=(i-3.5)*.015;ceiling.add(blade)}
   group.add(ceiling);
 
   const distant=new THREE.Group();
@@ -103,12 +104,12 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
     const side=i%2===0?-1:1;const frame=new THREE.Group();frame.position.set(side*(8.8+(i%3)*2.2),-.35,5.5-i*4.8);frame.rotation.set(0,side*(.12+i*.018),side*.025);
     const column=new THREE.Mesh(new THREE.BoxGeometry(.72,10.5,1.4),i%3===0?dark2:dark);column.position.y=.6;frame.add(column);
     const beam=new THREE.Mesh(new THREE.BoxGeometry(8.2,.48,1.1),i%3===0?dark2:dark);beam.position.set(-side*3.7,5.55,0);frame.add(beam);
-    const edge=new THREE.Mesh(new THREE.BoxGeometry(.035,8.4,.08),i%2?violet:cyan);edge.position.set(-side*.39,.85,.72);frame.add(edge);foreground.add(frame);
+    const edge=new THREE.Mesh(new THREE.BoxGeometry(.035,8.4,.08),i%2?cyanSoft:cyan);edge.position.set(-side*.39,.85,.72);frame.add(edge);foreground.add(frame);
   }
   group.add(foreground);
 
   const suspended:THREE.Mesh[]=[];
-  for(let i=0;i<9;i++){const panel=new THREE.Mesh(new THREE.PlaneGeometry(.8+i%3*.5,2.1+i%2*.9),i%2?violet:cyan);panel.position.set((i%2?-1:1)*(6.2+(i%4)*1.35),1.2+(i%3)*1.55,-4-i*3.4);panel.rotation.y=(i%2?-1:1)*(.45+i*.035);group.add(panel);suspended.push(panel)}
+  for(let i=0;i<9;i++){const panel=new THREE.Mesh(new THREE.PlaneGeometry(.8+i%3*.5,2.1+i%2*.9),i%2?cyanSoft:cyan);panel.position.set((i%2?-1:1)*(6.2+(i%4)*1.35),1.2+(i%3)*1.55,-4-i*3.4);panel.rotation.y=(i%2?-1:1)*(.45+i*.035);group.add(panel);suspended.push(panel)}
 
   scene.add(group);
 
