@@ -20,8 +20,9 @@ type PortalNode = {
   target:THREE.Vector3;
 };
 
-const POS = [[-4.45,1.95,-1.3],[4.35,1.85,-2.5],[4.55,-1.5,-1.2],[-4.45,-1.55,-2.25],[0,3.55,-3.2]] as const;
-const COLORS:Record<string,number>={gold:0xe8b96c,cyan:0x78e8ff,violet:0xb18cff,blue:0x7da7ff,white:0xeefaff};
+const POS = [[-4.25,2.0,-1.5],[4.25,2.0,-1.5],[4.55,-1.5,-2.0],[-4.55,-1.5,-2.0],[0,3.75,-3.25]] as const;
+const ZERO_CYAN=0x0df6ff;
+const COLORS:Record<string,number>={gold:ZERO_CYAN,cyan:ZERO_CYAN,violet:ZERO_CYAN,blue:ZERO_CYAN,white:ZERO_CYAN};
 const clamp=(v:number,min=0,max=1)=>Math.max(min,Math.min(max,v));
 const ease=(t:number)=>1-Math.pow(1-clamp(t),3);
 
@@ -46,20 +47,20 @@ void main(){
   float grain=hash(floor((p+.5)*90.0)+floor(uTime*2.0));
   float core=smoothstep(.49,.04,r);
   float edge=smoothstep(.50,.30,r)-smoothstep(.30,.10,r);
-  float alpha=core*(.12+.16*wave+.09*wave2)+edge*(.18+.18*uHover)+grain*.025*core;
-  vec3 color=uColor*(.55+wave*.45)+vec3(.35,.55,.8)*wave2*.18;
-  gl_FragColor=vec4(color,alpha*(.85+.5*uHover));
+  float alpha=core*(.10+.15*wave+.07*wave2)+edge*(.22+.22*uHover)+grain*.02*core;
+  vec3 color=uColor*(.66+wave*.34)+vec3(.03,.72,.76)*wave2*.12;
+  gl_FragColor=vec4(color,alpha*(.88+.52*uHover));
 }
 `;
 
 function addDrone(scene:THREE.Scene){
   const drone=new THREE.Group();drone.position.set(2.8,4.45,-5.4);drone.scale.setScalar(.7);
-  const coreMat=new THREE.MeshStandardMaterial({color:0x173b52,metalness:.72,roughness:.18,emissive:0x2bbbd7,emissiveIntensity:.8});
+  const coreMat=new THREE.MeshStandardMaterial({color:0x090c0d,metalness:.82,roughness:.16,emissive:ZERO_CYAN,emissiveIntensity:.62});
   const core=new THREE.Mesh(new THREE.IcosahedronGeometry(.58,1),coreMat);drone.add(core);
-  const wingMat=new THREE.MeshStandardMaterial({color:0x193341,metalness:.55,roughness:.32,emissive:0x163e4d,emissiveIntensity:.55});
+  const wingMat=new THREE.MeshStandardMaterial({color:0x0a0e10,metalness:.68,roughness:.27,emissive:0x03383b,emissiveIntensity:.6});
   [-1,1].forEach(side=>{
     const wing=new THREE.Mesh(new THREE.BoxGeometry(1.6,.07,.55),wingMat);wing.position.x=side*1.05;wing.rotation.z=side*.08;drone.add(wing);
-    const tip=new THREE.PointLight(0x62e8ff,7,5);tip.position.set(side*1.82,0,.05);drone.add(tip);
+    const tip=new THREE.PointLight(ZERO_CYAN,8,5);tip.position.set(side*1.82,0,.05);drone.add(tip);
   });
   scene.add(drone);return drone;
 }
@@ -77,19 +78,19 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
   useEffect(()=>{
     const host=mount.current;if(!host)return;
     const shown=agreementOnly?portals.slice(-1):portals;
-    const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x020811,.032);
+    const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x000000,.029);
     const camera=new THREE.PerspectiveCamera(47,host.clientWidth/host.clientHeight,.1,110);camera.position.set(0,.85,agreementOnly?12.5:17.4);
-    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}),{exposure:1.12});renderer.setSize(host.clientWidth,host.clientHeight);renderer.setClearColor(0x020810,1);host.appendChild(renderer.domElement);
+    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}),{exposure:1.08});renderer.setSize(host.clientWidth,host.clientHeight);renderer.setClearColor(0x000000,1);host.appendChild(renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0x7fbfff,0x061018,1.25));
-    const key=new THREE.DirectionalLight(0xe0f8ff,3.8);key.position.set(5,8,7);scene.add(key);
-    const rim=new THREE.PointLight(0x7e56ff,48,24);rim.position.set(-4,2,-1);scene.add(rim);
-    const front=new THREE.PointLight(0x5edfff,22,16);front.position.set(2,-1,6);scene.add(front);
+    scene.add(new THREE.HemisphereLight(0xffffff,0x000000,.78));
+    const key=new THREE.DirectionalLight(0xffffff,3.25);key.position.set(5,8,7);scene.add(key);
+    const rim=new THREE.PointLight(ZERO_CYAN,58,25);rim.position.set(-4,2,-1);scene.add(rim);
+    const front=new THREE.PointLight(ZERO_CYAN,28,17);front.position.set(2,-1,6);scene.add(front);
 
-    const floorMat=new THREE.MeshStandardMaterial({color:0x06131b,roughness:.84,metalness:.08,transparent:true,opacity:.9});
+    const floorMat=new THREE.MeshStandardMaterial({color:0x020303,roughness:.88,metalness:.08,transparent:true,opacity:.96});
     const floor=new THREE.Mesh(new THREE.PlaneGeometry(38,38),floorMat);floor.rotation.x=-Math.PI/2;floor.position.y=-3.12;scene.add(floor);
-    const grid=new THREE.GridHelper(38,38,0x2d6577,0x102934);grid.position.y=-3.1;scene.add(grid);
-    const halo=new THREE.Mesh(new THREE.RingGeometry(1.2,4.2,96),new THREE.MeshBasicMaterial({color:0x2ecde9,transparent:true,opacity:.075,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));halo.rotation.x=-Math.PI/2;halo.position.y=-3.06;scene.add(halo);
+    const grid=new THREE.GridHelper(38,38,0x0df6ff,0x071d1f);grid.position.y=-3.1;scene.add(grid);
+    const halo=new THREE.Mesh(new THREE.RingGeometry(1.2,4.2,96),new THREE.MeshBasicMaterial({color:ZERO_CYAN,transparent:true,opacity:.082,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));halo.rotation.x=-Math.PI/2;halo.position.y=-3.06;scene.add(halo);
 
     const architecture=addPortalArchitecture(scene);
     const drone=addDrone(scene);
@@ -98,17 +99,17 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
     const starPos=new Float32Array(2400);
     for(let i=0;i<starPos.length;i+=3){starPos[i]=(Math.random()-.5)*42;starPos[i+1]=(Math.random()-.5)*24;starPos[i+2]=6-Math.random()*50}
     starsGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3));
-    const stars=new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0x8ddff4,size:.03,transparent:true,opacity:.7,depthWrite:false}));scene.add(stars);
+    const stars=new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xbdfcff,size:.026,transparent:true,opacity:.56,depthWrite:false}));scene.add(stars);
 
     const nodes:PortalNode[]=shown.map((portal,i)=>{
-      const color=COLORS[portal.tone]||0x78e8ff;
+      const color=COLORS[portal.tone]||ZERO_CYAN;
       const position=agreementOnly?[0,.15,-1.1]:POS[i];
       const base=new THREE.Vector3(position[0],position[1],position[2]);
       const group=new THREE.Group();group.position.copy(base);
-      const ringMaterial=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:2.4,metalness:.65,roughness:.16});
+      const ringMaterial=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:2.7,metalness:.78,roughness:.12});
       const ring=new THREE.Mesh(new THREE.TorusGeometry(1.08,.095,18,96),ringMaterial);group.add(ring);
-      const outer=new THREE.Mesh(new THREE.TorusGeometry(1.36,.018,8,96),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.36,blending:THREE.AdditiveBlending}));outer.rotation.z=.38;group.add(outer);
-      const rear=new THREE.Mesh(new THREE.TorusGeometry(1.58,.012,6,96),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.14,blending:THREE.AdditiveBlending}));rear.rotation.z=-.34;rear.position.z=-.08;group.add(rear);
+      const outer=new THREE.Mesh(new THREE.TorusGeometry(1.36,.018,8,96),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.42,blending:THREE.AdditiveBlending}));outer.rotation.z=.38;group.add(outer);
+      const rear=new THREE.Mesh(new THREE.TorusGeometry(1.58,.012,6,96),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.18,blending:THREE.AdditiveBlending}));rear.rotation.z=-.34;rear.position.z=-.08;group.add(rear);
       const shader=new THREE.ShaderMaterial({vertexShader:PORTAL_VERTEX,fragmentShader:PORTAL_FRAGMENT,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,uniforms:{uTime:{value:0},uHover:{value:0},uColor:{value:new THREE.Color(color)}}});
       const inner=new THREE.Mesh(new THREE.CircleGeometry(.98,72),shader);inner.position.z=.015;group.add(inner);
       ring.userData={index:i,href:portal.href};inner.userData={index:i,href:portal.href};rear.userData={index:i,href:portal.href};
@@ -158,10 +159,10 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
         const wanted=entryScale*(focused?1.32:muted?.84:1);
         node.group.scale.lerp(new THREE.Vector3(wanted,wanted,wanted),.085);
         const ringMat=node.ring.material as THREE.MeshStandardMaterial;
-        const ringEnergy=focused?5.8:muted?1.15:2.4;
+        const ringEnergy=focused?6.6:muted?1.1:2.7;
         ringMat.emissiveIntensity+=((ringEnergy*(.35+entry*.65))-ringMat.emissiveIntensity)*.09;
         const outerMat=node.outer.material as THREE.MeshBasicMaterial;
-        const outerOpacity=focused?.76:muted?.12:.36;
+        const outerOpacity=focused?.88:muted?.1:.42;
         outerMat.opacity+=((outerOpacity*entry)-outerMat.opacity)*.09;
         node.shader.uniforms.uTime.value=t;
         node.shader.uniforms.uHover.value+=(((focused?1:0)-node.shader.uniforms.uHover.value)*.08);
@@ -178,7 +179,7 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
       architecture.group.position.z+=(((1-entry)*-3.2)-architecture.group.position.z)*.055;
       architecture.group.rotation.y+=((focusedNode?-focusX*.018:0)-architecture.group.rotation.y)*.035;
       const architectureScale=.86+entry*.14;architecture.group.scale.lerp(new THREE.Vector3(architectureScale,architectureScale,architectureScale),.055);
-      (scene.fog as THREE.FogExp2).density=.044-entry*.012+(focusedNode?.0015:0);
+      (scene.fog as THREE.FogExp2).density=.041-entry*.012+(focusedNode?.0012:0);
       front.position.x+=(focusX*.18-front.position.x+2)*.03;
       rim.position.x+=((-4-focusX*.08)-rim.position.x)*.03;
 
