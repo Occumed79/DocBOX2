@@ -49,3 +49,14 @@ jobs:
 
       - name: Provider browser regression
         run: npx playwright test tests/e2e/provider-experience.spec.ts --project=chromium-desktop
+
+      - name: Preserve browser failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-experience-browser-failure
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
