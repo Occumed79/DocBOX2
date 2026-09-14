@@ -30,8 +30,8 @@ export default function SpecialtyField({items,selectedId}:{items:readonly Item[]
     renderer.setSize(host.clientWidth,host.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));host.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0xeafaff,0x020406,.92));
-    const key=new THREE.PointLight(0xffffff,18,22);key.position.set(4,5,6);scene.add(key);
-    const rim=new THREE.PointLight(0x79e8ff,14,18);rim.position.set(-5,-2,3);scene.add(rim);
+    const key=new THREE.PointLight(0xffffff,18,22);key.position.set(5,5,6);scene.add(key);
+    const rim=new THREE.PointLight(0x79e8ff,14,18);rim.position.set(-2,-2,3);scene.add(rim);
 
     const visuals:Visual[]=items.map((item,index)=>{
       const color=new THREE.Color(item.color);
@@ -42,13 +42,13 @@ export default function SpecialtyField({items,selectedId}:{items:readonly Item[]
         const ring=new THREE.Mesh(new THREE.TorusGeometry(radius,.018-ringIndex*.002,8,120),new THREE.MeshBasicMaterial({color,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
         ring.rotation.set(.62+ringIndex*.32,index*.18+ringIndex*.21,.22+ringIndex*.17);group.add(ring);return ring;
       });
-      group.position.set(0,.18,-.4);group.scale.setScalar(.72);scene.add(group);return{group,mesh,rings,item,index};
+      group.position.set(2.35,.12,-.4);group.scale.setScalar(.72);scene.add(group);return{group,mesh,rings,item,index};
     });
 
     const dustGeo=new THREE.BufferGeometry();const dust=new Float32Array(1200);for(let i=0;i<dust.length;i+=3){dust[i]=(Math.random()-.5)*16;dust[i+1]=(Math.random()-.5)*10;dust[i+2]=3-Math.random()*20}dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));
     const dustMat=new THREE.PointsMaterial({color:0xd7f8ff,size:.018,transparent:true,opacity:.23,depthWrite:false});const dustField=new THREE.Points(dustGeo,dustMat);scene.add(dustField);
 
-    const backRing=new THREE.Mesh(new THREE.TorusGeometry(3.4,.012,7,140),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.05,depthWrite:false}));backRing.rotation.x=1.16;backRing.rotation.z=.32;backRing.position.z=-2.4;scene.add(backRing);
+    const backRing=new THREE.Mesh(new THREE.TorusGeometry(3.4,.012,7,140),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.05,depthWrite:false}));backRing.rotation.x=1.16;backRing.rotation.z=.32;backRing.position.set(2.35,0,-2.4);scene.add(backRing);
 
     const pointer={x:0,y:0};const move=(event:PointerEvent)=>{pointer.x=(event.clientX/window.innerWidth-.5)*2;pointer.y=(event.clientY/window.innerHeight-.5)*2};window.addEventListener('pointermove',move,{passive:true});
     let raf=0,start=performance.now(),lastSelected=-1;
@@ -57,14 +57,14 @@ export default function SpecialtyField({items,selectedId}:{items:readonly Item[]
       if(selectedIndex!==lastSelected){lastSelected=selectedIndex;const color=new THREE.Color(visuals[selectedIndex]?.item.color??'#72dcff');rim.color.copy(color);dustMat.color.copy(color).lerp(new THREE.Color(0xffffff),.45)}
       visuals.forEach((visual,index)=>{
         const active=index===selectedIndex;const material=visual.mesh.material;
-        const targetOpacity=active?1:0;material.opacity+=(targetOpacity-material.opacity)*(active?.11:.16);material.emissiveIntensity+=((active?2.25:.4)-material.emissiveIntensity)*.08;
+        material.opacity+=((active?1:0)-material.opacity)*(active?.11:.16);material.emissiveIntensity+=((active?2.25:.4)-material.emissiveIntensity)*.08;
         const targetScale=active?1:0.68;visual.group.scale.lerp(new THREE.Vector3(targetScale,targetScale,targetScale),.09);
-        visual.group.position.z+=((active?.2:-3.8)-visual.group.position.z)*.085;visual.group.position.y+=((active?.12:1.4)-visual.group.position.y)*.07;
+        visual.group.position.x+=((active?2.35:3.4)-visual.group.position.x)*.075;visual.group.position.z+=((active?.2:-3.8)-visual.group.position.z)*.085;visual.group.position.y+=((active?.12:1.4)-visual.group.position.y)*.07;
         visual.mesh.rotation.x=t*(index%2?.075:-.06)+index*.2;visual.mesh.rotation.y=t*(index%2?.11:-.09)+index*.16;
         visual.rings.forEach((ring,ringIndex)=>{const mat=ring.material as THREE.MeshBasicMaterial;mat.opacity+=(((active?.34-ringIndex*.07:0))-mat.opacity)*.1;ring.rotation.z=t*((index+ringIndex)%2?.045:-.038)+ringIndex*.4});
         visual.group.visible=material.opacity>.008||active;
       });
-      camera.position.x+=(pointer.x*.16-camera.position.x)*.025;camera.position.y+=(.15+pointer.y*.09-camera.position.y)*.025;camera.lookAt(0,.08,-.55);
+      camera.position.x+=(pointer.x*.12-camera.position.x)*.025;camera.position.y+=(.15+pointer.y*.09-camera.position.y)*.025;camera.lookAt(1.45,.08,-.55);
       backRing.rotation.z=t*.018;dustField.rotation.y=t*.004;renderer.render(scene,camera);
     };loop(performance.now());
 
