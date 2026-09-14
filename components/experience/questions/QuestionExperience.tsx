@@ -5,34 +5,46 @@ import QuestionField from './QuestionField';
 import styles from './QuestionExperience.module.css';
 import stageMotion from './QuestionStageMotion.module.css';
 
-type Topic = 'All' | 'Preparation' | 'Examination' | 'Records' | 'Billing' | 'Network';
+type Topic = 'All' | 'Authorization' | 'Examination' | 'Records' | 'Privacy' | 'Billing' | 'Network';
 type Stage = 'Receive' | 'Schedule' | 'Examine' | 'Return' | 'Invoice';
 
 type Question = { q: string; a: string; topic: Exclude<Topic,'All'>; stage: Stage };
 
 const STAGES: Array<{ stage: Stage; number: string; note: string }> = [
-  { stage: 'Receive', number: '01', note: 'Authorization arrives' },
+  { stage: 'Receive', number: '01', note: 'Authorization defines the scope' },
   { stage: 'Schedule', number: '02', note: 'Appointment coordination' },
   { stage: 'Examine', number: '03', note: 'Authorized clinical work' },
-  { stage: 'Return', number: '04', note: 'Records and QA' },
-  { stage: 'Invoice', number: '05', note: 'Direct-pay billing' },
+  { stage: 'Return', number: '04', note: 'Records, QA, privacy & review' },
+  { stage: 'Invoice', number: '05', note: 'Itemized billing / NET 30' },
 ];
 
 const QUESTIONS: Question[] = [
-  { q: 'What is Occu-Med’s role?', topic: 'Preparation', stage: 'Receive', a: 'Occu-Med coordinates the referral, scheduling, documentation follow-up, quality assurance, and applicable medical review. The clinic performs the authorized clinical services and documents its findings.' },
-  { q: 'What does our clinic receive before the visit?', topic: 'Preparation', stage: 'Receive', a: 'The clinic receives an authorization identifying the examinee, requested services, required forms or reports, and instructions for returning the completed documentation.' },
-  { q: 'Who schedules the appointment?', topic: 'Preparation', stage: 'Schedule', a: 'Occu-Med coordinates the examinee’s availability with the clinic and confirms the appointment with the involved parties.' },
-  { q: 'What happens after a missed appointment?', topic: 'Preparation', stage: 'Schedule', a: 'Occu-Med follows up with the examinee and coordinates a replacement appointment with the clinic when another visit is needed.' },
-  { q: 'May we perform services outside the authorization?', topic: 'Examination', stage: 'Examine', a: 'No. Contact Occu-Med for approval before providing any service that is not listed on the authorization.' },
-  { q: 'Does our provider make the employment or deployment decision?', topic: 'Examination', stage: 'Examine', a: 'No. The clinic documents clinical findings. Occu-Med evaluates the returned information against the applicable job or deployment requirements and communicates the appropriate outcome.' },
-  { q: 'What happens if the provider identifies a finding that needs follow-up?', topic: 'Examination', stage: 'Examine', a: 'Document the finding and return the authorized records. When additional evaluation is required, Occu-Med coordinates the next step with the examinee and the appropriate provider.' },
-  { q: 'What records must be returned?', topic: 'Records', stage: 'Return', a: 'Return every requested form, report, tracing, image, laboratory result, vaccination record, or other supporting document identified in the referral instructions.' },
-  { q: 'How are missing or incomplete records handled?', topic: 'Records', stage: 'Return', a: 'Provider Relations follows up with the clinic, and Quality Assurance identifies incomplete, missing, or inconsistent documentation that requires correction or completion.' },
-  { q: 'What information reaches the employer?', topic: 'Records', stage: 'Return', a: 'Occu-Med communicates the applicable occupational or deployment outcome. Confidential medical details are not sent to the employer as part of that determination.' },
-  { q: 'How should we invoice Occu-Med?', topic: 'Billing', stage: 'Invoice', a: 'Invoice Occu-Med using the accepted fee schedule and the billing directions provided with the referral. The provider should bill only the services that were authorized and completed.' },
-  { q: 'What if our pricing changes later?', topic: 'Billing', stage: 'Invoice', a: 'Contact Network Management before applying new pricing to future referrals so the accepted fee schedule can be reviewed and updated.' },
-  { q: 'Can multiple clinic locations participate?', topic: 'Network', stage: 'Receive', a: 'Yes. Each participating location and its available services can be identified for Network Management so referrals can be directed to the correct facility.' },
-  { q: 'Who should we contact when the authorization is unclear?', topic: 'Network', stage: 'Receive', a: 'Contact Occu-Med before the appointment or before performing an uncertain service. The referral instructions and Network Management or scheduling contact should be used to resolve scope questions before care is added.' },
+  { q: 'What is Occu-Med’s role?', topic: 'Network', stage: 'Receive', a: 'Occu-Med coordinates the referral and scheduling, follows for records through Provider Relations, checks documentation through Exam Quality Assurance, and completes the applicable medical review. The clinic performs the authorized clinical services and documents its findings.' },
+  { q: 'How do we know which tests or services to perform?', topic: 'Authorization', stage: 'Receive', a: 'Use the Authorization for Examination as the definitive source for the required components. Occu-Med determines the required testing from the applicable standards, job duties, work environment, and employer requirements; your clinic is not expected to determine which components are administratively required.' },
+  { q: 'What does our clinic receive before the visit?', topic: 'Authorization', stage: 'Receive', a: 'The Authorization for Examination identifies the examinee, approved services, required forms, and clinic location. The exam packet also includes the Authorization for Examination and Authorization for Release of Information from Medical Records for the examinee to sign.' },
+  { q: 'What if a listed component cannot be performed?', topic: 'Authorization', stage: 'Receive', a: 'Notify Occu-Med immediately. Complete all components that are listed on the Authorization for Examination, perform only those listed components, and document the findings clearly.' },
+  { q: 'Can multiple clinic locations participate?', topic: 'Network', stage: 'Receive', a: 'Yes. Network Management can maintain participating locations and the services available at each facility so referrals can be directed to the correct clinic.' },
+  { q: 'Who should we contact when the authorization is unclear?', topic: 'Network', stage: 'Receive', a: 'Contact Occu-Med before the appointment or before performing an uncertain service. Do not add a service that is not clearly authorized while the scope question is unresolved.' },
+
+  { q: 'Who schedules the appointment?', topic: 'Network', stage: 'Schedule', a: 'Occu-Med’s Scheduling Department receives the employer referral, contacts the employee or applicant and the provider or clinic to obtain availability, and coordinates the appointment.' },
+  { q: 'What happens after a missed appointment?', topic: 'Network', stage: 'Schedule', a: 'A Scheduling Analyst follows up after a missed appointment and works to arrange another appointment so the examination can be completed.' },
+
+  { q: 'May we perform services outside the authorization?', topic: 'Authorization', stage: 'Examine', a: 'No. Perform only the components listed on the Authorization for Examination. Contact Occu-Med before adding or billing any service outside that written authorization.' },
+  { q: 'Does our provider make the employment or deployment decision?', topic: 'Examination', stage: 'Examine', a: 'No. The clinic documents the clinical findings. Occu-Med’s Exam Review Department—experienced subject matter experts and medical providers—evaluates the results against the applicable guidelines and employer requirements and issues the final recommendation.' },
+  { q: 'What happens if the provider identifies an abnormal finding?', topic: 'Examination', stage: 'Examine', a: 'Document the finding and return the authorized examination records. If clarification or additional follow-up is required under the applicable guidelines, Occu-Med notifies the employee or applicant. That follow-up is the individual’s responsibility.' },
+  { q: 'Where should post-exam follow-up documentation go?', topic: 'Records', stage: 'Examine', a: 'Additional follow-up documentation should be given directly to the employee or applicant rather than sent to Occu-Med by the clinic. The individual provides the follow-up information to Occu-Med for reconsideration and final review.' },
+
+  { q: 'What records must be returned after the authorized exam?', topic: 'Records', stage: 'Return', a: 'Return every requested form, report, tracing, laboratory result, vaccination record, imaging result, or other supporting document required by the authorization and referral instructions. Provider Relations follows until all examination components and results have been received.' },
+  { q: 'How are missing or incomplete records handled?', topic: 'Records', stage: 'Return', a: 'Exam Quality Assurance checks that all examination components are present and that the documentation is complete and accurate. If documentation is incomplete or missing, Provider Relations follows up with the clinic for amended or outstanding results.' },
+  { q: 'What does the medical review team do with the records?', topic: 'Examination', stage: 'Return', a: 'The Exam Review Department evaluates the completed records against the applicable DoD or DoS guidelines and employer requirements, determines whether the individual can safely deploy or perform the essential job functions, and issues the final recommendation.' },
+  { q: 'What medical information is shared with the employer?', topic: 'Privacy', stage: 'Return', a: 'Occu-Med does not share the individual’s medical information with the employer. The employer receives only the outcome of the evaluation.' },
+  { q: 'Why can the clinic send the medical records directly to Occu-Med?', topic: 'Privacy', stage: 'Return', a: 'The exam packet includes an Authorization for Release of Information from Medical Records for the examinee to sign. That authorization permits the clinic to release the examination documentation directly to Occu-Med in accordance with the applicable privacy requirements described in the provider packet.' },
+
+  { q: 'Should the examinee be billed for authorized services?', topic: 'Billing', stage: 'Invoice', a: 'No. Occu-Med’s employer clients cover the cost of authorized medical and occupational-health screening through Occu-Med. Examinees should not be billed directly for the authorized services.' },
+  { q: 'What should our invoice include?', topic: 'Billing', stage: 'Invoice', a: 'Submit a complete itemized invoice with the examinee’s name, date of birth, date of service, itemized services performed, approved fees, and billing currency. Invoices may be sent to Finance@occu-med.com.' },
+  { q: 'When does NET 30 begin?', topic: 'Billing', stage: 'Invoice', a: 'The NET 30 period begins after Occu-Med has received all authorized results and a complete, itemized invoice. Undisputed invoices are then paid within NET 30.' },
+  { q: 'How does Occu-Med issue payment?', topic: 'Billing', stage: 'Invoice', a: 'The provider packet states that payments are issued by bank transfer or check in U.S. dollars for undisputed invoices after the required results and complete invoice have been received.' },
+  { q: 'What if our pricing changes later?', topic: 'Billing', stage: 'Invoice', a: 'Fee updates may be submitted to Occu-Med for review and written approval. Once approved, the updated pricing applies to future appointments.' },
 ];
 
 export default function QuestionExperience() {
@@ -58,7 +70,7 @@ export default function QuestionExperience() {
   };
 
   return <main className={`${styles.root} ${stageMotion.root}`} data-stage={stageKey}>
-    <header className={styles.topbar}><a href="/experience#provider-portals">OCCU-MED / INFORMATION FIELD</a><div><a href="/experience/network">NETWORK</a> · <a href="/experience/resources">RESOURCES</a> · <a href="/experience/agreement">AGREEMENT</a></div></header>
+    <header className={styles.topbar}><a href="/experience#provider-portals">OCCU-MED / PROVIDER Q&A</a><div><a href="/experience/network">NETWORK</a> · <a href="/experience/resources">RESOURCES</a> · <a href="/experience/agreement">AGREEMENT</a></div></header>
     <aside className={styles.sidebar}><span>REFERRAL LIFECYCLE</span>{STAGES.map(x=><button key={x.stage} aria-pressed={stage===x.stage} onClick={()=>choose(x.stage)}><small>{x.number}</small><b>{x.stage}</b><em>{x.note}</em></button>)}</aside>
     <section className={`${styles.explorer} ${stageMotion.explorer}`} data-stage={stageKey}>
       <QuestionField count={visible.length} active={activeVisible} stageIndex={stageIndex}/>
