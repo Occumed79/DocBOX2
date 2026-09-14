@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import OryzoStoryWorld from './immersive/OryzoStoryWorld';
-import PortalOrbitalNav from './immersive/PortalOrbitalNav';
+import ZeroTechPortalHub from './immersive/ZeroTechPortalHub';
 import { PORTALS, STORY } from './ProviderJourneyStoryData';
 import styles from './ProviderJourneyReplica.module.css';
 
@@ -66,8 +66,7 @@ export default function ProviderJourneyReplica(){
     </section>
 
     <section id="provider-portals" className={styles.zeroArrival} data-zero-arrival>
-      <header className={styles.zeroHeader}><span>OCCU-MED</span><b>PROVIDER WORLD</b><p>Choose a destination.</p></header>
-      <PortalOrbitalNav portals={PORTALS} entryProgress={portalEntry}/>
+      <ZeroTechPortalHub portals={PORTALS} entryProgress={portalEntry}/>
     </section>
   </main>;
 }
