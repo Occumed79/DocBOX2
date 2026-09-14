@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import QuestionField from './QuestionField';
 import styles from './QuestionExperience.module.css';
-import stageMotion from './QuestionStageMotion.module.css';
 
 type Topic = 'All' | 'Authorization' | 'Examination' | 'Records' | 'Privacy' | 'Billing' | 'Network';
 type Stage = 'Receive' | 'Schedule' | 'Examine' | 'Return' | 'Invoice';
@@ -51,7 +50,6 @@ export default function QuestionExperience(){
   const active=QUESTIONS[open]??QUESTIONS[0];
   const activeVisible=Math.max(0,visible.findIndex(({index})=>index===open));
   const stageIndex=Math.max(0,STAGES.findIndex(item=>item.stage===stage));
-  const stageKey=stage.toLowerCase();
 
   const choose=(next:Stage)=>{
     const nextTopics=Array.from(new Set(QUESTIONS.filter(item=>item.stage===next).map(item=>item.topic)));
@@ -59,13 +57,13 @@ export default function QuestionExperience(){
     setStage(next);setTopic(nextTopic);
     const i=QUESTIONS.findIndex(x=>x.stage===next&&(nextTopic==='All'||x.topic===nextTopic));if(i>=0)setOpen(i);
   };
-  const toggleTopic=(next:Exclude<Topic,'All'>)=>{
-    const resolved:Topic=topic===next?'All':next;setTopic(resolved);
-    const i=QUESTIONS.findIndex(x=>x.stage===stage&&(resolved==='All'||x.topic===resolved));if(i>=0)setOpen(i);
+  const setTopicFilter=(next:Topic)=>{
+    setTopic(next);
+    const i=QUESTIONS.findIndex(x=>x.stage===stage&&(next==='All'||x.topic===next));if(i>=0)setOpen(i);
   };
 
-  return <main className={`${styles.root} ${stageMotion.root}`} data-stage={stageKey}>
-    <header className={styles.topbar}><a href="/experience#provider-portals">OCCU-MED / PROVIDER Q&A</a><div><a href="/experience/network">NETWORK</a> · <a href="/experience/resources">RESOURCES</a> · <a href="/experience/agreement">AGREEMENT</a></div></header>
+  return <main className={styles.root}>
+    <header className={styles.topbar}><a href="/experience#provider-portals">OCCU-MED / PROVIDER Q&A</a><nav aria-label="Provider portals"><a href="/experience/network">NETWORK</a><a href="/experience/resources">RESOURCES</a><a href="/experience/questions" aria-current="page">Q&A</a><a href="/experience/agreement">AGREEMENT</a></nav></header>
 
     <aside className={styles.sidebar}>
       <span className={styles.railLabel}>REFERRAL LIFECYCLE</span>
@@ -76,10 +74,10 @@ export default function QuestionExperience(){
       </div>
     </aside>
 
-    <section className={`${styles.explorer} ${stageMotion.explorer}`} data-stage={stageKey}>
+    <section className={styles.explorer}>
       <QuestionField count={Math.min(4,Math.max(1,visible.length))} active={activeVisible%4} stageIndex={stageIndex}/>
-      <div className={styles.explorerHeading}><span>PORTAL 04 / {stage.toUpperCase()}</span><h1>{STAGES[stageIndex].note}</h1></div>
-      <div className={styles.filters}><span>LAYERS</span>{availableTopics.map(x=><button key={x} aria-pressed={topic===x} onClick={()=>toggleTopic(x)}>{x}</button>)}</div>
+      <div className={styles.explorerHeading}><span>PORTAL 04 / KNOWLEDGE FIELD</span><h1>{STAGES[stageIndex].note}</h1></div>
+      <div className={styles.filters}><span>LAYERS</span><button aria-pressed={topic==='All'} onClick={()=>setTopicFilter('All')}>All</button>{availableTopics.map(x=><button key={x} aria-pressed={topic===x} onClick={()=>setTopicFilter(x)}>{x}</button>)}</div>
       <div className={styles.fieldMeta} aria-hidden="true"><span>KNOWLEDGE FIELD / {STAGES[stageIndex].number}</span><b>{String(activeVisible+1).padStart(2,'0')}</b><small> / {String(visible.length).padStart(2,'0')}</small></div>
       <article className={styles.detail} key={open}><small>{active.stage} / {active.topic}</small><h2>{active.q}</h2><p>{active.a}</p><span className={styles.detailIndex}>{String(activeVisible+1).padStart(2,'0')}</span></article>
     </section>
