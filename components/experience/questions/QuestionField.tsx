@@ -13,7 +13,8 @@ const STAGE_POSITIONS = [
   [[-2.65,.35,-1.1],[2.8,.35,-2.1],[-4,-2,-4],[4,-2,-4]],
 ] as const;
 
-const STAGE_COLORS = [0x6ee8ff,0x7aa8ff,0x70e8c5,0xb18cff,0xe6bd73] as const;
+const FIELD_COLOR = 0x00e05d;
+const SECONDARY_COLOR = 0x21558d;
 const CAMERA_POSES = [
   {x:0,y:.15,z:10.5,lx:0,ly:0,lz:-1.8,fov:45},
   {x:-.55,y:.45,z:11.2,lx:.15,ly:.05,lz:-2.0,fov:47},
@@ -43,51 +44,51 @@ export default function QuestionField({count,active,stageIndex}:{count:number;ac
     const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'}),{exposure:1.03});renderer.setSize(el.clientWidth,el.clientHeight);el.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0xb9efff,0x061117,.8));
-    const fieldLight=new THREE.PointLight(STAGE_COLORS[0],20,20);fieldLight.position.set(3,2,5);scene.add(fieldLight);
-    const violet=new THREE.PointLight(0x7755ff,9,18);violet.position.set(-4,-1,-2);scene.add(violet);
+    const fieldLight=new THREE.PointLight(FIELD_COLOR,20,20);fieldLight.position.set(3,2,5);scene.add(fieldLight);
+    const secondary=new THREE.PointLight(SECONDARY_COLOR,9,18);secondary.position.set(-4,-1,-2);scene.add(secondary);
 
     const nodes:Array<{group:THREE.Group;core:THREE.Mesh<THREE.BufferGeometry,THREE.MeshStandardMaterial>;ring:THREE.Mesh<THREE.TorusGeometry,THREE.MeshBasicMaterial>;orbit:THREE.Mesh<THREE.TorusGeometry,THREE.MeshBasicMaterial>}>=[];
     for(let i=0;i<4;i++){
       const p=STAGE_POSITIONS[0][i];
       const group=new THREE.Group();group.position.set(p[0],p[1],p[2]);
-      const coreMat=new THREE.MeshStandardMaterial({color:0x0b232d,emissive:STAGE_COLORS[0],emissiveIntensity:.55,metalness:.48,roughness:.18,transparent:true,opacity:.9});
+      const coreMat=new THREE.MeshStandardMaterial({color:0x0b232d,emissive:FIELD_COLOR,emissiveIntensity:.55,metalness:.48,roughness:.18,transparent:true,opacity:.9});
       const core=new THREE.Mesh(geometryFor(i),coreMat);group.add(core);
-      const ringMat=new THREE.MeshBasicMaterial({color:STAGE_COLORS[0],transparent:true,opacity:.42,blending:THREE.AdditiveBlending,depthWrite:false});
+      const ringMat=new THREE.MeshBasicMaterial({color:FIELD_COLOR,transparent:true,opacity:.42,blending:THREE.AdditiveBlending,depthWrite:false});
       const ring=new THREE.Mesh(new THREE.TorusGeometry(.44+i*.035,.017,8,54),ringMat);ring.rotation.x=.62+i*.13;group.add(ring);
-      const orbitMat=new THREE.MeshBasicMaterial({color:i%2?0xb18cff:STAGE_COLORS[0],transparent:true,opacity:.14,blending:THREE.AdditiveBlending,depthWrite:false});
+      const orbitMat=new THREE.MeshBasicMaterial({color:i%2?SECONDARY_COLOR:FIELD_COLOR,transparent:true,opacity:.14,blending:THREE.AdditiveBlending,depthWrite:false});
       const orbit=new THREE.Mesh(new THREE.TorusGeometry(.72+i*.04,.008,6,58),orbitMat);orbit.rotation.set(1.1,i*.3,.4);group.add(orbit);
       scene.add(group);nodes.push({group,core,ring,orbit});
     }
 
     const lineArray=new Float32Array(36);
     const lineGeo=new THREE.BufferGeometry();const lineAttribute=new THREE.BufferAttribute(lineArray,3);lineGeo.setAttribute('position',lineAttribute);
-    const lineMat=new THREE.LineBasicMaterial({color:STAGE_COLORS[0],transparent:true,opacity:.13});const lines=new THREE.LineSegments(lineGeo,lineMat);scene.add(lines);
+    const lineMat=new THREE.LineBasicMaterial({color:FIELD_COLOR,transparent:true,opacity:.13});const lines=new THREE.LineSegments(lineGeo,lineMat);scene.add(lines);
 
     const corridor=new THREE.Group();
     for(let i=0;i<6;i++){
-      const mat=new THREE.MeshBasicMaterial({color:STAGE_COLORS[0],transparent:true,opacity:.06,wireframe:true,blending:THREE.AdditiveBlending,depthWrite:false});
+      const mat=new THREE.MeshBasicMaterial({color:FIELD_COLOR,transparent:true,opacity:.06,wireframe:true,blending:THREE.AdditiveBlending,depthWrite:false});
       const ring=new THREE.Mesh(new THREE.TorusGeometry(2.7+i*.62,.012,6,72),mat);ring.position.z=-3.5-i*1.2;ring.rotation.set(Math.PI*.5,i*.05,i*.25);corridor.add(ring);
     }
     scene.add(corridor);
 
     const dustGeo=new THREE.BufferGeometry();const dust=new Float32Array(1500);
     for(let i=0;i<dust.length;i+=3){dust[i]=(Math.random()-.5)*18;dust[i+1]=(Math.random()-.5)*10;dust[i+2]=3-Math.random()*25}
-    dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));const dustMat=new THREE.PointsMaterial({color:STAGE_COLORS[0],size:.024,transparent:true,opacity:.3,depthWrite:false});const dustField=new THREE.Points(dustGeo,dustMat);scene.add(dustField);
+    dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));const dustMat=new THREE.PointsMaterial({color:FIELD_COLOR,size:.024,transparent:true,opacity:.3,depthWrite:false});const dustField=new THREE.Points(dustGeo,dustMat);scene.add(dustField);
 
     const pointer={x:0,y:0};const onPointer=(event:PointerEvent)=>{pointer.x=(event.clientX/window.innerWidth-.5)*2;pointer.y=(event.clientY/window.innerHeight-.5)*2};window.addEventListener('pointermove',onPointer,{passive:true});
-    let raf=0;const clock=new THREE.Clock();const stageColor=new THREE.Color(STAGE_COLORS[0]);
+    let raf=0;const clock=new THREE.Clock();const fieldColor=new THREE.Color(FIELD_COLOR);
     const loop=()=>{
-      raf=requestAnimationFrame(loop);const t=clock.getElapsedTime();const stage=stageRef.current;const activeCount=Math.max(0,Math.min(4,countRef.current));const colorTarget=new THREE.Color(STAGE_COLORS[stage]);stageColor.lerp(colorTarget,.055);
-      fieldLight.color.copy(stageColor);lineMat.color.copy(stageColor);dustMat.color.copy(stageColor);
-      corridor.children.forEach((child,i)=>{const mesh=child as THREE.Mesh<THREE.TorusGeometry,THREE.MeshBasicMaterial>;mesh.material.color.copy(stageColor);mesh.material.opacity=.035+(i%3)*.014;mesh.rotation.z=t*(i%2?.025:-.02)+stage*.12+i*.08});
+      raf=requestAnimationFrame(loop);const t=clock.getElapsedTime();const stage=stageRef.current;const activeCount=Math.max(0,Math.min(4,countRef.current));
+      fieldLight.color.copy(fieldColor);lineMat.color.copy(fieldColor);dustMat.color.copy(fieldColor);
+      corridor.children.forEach((child,i)=>{const mesh=child as THREE.Mesh<THREE.TorusGeometry,THREE.MeshBasicMaterial>;mesh.material.color.copy(fieldColor);mesh.material.opacity=.035+(i%3)*.014;mesh.rotation.z=t*(i%2?.025:-.02)+stage*.12+i*.08});
 
       nodes.forEach((node,i)=>{
         const tuple=STAGE_POSITIONS[stage][i];const target=new THREE.Vector3(tuple[0],tuple[1],tuple[2]);const visible=i<activeCount;const isActive=visible&&i===activeRef.current;
         if(isActive){target.x*=.86;target.y*=.82;target.z+=.72}
         node.group.position.lerp(target,.065);
         const wanted=visible?(isActive?1.42:1):.001;node.group.scale.lerp(new THREE.Vector3(wanted,wanted,wanted),.09);node.group.visible=node.group.scale.x>.01;
-        node.core.material.emissive.lerp(stageColor,.08);node.core.material.emissiveIntensity+=((isActive?3.1:.6)-node.core.material.emissiveIntensity)*.08;node.core.material.opacity+=((visible?.92:0)-node.core.material.opacity)*.08;
-        node.ring.material.color.lerp(stageColor,.08);node.ring.material.opacity+=((isActive?.72:.38)-node.ring.material.opacity)*.08;node.orbit.material.opacity+=((isActive?.32:.12)-node.orbit.material.opacity)*.08;
+        node.core.material.emissive.copy(fieldColor);node.core.material.emissiveIntensity+=((isActive?3.1:.6)-node.core.material.emissiveIntensity)*.08;node.core.material.opacity+=((visible?.92:0)-node.core.material.opacity)*.08;
+        node.ring.material.color.copy(fieldColor);node.ring.material.opacity+=((isActive?.72:.38)-node.ring.material.opacity)*.08;node.orbit.material.opacity+=((isActive?.32:.12)-node.orbit.material.opacity)*.08;
         node.group.rotation.z=Math.sin(t*.4+i+stage*.5)*.025;node.core.rotation.x=t*(i%2?.08:-.065);node.core.rotation.y=t*(i%2?.11:-.09);node.ring.rotation.z=t*(i%2?.16:-.13)+i;node.orbit.rotation.z=-t*(i%2?.09:-.075);
       });
 
