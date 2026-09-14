@@ -1,5 +1,5 @@
-import ProviderJourney from '@/components/experience/ProviderJourney';
+import ProviderJourneyReplica from '@/components/experience/ProviderJourneyReplica';
 
 export default function ProviderExperiencePage() {
-  return <ProviderJourney />;
+  return <ProviderJourneyReplica />;
 }
