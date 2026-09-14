@@ -1,77 +1,76 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import styles from './SpecialtyField.module.css';
 import { configureCinematicRenderer } from '../immersive/rendererQuality';
 
 type Item={id:string;label:string;color:string};
-type NodeRecord={group:THREE.Group;mesh:THREE.Mesh<THREE.BufferGeometry,THREE.MeshStandardMaterial>;ring:THREE.Mesh;orbit:THREE.Mesh;item:Item;base:THREE.Vector3};
-const POS=[[-4.2,1.7,-1.4],[-1.5,2.1,-2.2],[1.8,1.9,-1.7],[4.3,.7,-2.4],[-2.6,-1.55,-1.5],[2.7,-1.65,-1.2]] as const;
+type Visual={group:THREE.Group;mesh:THREE.Mesh<THREE.BufferGeometry,THREE.MeshStandardMaterial>;rings:THREE.Mesh[];item:Item;index:number};
 
 function geometryFor(index:number):THREE.BufferGeometry{
-  if(index===0)return new THREE.IcosahedronGeometry(.72,2);
-  if(index===1)return new THREE.TorusKnotGeometry(.5,.15,96,14,2,3);
-  if(index===2)return new THREE.OctahedronGeometry(.76,1);
-  if(index===3)return new THREE.SphereGeometry(.68,32,22);
-  if(index===4)return new THREE.TorusGeometry(.58,.18,18,72);
-  return new THREE.CapsuleGeometry(.44,.78,8,16);
+  if(index===0)return new THREE.IcosahedronGeometry(1.3,3);
+  if(index===1)return new THREE.TorusKnotGeometry(.9,.26,150,20,2,3);
+  if(index===2)return new THREE.OctahedronGeometry(1.34,2);
+  if(index===3)return new THREE.SphereGeometry(1.15,48,32);
+  if(index===4)return new THREE.TorusGeometry(1.0,.31,24,120);
+  return new THREE.CapsuleGeometry(.72,1.35,12,24);
 }
 
-export default function SpecialtyField({items,selectedId,onSelect}:{items:readonly Item[];selectedId:string;onSelect:(id:string)=>void}){
+export default function SpecialtyField({items,selectedId}:{items:readonly Item[];selectedId:string;onSelect:(id:string)=>void}){
   const mount=useRef<HTMLDivElement>(null);
   const selectedRef=useRef(selectedId);selectedRef.current=selectedId;
-  const selectRef=useRef(onSelect);selectRef.current=onSelect;
-  const [labels,setLabels]=useState<Array<{x:number;y:number;visible:boolean}>>([]);
-  const [hovered,setHovered]=useState(-1);
 
   useEffect(()=>{
     const host=mount.current;if(!host)return;
-    const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x050a0d,.041);
-    const camera=new THREE.PerspectiveCamera(48,host.clientWidth/host.clientHeight,.1,80);camera.position.set(0,.35,16);
-    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'}),{exposure:1.05});renderer.setSize(host.clientWidth,host.clientHeight);host.appendChild(renderer.domElement);
-    scene.add(new THREE.HemisphereLight(0xb7edff,0x020608,1.02));const key=new THREE.PointLight(0x79e8ff,22,22);key.position.set(0,4,5);scene.add(key);
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(42,Math.max(1,host.clientWidth)/Math.max(1,host.clientHeight),.1,80);
+    camera.position.set(0,.15,9.5);
+    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'}),{exposure:1.02});
+    renderer.setSize(host.clientWidth,host.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));host.appendChild(renderer.domElement);
 
-    const nodes:NodeRecord[]=items.map((item,i)=>{
-      const group=new THREE.Group();const pos=POS[i]??[0,0,-1];const base=new THREE.Vector3(pos[0],pos[1],pos[2]);group.position.copy(base);
-      const color=new THREE.Color(item.color);const orbMat=new THREE.MeshStandardMaterial({color:0x0b1f29,emissive:color,emissiveIntensity:.7,metalness:.58,roughness:.16,transparent:true,opacity:.9});
-      const mesh=new THREE.Mesh(geometryFor(i),orbMat);group.add(mesh);
-      const ring=new THREE.Mesh(new THREE.TorusGeometry(1.08,.032,8,72),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.58,blending:THREE.AdditiveBlending}));ring.rotation.x=.55;ring.rotation.y=i*.25;group.add(ring);
-      const orbit=new THREE.Mesh(new THREE.TorusGeometry(1.42,.011,6,80),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.2}));orbit.rotation.set(1.05,i*.31,.4);group.add(orbit);
-      group.add(new THREE.PointLight(color,6,4));mesh.userData={index:i};ring.userData={index:i};scene.add(group);return{group,mesh,ring,orbit,item,base};
-    });
-    const interactive=nodes.flatMap(node=>[node.mesh,node.ring]);
+    scene.add(new THREE.HemisphereLight(0xeafaff,0x020406,.92));
+    const key=new THREE.PointLight(0xffffff,18,22);key.position.set(4,5,6);scene.add(key);
+    const rim=new THREE.PointLight(0x79e8ff,14,18);rim.position.set(-5,-2,3);scene.add(rim);
 
-    const links=new THREE.Group();nodes.forEach((node,i)=>{const material=new THREE.LineBasicMaterial({color:new THREE.Color(node.item.color),transparent:true,opacity:.08});const geometry=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-5),node.base.clone().multiplyScalar(.95)]);const line=new THREE.Line(geometry,material);line.userData={index:i};links.add(line)});scene.add(links);
-    const arrival=new THREE.Group();for(let i=0;i<5;i++){const material=new THREE.MeshBasicMaterial({color:i%2?0x8b6cff:0x64e5ff,transparent:true,opacity:.24-i*.025,blending:THREE.AdditiveBlending,depthWrite:false});const ring=new THREE.Mesh(new THREE.TorusGeometry(3.9+i*.72,.018+i*.004,7,96),material);ring.position.z=4.2-i*.55;ring.rotation.set(Math.PI*.5+i*.025,i*.06,i*.22);arrival.add(ring)}scene.add(arrival);
-    const dustGeo=new THREE.BufferGeometry();const dust=new Float32Array(1800);for(let i=0;i<dust.length;i+=3){dust[i]=(Math.random()-.5)*26;dust[i+1]=(Math.random()-.5)*14;dust[i+2]=7-Math.random()*38}dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));const dustMat=new THREE.PointsMaterial({color:0x91e9ff,size:.025,transparent:true,opacity:.38,depthWrite:false});const dustField=new THREE.Points(dustGeo,dustMat);scene.add(dustField);
-
-    const pointer=new THREE.Vector2(9,9),ray=new THREE.Raycaster(),targetPosition=new THREE.Vector3(),scaleVector=new THREE.Vector3(),projected=new THREE.Vector3();let raf=0,start=performance.now(),targetX=0,targetY=.2;
-    const move=(event:PointerEvent)=>{const rect=renderer.domElement.getBoundingClientRect();pointer.set((event.clientX-rect.left)/rect.width*2-1,-((event.clientY-rect.top)/rect.height)*2+1)};
-    const leave=()=>{pointer.set(9,9);setHovered(-1)};
-    const click=()=>{ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(interactive)[0];if(!hit)return;const node=nodes[hit.object.userData.index as number];if(node)selectRef.current(node.item.id)};
-    renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerleave',leave);renderer.domElement.addEventListener('click',click);
-
-    const loop=(now:number)=>{
-      raf=requestAnimationFrame(loop);const t=(now-start)/1000;const arrivalProgress=Math.min(1,t/1.45);ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(interactive)[0];const index=hit?(hit.object.userData.index as number):-1;setHovered(current=>current===index?current:index);
-      const selectedIndex=Math.max(0,nodes.findIndex(node=>node.item.id===selectedRef.current));
-      nodes.forEach((node,i)=>{
-        const active=i===selectedIndex;const hot=i===index&&!active;const muted=!active&&!hot;
-        if(active)targetPosition.set(0,.25,1.05);else targetPosition.copy(node.base).multiplyScalar(hot?.98:1.08);
-        targetPosition.z+=(hot?.55:muted?-1:0);node.group.position.lerp(targetPosition,active?.075:.055);
-        const scale=active?1.62:hot?1.2:.88;scaleVector.set(scale,scale,scale);node.group.scale.lerp(scaleVector,.075);
-        node.mesh.material.emissiveIntensity+=((active?2.7:hot?1.9:.5)-node.mesh.material.emissiveIntensity)*.08;node.mesh.material.opacity+=((active?1:hot?.94:.72)-node.mesh.material.opacity)*.07;
-        node.mesh.rotation.x=t*(i%2?.09:-.075)+i*.12;node.mesh.rotation.y=t*(i%2?.12:-.1);node.ring.rotation.z=t*(i%2?.12:-.1)+i*.3;node.orbit.rotation.z=-t*(i%2?.07:-.06);
-        const ringMaterial=node.ring.material as THREE.MeshBasicMaterial;const orbitMaterial=node.orbit.material as THREE.MeshBasicMaterial;const ringTarget=active?.9:hot?.62:.24;const orbitTarget=active?.42:hot?.27:.09;ringMaterial.opacity+=(ringTarget-ringMaterial.opacity)*.04;orbitMaterial.opacity+=(orbitTarget-orbitMaterial.opacity)*.04;
+    const visuals:Visual[]=items.map((item,index)=>{
+      const color=new THREE.Color(item.color);
+      const group=new THREE.Group();
+      const material=new THREE.MeshStandardMaterial({color:0x101417,emissive:color,emissiveIntensity:.8,metalness:.7,roughness:.16,transparent:true,opacity:0});
+      const mesh=new THREE.Mesh(geometryFor(index),material);group.add(mesh);
+      const rings=[1.7,2.15,2.55].map((radius,ringIndex)=>{
+        const ring=new THREE.Mesh(new THREE.TorusGeometry(radius,.018-ringIndex*.002,8,120),new THREE.MeshBasicMaterial({color,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+        ring.rotation.set(.62+ringIndex*.32,index*.18+ringIndex*.21,.22+ringIndex*.17);group.add(ring);return ring;
       });
-      arrival.children.forEach((child,i)=>{const ring=child as THREE.Mesh<THREE.TorusGeometry,THREE.MeshBasicMaterial>;ring.scale.setScalar(1+arrivalProgress*(1.4+i*.12));ring.material.opacity=(.24-i*.025)*(1-arrivalProgress);ring.rotation.z=t*(i%2?.18:-.15)+i*.2});arrival.visible=arrivalProgress<.995;
-      camera.position.z+=(10.9-camera.position.z)*.04;targetX+=(pointer.x*.22-targetX)*.022;targetY+=(.22+pointer.y*.11-targetY)*.022;camera.lookAt(targetX,targetY,-.45);links.rotation.z=Math.sin(t*.12)*.012;dustField.rotation.y=t*.006;
-      setLabels(nodes.map((node,i)=>{projected.copy(node.group.getWorldPosition(new THREE.Vector3())).project(camera);return{x:(projected.x*.5+.5)*host.clientWidth,y:(-.5*projected.y+.5)*host.clientHeight,visible:projected.z<1&&i!==selectedIndex}}));renderer.render(scene,camera)
+      group.position.set(0,.18,-.4);group.scale.setScalar(.72);scene.add(group);return{group,mesh,rings,item,index};
+    });
+
+    const dustGeo=new THREE.BufferGeometry();const dust=new Float32Array(1200);for(let i=0;i<dust.length;i+=3){dust[i]=(Math.random()-.5)*16;dust[i+1]=(Math.random()-.5)*10;dust[i+2]=3-Math.random()*20}dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));
+    const dustMat=new THREE.PointsMaterial({color:0xd7f8ff,size:.018,transparent:true,opacity:.23,depthWrite:false});const dustField=new THREE.Points(dustGeo,dustMat);scene.add(dustField);
+
+    const backRing=new THREE.Mesh(new THREE.TorusGeometry(3.4,.012,7,140),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.05,depthWrite:false}));backRing.rotation.x=1.16;backRing.rotation.z=.32;backRing.position.z=-2.4;scene.add(backRing);
+
+    const pointer={x:0,y:0};const move=(event:PointerEvent)=>{pointer.x=(event.clientX/window.innerWidth-.5)*2;pointer.y=(event.clientY/window.innerHeight-.5)*2};window.addEventListener('pointermove',move,{passive:true});
+    let raf=0,start=performance.now(),lastSelected=-1;
+    const loop=(now:number)=>{
+      raf=requestAnimationFrame(loop);const t=(now-start)/1000;const selectedIndex=Math.max(0,visuals.findIndex(visual=>visual.item.id===selectedRef.current));
+      if(selectedIndex!==lastSelected){lastSelected=selectedIndex;const color=new THREE.Color(visuals[selectedIndex]?.item.color??'#72dcff');rim.color.copy(color);dustMat.color.copy(color).lerp(new THREE.Color(0xffffff),.45)}
+      visuals.forEach((visual,index)=>{
+        const active=index===selectedIndex;const material=visual.mesh.material;
+        const targetOpacity=active?1:0;material.opacity+=(targetOpacity-material.opacity)*(active?.11:.16);material.emissiveIntensity+=((active?2.25:.4)-material.emissiveIntensity)*.08;
+        const targetScale=active?1:0.68;visual.group.scale.lerp(new THREE.Vector3(targetScale,targetScale,targetScale),.09);
+        visual.group.position.z+=((active?.2:-3.8)-visual.group.position.z)*.085;visual.group.position.y+=((active?.12:1.4)-visual.group.position.y)*.07;
+        visual.mesh.rotation.x=t*(index%2?.075:-.06)+index*.2;visual.mesh.rotation.y=t*(index%2?.11:-.09)+index*.16;
+        visual.rings.forEach((ring,ringIndex)=>{const mat=ring.material as THREE.MeshBasicMaterial;mat.opacity+=(((active?.34-ringIndex*.07:0))-mat.opacity)*.1;ring.rotation.z=t*((index+ringIndex)%2?.045:-.038)+ringIndex*.4});
+        visual.group.visible=material.opacity>.008||active;
+      });
+      camera.position.x+=(pointer.x*.16-camera.position.x)*.025;camera.position.y+=(.15+pointer.y*.09-camera.position.y)*.025;camera.lookAt(0,.08,-.55);
+      backRing.rotation.z=t*.018;dustField.rotation.y=t*.004;renderer.render(scene,camera);
     };loop(performance.now());
 
-    const resize=()=>{camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(host.clientWidth,host.clientHeight)};addEventListener('resize',resize);
-    return()=>{cancelAnimationFrame(raf);removeEventListener('resize',resize);renderer.domElement.removeEventListener('pointermove',move);renderer.domElement.removeEventListener('pointerleave',leave);renderer.domElement.removeEventListener('click',click);scene.traverse(object=>{const mesh=object as THREE.Mesh;if(mesh.geometry)mesh.geometry.dispose();const material=mesh.material;if(Array.isArray(material))material.forEach(x=>x.dispose());else material?.dispose()});renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement)};
+    const resize=()=>{camera.aspect=Math.max(1,host.clientWidth)/Math.max(1,host.clientHeight);camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8))};window.addEventListener('resize',resize);
+    return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);window.removeEventListener('pointermove',move);scene.traverse(object=>{const mesh=object as THREE.Mesh;if(mesh.geometry)mesh.geometry.dispose();const material=mesh.material;if(Array.isArray(material))material.forEach(x=>x.dispose());else material?.dispose()});renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement)};
   },[items]);
 
-  return <section className={styles.root} aria-label="Provider specialty destinations"><div ref={mount} className={styles.canvas}/><div className={styles.labels}>{items.map((item,i)=><button key={item.id} type="button" className={styles.label} data-active={hovered===i} data-selected={item.id===selectedId} onFocus={()=>setHovered(i)} onBlur={()=>setHovered(-1)} onClick={()=>onSelect(item.id)} style={{left:labels[i]?.x,top:labels[i]?.y,opacity:labels[i]?.visible?1:0,'--label-color':item.color} as React.CSSProperties}><small>SPECIALTY</small><b>{item.label}</b></button>)}</div><p className={styles.hint}>MOVE THROUGH THE FIELD · SELECT A SPECIALTY</p><div className={styles.fallback}>{items.map(item=><button key={item.id} type="button" aria-pressed={item.id===selectedId} onClick={()=>onSelect(item.id)} style={{'--fallback-color':item.color} as React.CSSProperties}>{item.label}</button>)}</div></section>;
+  return <section className={styles.root} aria-label="Selected provider specialty visual"><div ref={mount} className={styles.canvas}/></section>;
 }
