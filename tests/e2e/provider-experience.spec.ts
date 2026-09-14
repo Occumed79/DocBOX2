@@ -7,7 +7,7 @@ async function collectPageErrors(page: import('@playwright/test').Page) {
 }
 
 test.describe('DOCBOX2 provider experience', () => {
-  test('story uses the source-authored Oryzo-style sequence and hands off to five Zero Tech portals', async ({ page }) => {
+  test('story uses the source-authored Oryzo-style sequence and hands off to exactly five Zero Tech portals', async ({ page }) => {
     const errors = await collectPageErrors(page);
     await page.goto('/experience');
 
@@ -16,16 +16,22 @@ test.describe('DOCBOX2 provider experience', () => {
     await expect(page.getByText('Around', { exact: true })).toBeVisible();
     await expect(page.getByText('The Job.', { exact: true })).toBeVisible();
     await expect(page.locator('[data-oryzo-scene]')).toHaveCount(11);
+    await expect(page.locator('#cinematic-story figure')).toHaveCount(26);
 
     const firstScene = page.locator('#story-1');
     await firstScene.scrollIntoViewIfNeeded();
     await expect(firstScene.getByRole('heading', { name: 'The job changed the question.' })).toBeVisible();
     await expect(firstScene.getByText(/California-funded research/i)).toBeVisible();
 
+    // Other destination grammars must not leak into the story.
+    await expect(page.getByText('REFERRAL LIFECYCLE')).toHaveCount(0);
+    await expect(page.getByText('FEATURED SPECIALTIES')).toHaveCount(0);
+
     const portals = page.locator('#provider-portals');
     await portals.scrollIntoViewIfNeeded();
     const portalNav = page.getByRole('navigation', { name: 'Provider world portals' });
     await expect(portalNav).toBeVisible();
+    await expect(portalNav.getByRole('link')).toHaveCount(5);
     await expect(portalNav.getByRole('link', { name: /Company history/i })).toBeVisible();
     await expect(portalNav.getByRole('link', { name: /Explore the network/i })).toBeVisible();
     await expect(portalNav.getByRole('link', { name: /Provider resources/i })).toBeVisible();
@@ -38,10 +44,14 @@ test.describe('DOCBOX2 provider experience', () => {
     const errors = await collectPageErrors(page);
     await page.goto('/experience/history');
 
-    await expect(page.getByRole('navigation', { name: 'Occu-Med history timeline' })).toBeVisible();
+    const timeline = page.getByRole('navigation', { name: 'Occu-Med history timeline' });
+    await expect(timeline).toBeVisible();
+    await expect(timeline.getByRole('button')).toHaveCount(10);
     await expect(page.getByText('1979', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('TODAY', { exact: true }).first()).toBeVisible();
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByText('FEATURED SPECIALTIES')).toHaveCount(0);
+    await expect(page.getByText('REFERRAL LIFECYCLE')).toHaveCount(0);
 
     await page.getByRole('button', { name: 'SEARCH' }).click();
     const search = page.getByRole('textbox', { name: 'Search history' });
@@ -64,6 +74,8 @@ test.describe('DOCBOX2 provider experience', () => {
     await expect(page.getByText('23,524', { exact: true }).first()).toBeVisible();
     await expect(page.getByText(/MAPPED NODES/)).toBeVisible();
     await expect(page.getByText(/DIRECTORY RECORDS/)).toHaveCount(0);
+    await expect(page.getByText('NETWORK LAYERS', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('23,544', { exact: true })).toHaveCount(0);
 
     const dental = page.getByRole('button', { name: /Dental.*3,141/i }).first();
     await dental.click();
@@ -72,21 +84,30 @@ test.describe('DOCBOX2 provider experience', () => {
 
     await page.getByRole('button', { name: /02.*Geography/i }).click();
     await expect(page.getByRole('button', { name: /Europe/i })).toBeVisible();
+
+    await page.getByRole('button', { name: /04.*Diagnostics/i }).click();
+    await expect(page.getByText(/2,867 mapped diagnostic nodes/i)).toBeVisible();
+    await expect(page.getByText('2,885', { exact: true })).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 
-  test('resources follows the Lusion hierarchy with one selected specialty and a real resource surface', async ({ page }) => {
+  test('resources follows the Lusion hierarchy with one list selector and a real resource surface', async ({ page }) => {
     const errors = await collectPageErrors(page);
     await page.goto('/experience/resources');
 
     await expect(page.getByRole('heading', { name: /Step into a new world/i })).toBeVisible();
-    const dental = page.getByRole('button', { name: /Dental/i }).first();
+    await expect(page.getByText('FEATURED SPECIALTIES')).toBeVisible();
+    const specialtyNav = page.getByRole('navigation', { name: 'Provider specialties' });
+    await expect(specialtyNav.getByRole('button')).toHaveCount(6);
+
+    const dental = specialtyNav.getByRole('button', { name: /Dental/i });
     await dental.scrollIntoViewIfNeeded();
     await dental.click();
     await expect(dental).toHaveAttribute('aria-pressed', 'true');
 
     await expect(page.getByText('Documents for Dental')).toHaveCount(1);
     await expect(page.getByText('Dental Readiness Checklist')).toHaveCount(1);
+    await expect(page.getByText('REFERRAL LIFECYCLE')).toHaveCount(0);
     const agreement = page.getByRole('link', { name: /Enter agreement portal/i });
     await expect(agreement).toHaveAttribute('href', /specialty=Dental&from=resources/);
     expect(errors).toEqual([]);
@@ -99,6 +120,8 @@ test.describe('DOCBOX2 provider experience', () => {
     await expect(page.getByText('REFERRAL LIFECYCLE')).toBeVisible();
     await expect(page.getByText('PORTAL 04 / KNOWLEDGE FIELD')).toBeVisible();
     await expect(page.getByText('LAYERS')).toBeVisible();
+    await expect(page.getByText('QUESTIONS / 06')).toBeVisible();
+    await expect(page.getByText('FEATURED SPECIALTIES')).toHaveCount(0);
 
     await page.getByRole('button', { name: /04.*Return/i }).click();
     const privacyQuestion = page.getByRole('button', { name: /What medical information is shared with the employer/i });
@@ -117,6 +140,8 @@ test.describe('DOCBOX2 provider experience', () => {
     await enter.click();
     await expect(page.getByText('Provider Fee Proposal').first()).toBeVisible({ timeout: 12_000 });
     await expect(page.getByText('Comprehensive dental evaluation')).toBeVisible();
+    await expect(page.getByText('FEATURED SPECIALTIES')).toHaveCount(0);
+    await expect(page.getByText('REFERRAL LIFECYCLE')).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 
