@@ -34,27 +34,22 @@ export default function SpecialtyField({items,selectedId,onSelect}:{items:readon
 
     const nodes:NodeRecord[]=items.map((item,i)=>{
       const group=new THREE.Group();const pos=POS[i]??[0,0,-1];const base=new THREE.Vector3(pos[0],pos[1],pos[2]);group.position.copy(base);
-      const color=new THREE.Color(item.color);
-      const orbMat=new THREE.MeshStandardMaterial({color:0x0b1f29,emissive:color,emissiveIntensity:.7,metalness:.58,roughness:.16,transparent:true,opacity:.9});
+      const color=new THREE.Color(item.color);const orbMat=new THREE.MeshStandardMaterial({color:0x0b1f29,emissive:color,emissiveIntensity:.7,metalness:.58,roughness:.16,transparent:true,opacity:.9});
       const mesh=new THREE.Mesh(geometryFor(i),orbMat);group.add(mesh);
       const ring=new THREE.Mesh(new THREE.TorusGeometry(1.08,.032,8,72),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.58,blending:THREE.AdditiveBlending}));ring.rotation.x=.55;ring.rotation.y=i*.25;group.add(ring);
       const orbit=new THREE.Mesh(new THREE.TorusGeometry(1.42,.011,6,80),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.2}));orbit.rotation.set(1.05,i*.31,.4);group.add(orbit);
-      const light=new THREE.PointLight(color,6,4);group.add(light);mesh.userData={index:i};ring.userData={index:i};scene.add(group);return{group,mesh,ring,orbit,item,base};
+      group.add(new THREE.PointLight(color,6,4));mesh.userData={index:i};ring.userData={index:i};scene.add(group);return{group,mesh,ring,orbit,item,base};
     });
     const interactive=nodes.flatMap(node=>[node.mesh,node.ring]);
 
-    const links=new THREE.Group();
-    nodes.forEach((node,i)=>{const material=new THREE.LineBasicMaterial({color:new THREE.Color(node.item.color),transparent:true,opacity:.08});const geometry=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-5),node.base.clone().multiplyScalar(.95)]);const line=new THREE.Line(geometry,material);line.userData={index:i};links.add(line)});scene.add(links);
-
-    const arrival=new THREE.Group();
-    for(let i=0;i<5;i++){const material=new THREE.MeshBasicMaterial({color:i%2?0x8b6cff:0x64e5ff,transparent:true,opacity:.24-i*.025,blending:THREE.AdditiveBlending,depthWrite:false});const ring=new THREE.Mesh(new THREE.TorusGeometry(3.9+i*.72,.018+i*.004,7,96),material);ring.position.z=4.2-i*.55;ring.rotation.set(Math.PI*.5+i*.025,i*.06,i*.22);arrival.add(ring)}scene.add(arrival);
-
+    const links=new THREE.Group();nodes.forEach((node,i)=>{const material=new THREE.LineBasicMaterial({color:new THREE.Color(node.item.color),transparent:true,opacity:.08});const geometry=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-5),node.base.clone().multiplyScalar(.95)]);const line=new THREE.Line(geometry,material);line.userData={index:i};links.add(line)});scene.add(links);
+    const arrival=new THREE.Group();for(let i=0;i<5;i++){const material=new THREE.MeshBasicMaterial({color:i%2?0x8b6cff:0x64e5ff,transparent:true,opacity:.24-i*.025,blending:THREE.AdditiveBlending,depthWrite:false});const ring=new THREE.Mesh(new THREE.TorusGeometry(3.9+i*.72,.018+i*.004,7,96),material);ring.position.z=4.2-i*.55;ring.rotation.set(Math.PI*.5+i*.025,i*.06,i*.22);arrival.add(ring)}scene.add(arrival);
     const dustGeo=new THREE.BufferGeometry();const dust=new Float32Array(1800);for(let i=0;i<dust.length;i+=3){dust[i]=(Math.random()-.5)*26;dust[i+1]=(Math.random()-.5)*14;dust[i+2]=7-Math.random()*38}dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));const dustMat=new THREE.PointsMaterial({color:0x91e9ff,size:.025,transparent:true,opacity:.38,depthWrite:false});const dustField=new THREE.Points(dustGeo,dustMat);scene.add(dustField);
 
-    const pointer=new THREE.Vector2(9,9),ray=new THREE.Raycaster();let raf=0,start=performance.now(),targetX=0,targetY=.2;
+    const pointer=new THREE.Vector2(9,9),ray=new THREE.Raycaster(),targetPosition=new THREE.Vector3(),scaleVector=new THREE.Vector3(),projected=new THREE.Vector3();let raf=0,start=performance.now(),targetX=0,targetY=.2;
     const move=(event:PointerEvent)=>{const rect=renderer.domElement.getBoundingClientRect();pointer.set((event.clientX-rect.left)/rect.width*2-1,-((event.clientY-rect.top)/rect.height)*2+1)};
     const leave=()=>{pointer.set(9,9);setHovered(-1)};
-    const click=()=>{ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(interactive)[0];if(!hit)return;const index=hit.object.userData.index as number;const node=nodes[index];if(node)selectRef.current(node.item.id)};
+    const click=()=>{ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(interactive)[0];if(!hit)return;const node=nodes[hit.object.userData.index as number];if(node)selectRef.current(node.item.id)};
     renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerleave',leave);renderer.domElement.addEventListener('click',click);
 
     const loop=(now:number)=>{
@@ -62,25 +57,21 @@ export default function SpecialtyField({items,selectedId,onSelect}:{items:readon
       const selectedIndex=Math.max(0,nodes.findIndex(node=>node.item.id===selectedRef.current));
       nodes.forEach((node,i)=>{
         const active=i===selectedIndex;const hot=i===index&&!active;const muted=!active&&!hot;
-        const targetPosition=active?new THREE.Vector3(0,.25,1.05):node.base.clone().multiplyScalar(hot?.98:1.08);
-        targetPosition.z+=(hot?.55:muted?-1.0:0);
-        node.group.position.lerp(targetPosition,active?.075:.055);
-        const scale=active?1.62:hot?1.2:.88;node.group.scale.lerp(new THREE.Vector3(scale,scale,scale),.075);
-        node.mesh.material.emissiveIntensity+=((active?2.7:hot?1.9:.5)-node.mesh.material.emissiveIntensity)*.08;
-        node.mesh.material.opacity+=((active?1:hot?.94:.72)-node.mesh.material.opacity)*.07;
-        node.mesh.rotation.x=t*(i%2?.09:-.075)+i*.12;node.mesh.rotation.y=t*(i%2?.12:-.1);
-        node.ring.rotation.z=t*(i%2?.12:-.1)+i*.3;node.orbit.rotation.z=-t*(i%2?.07:-.06);
-        (node.ring.material as THREE.MeshBasicMaterial).opacity+=(active?.9:hot?.62:.24-(node.ring.material as THREE.MeshBasicMaterial).opacity)*.04;
-        (node.orbit.material as THREE.MeshBasicMaterial).opacity+=(active?.42:hot?.27:.09-(node.orbit.material as THREE.MeshBasicMaterial).opacity)*.04;
+        if(active)targetPosition.set(0,.25,1.05);else targetPosition.copy(node.base).multiplyScalar(hot?.98:1.08);
+        targetPosition.z+=(hot?.55:muted?-1:0);node.group.position.lerp(targetPosition,active?.075:.055);
+        const scale=active?1.62:hot?1.2:.88;scaleVector.set(scale,scale,scale);node.group.scale.lerp(scaleVector,.075);
+        node.mesh.material.emissiveIntensity+=((active?2.7:hot?1.9:.5)-node.mesh.material.emissiveIntensity)*.08;node.mesh.material.opacity+=((active?1:hot?.94:.72)-node.mesh.material.opacity)*.07;
+        node.mesh.rotation.x=t*(i%2?.09:-.075)+i*.12;node.mesh.rotation.y=t*(i%2?.12:-.1);node.ring.rotation.z=t*(i%2?.12:-.1)+i*.3;node.orbit.rotation.z=-t*(i%2?.07:-.06);
+        const ringMaterial=node.ring.material as THREE.MeshBasicMaterial;const orbitMaterial=node.orbit.material as THREE.MeshBasicMaterial;const ringTarget=active?.9:hot?.62:.24;const orbitTarget=active?.42:hot?.27:.09;ringMaterial.opacity+=(ringTarget-ringMaterial.opacity)*.04;orbitMaterial.opacity+=(orbitTarget-orbitMaterial.opacity)*.04;
       });
       arrival.children.forEach((child,i)=>{const ring=child as THREE.Mesh<THREE.TorusGeometry,THREE.MeshBasicMaterial>;ring.scale.setScalar(1+arrivalProgress*(1.4+i*.12));ring.material.opacity=(.24-i*.025)*(1-arrivalProgress);ring.rotation.z=t*(i%2?.18:-.15)+i*.2});arrival.visible=arrivalProgress<.995;
-      const destinationZ=10.9;camera.position.z+=(destinationZ-camera.position.z)*.04;targetX+=(pointer.x*.22-targetX)*.022;targetY+=(.22+pointer.y*.11-targetY)*.022;camera.lookAt(targetX,targetY,-.45);links.rotation.z=Math.sin(t*.12)*.012;dustField.rotation.y=t*.006;
-      setLabels(nodes.map((node,i)=>{const p=node.group.getWorldPosition(new THREE.Vector3()).project(camera);return{x:(p.x*.5+.5)*host.clientWidth,y:(-.5*p.y+.5)*host.clientHeight,visible:p.z<1&&i!==selectedIndex}}));renderer.render(scene,camera)
+      camera.position.z+=(10.9-camera.position.z)*.04;targetX+=(pointer.x*.22-targetX)*.022;targetY+=(.22+pointer.y*.11-targetY)*.022;camera.lookAt(targetX,targetY,-.45);links.rotation.z=Math.sin(t*.12)*.012;dustField.rotation.y=t*.006;
+      setLabels(nodes.map((node,i)=>{projected.copy(node.group.getWorldPosition(new THREE.Vector3())).project(camera);return{x:(projected.x*.5+.5)*host.clientWidth,y:(-.5*projected.y+.5)*host.clientHeight,visible:projected.z<1&&i!==selectedIndex}}));renderer.render(scene,camera)
     };loop(performance.now());
 
     const resize=()=>{camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(host.clientWidth,host.clientHeight)};addEventListener('resize',resize);
     return()=>{cancelAnimationFrame(raf);removeEventListener('resize',resize);renderer.domElement.removeEventListener('pointermove',move);renderer.domElement.removeEventListener('pointerleave',leave);renderer.domElement.removeEventListener('click',click);scene.traverse(object=>{const mesh=object as THREE.Mesh;if(mesh.geometry)mesh.geometry.dispose();const material=mesh.material;if(Array.isArray(material))material.forEach(x=>x.dispose());else material?.dispose()});renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement)};
   },[items]);
 
-  return <section className={styles.root} aria-label="Provider specialty destinations"><div ref={mount} className={styles.canvas}/><div className={styles.labels}>{items.map((item,i)=><button key={item.id} type="button" className={styles.label} data-active={item.id===selectedId||hovered===i} data-selected={item.id===selectedId} onFocus={()=>setHovered(i)} onBlur={()=>setHovered(-1)} onClick={()=>onSelect(item.id)} style={{left:labels[i]?.x,top:labels[i]?.y,opacity:labels[i]?.visible?1:0,'--label-color':item.color} as React.CSSProperties}><small>{item.id===selectedId?'ACTIVE PATH':'SPECIALTY'}</small><b>{item.label}</b></button>)}</div><p className={styles.hint}>MOVE THROUGH THE FIELD · SELECT A SPECIALTY</p><div className={styles.fallback}>{items.map(item=><button key={item.id} type="button" aria-pressed={item.id===selectedId} onClick={()=>onSelect(item.id)} style={{'--fallback-color':item.color} as React.CSSProperties}>{item.label}</button>)}</div></section>;
+  return <section className={styles.root} aria-label="Provider specialty destinations"><div ref={mount} className={styles.canvas}/><div className={styles.labels}>{items.map((item,i)=><button key={item.id} type="button" className={styles.label} data-active={hovered===i} data-selected={item.id===selectedId} onFocus={()=>setHovered(i)} onBlur={()=>setHovered(-1)} onClick={()=>onSelect(item.id)} style={{left:labels[i]?.x,top:labels[i]?.y,opacity:labels[i]?.visible?1:0,'--label-color':item.color} as React.CSSProperties}><small>SPECIALTY</small><b>{item.label}</b></button>)}</div><p className={styles.hint}>MOVE THROUGH THE FIELD · SELECT A SPECIALTY</p><div className={styles.fallback}>{items.map(item=><button key={item.id} type="button" aria-pressed={item.id===selectedId} onClick={()=>onSelect(item.id)} style={{'--fallback-color':item.color} as React.CSSProperties}>{item.label}</button>)}</div></section>;
 }
