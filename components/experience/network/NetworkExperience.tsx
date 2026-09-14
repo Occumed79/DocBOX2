@@ -89,7 +89,6 @@ export default function NetworkExperience(){
       <footer className={styles.railFooter}><span><b>{selectedCount.toLocaleString()}</b> {LAYER_LABELS[layer]}</span><span>{activeRegionLabel}</span></footer>
     </aside>
 
-    <div className={styles.mapLegend} aria-label="Map layer legend"><span>NETWORK LAYERS</span>{(['medical','dental','diagnostic','pharmacy'] as Layer[]).map(key=><button key={key} type="button" aria-pressed={layer===key||layer==='all'} onClick={()=>setLayer(layer===key?'all':key)}><i data-layer={key}/><span>{LAYER_LABELS[key]}</span></button>)}</div>
     <div className={styles.mapMeta} aria-live="polite"><span>{activeRegionLabel}</span><span>{selectedCount.toLocaleString()} MAPPED NODES</span><span>CESIUM / ION TERRAIN + 3D</span></div>
     <div className={styles.instructions}>DRAG TO ORBIT&nbsp;&nbsp;·&nbsp;&nbsp;SCROLL TO DIVE&nbsp;&nbsp;·&nbsp;&nbsp;CLICK A NODE TO LOCK</div>
   </main>;
