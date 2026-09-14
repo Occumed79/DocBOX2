@@ -10,6 +10,7 @@ on:
       - components/experience/**
       - public/data/provider-network-points.json
       - tests/e2e/provider-experience.spec.ts
+      - playwright.config.ts
       - package.json
       - package-lock.json
       - .github/workflows/provider-experience-qa.yml
@@ -21,7 +22,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -42,3 +43,9 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Provider browser regression
+        run: npx playwright test tests/e2e/provider-experience.spec.ts --project=chromium-desktop
