@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { configureCinematicRenderer } from './rendererQuality';
+import { tryCreateCinematicRenderer } from './rendererQuality';
 
 const PORTAL_VERTEX=`
 varying vec2 vUv;
@@ -37,13 +37,8 @@ export default function DiveWorld({progress}:{progress:number}){
     const el=host.current;if(!el)return;
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x02070d,.038);
     const camera=new THREE.PerspectiveCamera(56,el.clientWidth/el.clientHeight,.1,180);camera.position.set(0,0,10);
-    let renderer:THREE.WebGLRenderer;
-    try{
-      renderer=configureCinematicRenderer(new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'}),{exposure:1.08});
-    }catch{
-      setWebglAvailable(false);
-      return;
-    }
+    const renderer=tryCreateCinematicRenderer({alpha:false,antialias:true,powerPreference:'high-performance'},{exposure:1.08});
+    if(!renderer){setWebglAvailable(false);return}
     renderer.setSize(el.clientWidth,el.clientHeight);renderer.setClearColor(0x02070d,1);el.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0x8ddfff,0x05060b,.9));

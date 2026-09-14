@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import styles from './QuestionField.module.css';
-import { configureCinematicRenderer } from '../immersive/rendererQuality';
+import { tryCreateCinematicRenderer } from '../immersive/rendererQuality';
 
 const STAGE_POSITIONS = [
   [[-3.3,1.4,-1.0],[2.15,1.8,-2.5],[3.25,-.55,-1.5],[-2.0,-1.75,-2.15],[.2,-2.15,-3.1],[-4.1,.1,-3.5]],
@@ -43,7 +43,9 @@ export default function QuestionField({count,active,stageIndex}:{count:number;ac
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x07151c,.055);
     const camera=new THREE.PerspectiveCamera(45,el.clientWidth/el.clientHeight,.1,70);camera.position.set(0,.15,10.5);
     const lookTarget=new THREE.Vector3(0,0,-1.8);
-    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'}),{exposure:1.03});renderer.setSize(el.clientWidth,el.clientHeight);el.appendChild(renderer.domElement);
+    const renderer=tryCreateCinematicRenderer({antialias:true,alpha:true,powerPreference:'high-performance'},{exposure:1.03});
+    if(!renderer){el.dataset.webgl='unavailable';return}
+    renderer.setSize(el.clientWidth,el.clientHeight);el.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0xb9efff,0x061117,.8));
     const fieldLight=new THREE.PointLight(FIELD_COLOR,20,20);fieldLight.position.set(3,2,5);scene.add(fieldLight);

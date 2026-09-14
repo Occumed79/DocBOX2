@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import styles from './OryzoStoryWorld.module.css';
+import { tryCreateCinematicRenderer } from './rendererQuality';
 
 const ASSETS = [
   'Founders.png','Founders copy.png','California - Hawaii Map.png','Concerned provider.png',
@@ -139,8 +140,9 @@ export default function OryzoStoryWorld({sceneIndex}:{sceneIndex:number}){
     const envColors=ENVIRONMENTS.map(env=>({bg:new THREE.Color(env.bg),accent:new THREE.Color(env.accent),fill:new THREE.Color(env.fill)}));
     const scene=new THREE.Scene();scene.background=envColors[0].bg.clone();scene.fog=new THREE.FogExp2(envColors[0].bg,.034);
     const camera=new THREE.PerspectiveCamera(41,window.innerWidth/window.innerHeight,.1,80);camera.position.set(0,.05,8.4);
-    const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));renderer.setSize(window.innerWidth,window.innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;mount.appendChild(renderer.domElement);
+    const renderer=tryCreateCinematicRenderer({antialias:true,alpha:false,powerPreference:'high-performance'},{dprCap:1.8});
+    if(!renderer){mount.dataset.webgl='unavailable';return}
+    renderer.setSize(window.innerWidth,window.innerHeight);mount.appendChild(renderer.domElement);
 
     const ambient=new THREE.AmbientLight(envColors[0].fill,1.05);scene.add(ambient);
     const key=new THREE.PointLight(envColors[0].accent,16,24);key.position.set(5,2,6);scene.add(key);

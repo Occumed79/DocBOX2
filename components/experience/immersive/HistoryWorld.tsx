@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { configureCinematicRenderer } from './rendererQuality';
+import { tryCreateCinematicRenderer } from './rendererQuality';
 
 type Milestone = { year:string; image:string };
 type NodeVisual = {
@@ -58,7 +58,8 @@ export default function HistoryWorld({progress,milestones}:{progress:number;mile
     scene.fog=new THREE.FogExp2(0x08132c,.018);
     const camera=new THREE.PerspectiveCamera(42,Math.max(1,el.clientWidth)/Math.max(1,el.clientHeight),.1,220);
     camera.position.set(0,.2,11.5);
-    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}),{exposure:1.08});
+    const renderer=tryCreateCinematicRenderer({antialias:true,alpha:false,powerPreference:'high-performance'},{exposure:1.08});
+    if(!renderer){el.dataset.webgl='unavailable';return}
     renderer.setSize(el.clientWidth,el.clientHeight);el.appendChild(renderer.domElement);
 
     const disposables:Array<THREE.Material|THREE.BufferGeometry|THREE.Texture>=[];

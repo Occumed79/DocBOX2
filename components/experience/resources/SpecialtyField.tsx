@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import * as THREE from 'three';
 import styles from './SpecialtyField.module.css';
-import { configureCinematicRenderer } from '../immersive/rendererQuality';
+import { tryCreateCinematicRenderer } from '../immersive/rendererQuality';
 
 type Item={id:string;label:string;color:string};
 type FadeMaterial=THREE.MeshStandardMaterial|THREE.MeshPhysicalMaterial|THREE.MeshBasicMaterial;
@@ -80,13 +80,8 @@ export default function SpecialtyField({items,selectedId}:{items:readonly Item[]
   useEffect(()=>{
     const host=mount.current;if(!host||!items.length)return;
     const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(42,Math.max(1,host.clientWidth)/Math.max(1,host.clientHeight),.1,80);camera.position.set(0,.15,9.5);
-    let renderer:THREE.WebGLRenderer;
-    try{
-      renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'}),{exposure:1.02});
-    }catch{
-      setWebglAvailable(false);
-      return;
-    }
+    const renderer=tryCreateCinematicRenderer({antialias:true,alpha:true,powerPreference:'high-performance'},{exposure:1.02});
+    if(!renderer){setWebglAvailable(false);return}
     renderer.setSize(host.clientWidth,host.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));host.appendChild(renderer.domElement);
     scene.add(new THREE.HemisphereLight(0xeafaff,0x020406,.92));const key=new THREE.PointLight(0xffffff,18,22);key.position.set(5,5,6);scene.add(key);
     const rim=new THREE.PointLight(new THREE.Color(items[0].color),14,18);rim.position.set(-2,-2,3);scene.add(rim);

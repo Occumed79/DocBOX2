@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 
 import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
 import { addPortalArchitecture } from './PortalArchitecture';
-import { configureCinematicRenderer } from './rendererQuality';
+import { tryCreateCinematicRenderer } from './rendererQuality';
 import styles from './ZeroTechPortalHub.module.css';
 
 type Portal={id:string;href:string;number:string;title:string;note:string;tone:string};
@@ -48,12 +48,19 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
   const [active,setActive]=useState(-1);
   const [labels,setLabels]=useState<Array<{x:number;y:number;visible:boolean}>>([]);
   const [travelling,setTravelling]=useState(false);
+  const [webglAvailable,setWebglAvailable]=useState(true);
 
   useEffect(()=>{
     const host=mount.current;if(!host)return;
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x000000,.029);
     const camera=new THREE.PerspectiveCamera(47,host.clientWidth/host.clientHeight,.1,120);camera.position.set(0,.72,17.6);
-    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'}),{exposure:1.08});renderer.setClearColor(0x000000,1);renderer.setSize(host.clientWidth,host.clientHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));host.appendChild(renderer.domElement);
+    const renderer=tryCreateCinematicRenderer({antialias:true,powerPreference:'high-performance'},{exposure:1.08});
+    if(!renderer){
+      setWebglAvailable(false);
+      travelRef.current=(index:number)=>{const portal=portals[index];if(!portal)return;setActive(index);setTravelling(true);router.push(portal.href)};
+      return()=>{travelRef.current=()=>{}};
+    }
+    renderer.setClearColor(0x000000,1);renderer.setSize(host.clientWidth,host.clientHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));host.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0xffffff,0x000000,.72));
     const key=new THREE.DirectionalLight(0xffffff,3.3);key.position.set(5,8,7);scene.add(key);
@@ -133,11 +140,12 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
   },[portals,router]);
 
   const enter=(event:ReactMouseEvent<HTMLAnchorElement>,index:number)=>{event.preventDefault();travelRef.current(index)};
-  return <nav className={styles.root} data-travelling={travelling?true:undefined} aria-label="Provider world portals">
+  const fallbackPositions=[['50%','25%'],['70%','42%'],['64%','66%'],['36%','66%'],['30%','42%']] as const;
+  return <nav className={styles.root} data-travelling={travelling?true:undefined} data-webgl={webglAvailable?'available':'unavailable'} aria-label="Provider world portals">
     <div className={styles.wordmark} aria-hidden="true"><span>PROVIDER</span><span>WORLD</span></div>
     <div className={styles.kicker}><span>OCCU-MED / PROVIDER WORLD</span><b>CHOOSE A PATH</b></div>
     <div ref={mount} className={styles.canvas}/>
-    <div className={styles.labels}>{portals.map((portal,index)=><a key={portal.id} href={portal.href} data-active={active===index} data-muted={active>=0&&active!==index} onClick={e=>enter(e,index)} onFocus={()=>{focusRef.current=index;setActive(index)}} onBlur={()=>{focusRef.current=-1;setActive(-1)}} style={{left:labels[index]?.x,top:labels[index]?.y,opacity:labels[index]?.visible?1:0}}><small>{portal.number}</small><strong>{portal.title}</strong></a>)}</div>
-    <p className={styles.hint}>MOVE TO FOCUS · SELECT TO ENTER</p>
+    <div className={styles.labels}>{portals.map((portal,index)=><a key={portal.id} href={portal.href} data-active={active===index} data-muted={active>=0&&active!==index} onClick={e=>enter(e,index)} onFocus={()=>{focusRef.current=index;setActive(index)}} onBlur={()=>{focusRef.current=-1;setActive(-1)}} style={webglAvailable?{left:labels[index]?.x,top:labels[index]?.y,opacity:labels[index]?.visible?1:0}:{left:fallbackPositions[index]?.[0]??'50%',top:fallbackPositions[index]?.[1]??'50%',opacity:1}}><small>{portal.number}</small><strong>{portal.title}</strong></a>)}</div>
+    <p className={styles.hint}>{webglAvailable?'MOVE TO FOCUS · SELECT TO ENTER':'SELECT A PATH TO ENTER'}</p>
   </nav>;
 }

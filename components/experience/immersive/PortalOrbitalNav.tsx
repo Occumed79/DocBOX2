@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
 import styles from './PortalOrbitalNav.module.css';
 import { addPortalArchitecture } from './PortalArchitecture';
-import { configureCinematicRenderer } from './rendererQuality';
+import { tryCreateCinematicRenderer } from './rendererQuality';
 
 type Portal = { id:string; href:string; number:string; title:string; note:string; tone:string };
 type PortalNode = {
@@ -74,13 +74,20 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
   const router=useRouter();
   const [labels,setLabels]=useState<Array<{x:number;y:number;visible:boolean}>>([]);
   const [active,setActive]=useState(-1);
+  const [webglAvailable,setWebglAvailable]=useState(true);
 
   useEffect(()=>{
     const host=mount.current;if(!host)return;
     const shown=agreementOnly?portals.slice(-1):portals;
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x000000,.029);
     const camera=new THREE.PerspectiveCamera(47,host.clientWidth/host.clientHeight,.1,110);camera.position.set(0,.85,agreementOnly?12.5:17.4);
-    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}),{exposure:1.08});renderer.setSize(host.clientWidth,host.clientHeight);renderer.setClearColor(0x000000,1);host.appendChild(renderer.domElement);
+    const renderer=tryCreateCinematicRenderer({antialias:true,alpha:false,powerPreference:'high-performance'},{exposure:1.08});
+    if(!renderer){
+      setWebglAvailable(false);
+      beginTravelRef.current=(index:number)=>{const portal=shown[index];if(!portal)return;setActive(index);const enter=onEnterRef.current;enter?.();if(!enter)router.push(portal.href)};
+      return()=>{beginTravelRef.current=()=>{}};
+    }
+    renderer.setSize(host.clientWidth,host.clientHeight);renderer.setClearColor(0x000000,1);host.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0xffffff,0x000000,.78));
     const key=new THREE.DirectionalLight(0xffffff,3.25);key.position.set(5,8,7);scene.add(key);
@@ -219,5 +226,6 @@ export default function PortalOrbitalNav({portals,agreementOnly=false,onEnter,au
 
   const shown=agreementOnly?portals.slice(-1):portals;
   const enterFromLabel=(event:ReactMouseEvent<HTMLAnchorElement>,index:number)=>{event.preventDefault();beginTravelRef.current(index)};
-  return <nav className={styles.root} data-agreement-only={agreementOnly?true:undefined} aria-label="Spatial provider portals"><div ref={mount} className={styles.canvas}/><div className={styles.labels}>{shown.map((portal,i)=><a key={portal.id} href={portal.href} data-active={active===i} data-muted={active>=0&&active!==i} data-anchor={i===4?'top':i===0||i===3?'left':'right'} onClick={event=>enterFromLabel(event,i)} onFocus={()=>{domFocusRef.current=i;setActive(i)}} onBlur={()=>{domFocusRef.current=-1;setActive(-1)}} style={{left:labels[i]?.x,top:labels[i]?.y,opacity:labels[i]?.visible?1:0}}><small>{portal.number} / PORTAL</small><strong>{portal.title}</strong><span>{portal.note}</span></a>)}</div><p className={styles.hint}>MOVE TO FOCUS · SELECT A PORTAL TO TRAVEL</p></nav>;
+  const fallbackPositions=[['42%','34%'],['58%','34%'],['60%','64%'],['40%','64%'],['50%','27%']] as const;
+  return <nav className={styles.root} data-agreement-only={agreementOnly?true:undefined} data-webgl={webglAvailable?'available':'unavailable'} aria-label="Spatial provider portals"><div ref={mount} className={styles.canvas}/><div className={styles.labels}>{shown.map((portal,i)=><a key={portal.id} href={portal.href} data-active={active===i} data-muted={active>=0&&active!==i} data-anchor={i===4?'top':i===0||i===3?'left':'right'} onClick={event=>enterFromLabel(event,i)} onFocus={()=>{domFocusRef.current=i;setActive(i)}} onBlur={()=>{domFocusRef.current=-1;setActive(-1)}} style={webglAvailable?{left:labels[i]?.x,top:labels[i]?.y,opacity:labels[i]?.visible?1:0}:{left:fallbackPositions[i]?.[0]??'50%',top:fallbackPositions[i]?.[1]??'50%',opacity:1}}><small>{portal.number} / PORTAL</small><strong>{portal.title}</strong><span>{portal.note}</span></a>)}</div><p className={styles.hint}>{webglAvailable?'MOVE TO FOCUS · SELECT A PORTAL TO TRAVEL':'SELECT A PORTAL TO CONTINUE'}</p></nav>;
 }

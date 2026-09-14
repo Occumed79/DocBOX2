@@ -16,3 +16,15 @@ export function configureCinematicRenderer(
   renderer.sortObjects = true;
   return renderer;
 }
+
+export function tryCreateCinematicRenderer(
+  parameters: THREE.WebGLRendererParameters = {},
+  options: RendererQualityOptions = {},
+) {
+  try {
+    return configureCinematicRenderer(new THREE.WebGLRenderer(parameters), options);
+  } catch (error) {
+    console.warn('WebGL is unavailable; continuing with the accessible HTML experience.', error);
+    return null;
+  }
+}
