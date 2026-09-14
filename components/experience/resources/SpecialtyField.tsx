@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import * as THREE from 'three';
 import styles from './SpecialtyField.module.css';
 import { configureCinematicRenderer } from '../immersive/rendererQuality';
@@ -74,11 +74,20 @@ function disposeBuiltObject(object:BuiltObject){
 
 export default function SpecialtyField({items,selectedId}:{items:readonly Item[];selectedId:string}){
   const mount=useRef<HTMLDivElement>(null);const selectedRef=useRef(selectedId);selectedRef.current=selectedId;
+  const[webglAvailable,setWebglAvailable]=useState(true);
+  const selected=items.find(item=>item.id===selectedId)??items[0];
 
   useEffect(()=>{
     const host=mount.current;if(!host||!items.length)return;
     const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(42,Math.max(1,host.clientWidth)/Math.max(1,host.clientHeight),.1,80);camera.position.set(0,.15,9.5);
-    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'}),{exposure:1.02});renderer.setSize(host.clientWidth,host.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));host.appendChild(renderer.domElement);
+    let renderer:THREE.WebGLRenderer;
+    try{
+      renderer=configureCinematicRenderer(new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'}),{exposure:1.02});
+    }catch{
+      setWebglAvailable(false);
+      return;
+    }
+    renderer.setSize(host.clientWidth,host.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));host.appendChild(renderer.domElement);
     scene.add(new THREE.HemisphereLight(0xeafaff,0x020406,.92));const key=new THREE.PointLight(0xffffff,18,22);key.position.set(5,5,6);scene.add(key);
     const rim=new THREE.PointLight(new THREE.Color(items[0].color),14,18);rim.position.set(-2,-2,3);scene.add(rim);
 
@@ -109,5 +118,5 @@ export default function SpecialtyField({items,selectedId}:{items:readonly Item[]
     return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);window.removeEventListener('pointermove',move);disposeBuiltObject(built);orbitRings.forEach(ring=>ring.geometry.dispose());orbitMaterials.forEach(material=>material.dispose());dustGeo.dispose();dustMat.dispose();backRing.geometry.dispose();backRingMat.dispose();renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement)};
   },[items]);
 
-  return <section className={styles.root} aria-label="Selected provider specialty visual"><div ref={mount} className={styles.canvas}/></section>;
+  return <section className={styles.root} aria-label="Selected provider specialty visual" data-webgl={webglAvailable?'available':'unavailable'} style={{'--field-color':selected?.color??'#72dcff'} as CSSProperties}><div ref={mount} className={styles.canvas}/>{!webglAvailable&&<div className={styles.fallback}><i/><i/><i/><span>SELECTED PATH</span><strong>{selected?.label}</strong></div>}</section>;
 }

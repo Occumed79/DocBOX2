@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { configureCinematicRenderer } from './rendererQuality';
 
@@ -31,12 +31,20 @@ void main(){
 
 export default function DiveWorld({progress}:{progress:number}){
   const host=useRef<HTMLDivElement>(null);const progressRef=useRef(progress);progressRef.current=progress;
+  const[webglAvailable,setWebglAvailable]=useState(true);
 
   useEffect(()=>{
     const el=host.current;if(!el)return;
     const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x02070d,.038);
     const camera=new THREE.PerspectiveCamera(56,el.clientWidth/el.clientHeight,.1,180);camera.position.set(0,0,10);
-    const renderer=configureCinematicRenderer(new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'}),{exposure:1.08});renderer.setSize(el.clientWidth,el.clientHeight);renderer.setClearColor(0x02070d,1);el.appendChild(renderer.domElement);
+    let renderer:THREE.WebGLRenderer;
+    try{
+      renderer=configureCinematicRenderer(new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'}),{exposure:1.08});
+    }catch{
+      setWebglAvailable(false);
+      return;
+    }
+    renderer.setSize(el.clientWidth,el.clientHeight);renderer.setClearColor(0x02070d,1);el.appendChild(renderer.domElement);
 
     scene.add(new THREE.HemisphereLight(0x8ddfff,0x05060b,.9));
     const cyanLight=new THREE.PointLight(0x59dff4,24,30);cyanLight.position.set(4,3,5);scene.add(cyanLight);
@@ -102,5 +110,5 @@ export default function DiveWorld({progress}:{progress:number}){
     return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);disposables.forEach(item=>item.dispose());renderer.dispose();if(renderer.domElement.parentNode===el)el.removeChild(renderer.domElement)};
   },[]);
 
-  return <div ref={host} style={{position:'absolute',inset:0}} aria-hidden="true"/>;
+  return <div ref={host} style={{position:'absolute',inset:0}} aria-hidden="true" data-webgl={webglAvailable?'available':'unavailable'}>{!webglAvailable&&<div data-dive-fallback><i/><i/><i/><i/><i/><i/><i/><i/><span>PROVIDER<br/>RESOURCES</span></div>}</div>;
 }
