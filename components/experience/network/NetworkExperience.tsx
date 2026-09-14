@@ -20,12 +20,7 @@ const REGIONS:readonly Region[]=[
   {id:'africa-me',label:'Africa + Middle East',lon:31,lat:18,height:6500000},
   {id:'asia-pacific',label:'Asia-Pacific',lon:113,lat:10,height:9000000},
 ];
-const PANELS:[Panel,string,string][]=[
-  ['layers','Clinical layers','01'],
-  ['regions','Geography','02'],
-  ['coverage','Coverage','03'],
-  ['diagnostics','Diagnostics','04'],
-];
+const PANELS:[Panel,string,string][]=[['layers','Clinical layers','01'],['regions','Geography','02'],['coverage','Coverage','03'],['diagnostics','Diagnostics','04']];
 const AGGREGATE_GEO:Point[]=[
   {label:'California',lat:36.7,lon:-119.4,count:2512,type:'all'},{label:'Texas',lat:31,lon:-99.9,count:2065,type:'all'},{label:'Florida',lat:27.8,lon:-81.7,count:1211,type:'all'},{label:'New York',lat:43,lon:-75,count:936,type:'all'},{label:'Georgia',lat:32.7,lon:-83.3,count:808,type:'all'},{label:'Illinois',lat:40,lon:-89.2,count:802,type:'all'},{label:'North Carolina',lat:35.5,lon:-79.4,count:793,type:'all'},{label:'Pennsylvania',lat:41,lon:-77.7,count:760,type:'all'},{label:'South Africa',lat:-30.6,lon:22.9,count:160,type:'all'},{label:'India',lat:21.1,lon:78,count:63,type:'all'},{label:'Australia',lat:-25.3,lon:133.8,count:42,type:'all'},{label:'Canada',lat:56.1,lon:-106.3,count:32,type:'all'},{label:'Turkey',lat:39,lon:35.2,count:30,type:'all'},{label:'United Kingdom',lat:55,lon:-3.4,count:29,type:'all'},{label:'Jordan',lat:31.2,lon:36.5,count:22,type:'all'},{label:'Afghanistan',lat:33.9,lon:67.7,count:22,type:'all'},
 ];
@@ -74,10 +69,7 @@ export default function NetworkExperience(){
   const activeRegionLabel=activeRegion==='custom'?'Free orbit':REGIONS.find(region=>region.id===activeRegion)?.label??'World';
 
   return <main className={styles.root}>
-    <div className={styles.globeStage}>
-      <CesiumNetworkGlobe points={renderPoints} layer={layer} mode={mode} focus={focus} onExplore={()=>setActiveRegion('custom')}/>
-      <div className={styles.globeWash} aria-hidden="true"/>
-    </div>
+    <div className={styles.globeStage}><CesiumNetworkGlobe points={renderPoints} layer={layer} mode={mode} focus={focus} onExplore={()=>setActiveRegion('custom')}/><div className={styles.globeWash} aria-hidden="true"/></div>
 
     <header className={styles.topbar}>
       <a className={styles.menuMark} href="/experience#provider-portals" aria-label="Return to provider portals"><span/><span/><span/></a>
@@ -89,33 +81,16 @@ export default function NetworkExperience(){
     <aside className={styles.explorerRail}>
       <nav className={styles.panelTabs} aria-label="Network explorer modes">{PANELS.map(([id,label,index])=><button key={id} type="button" aria-pressed={panel===id} onClick={()=>setPanel(id)}><small>{index}</small><span>{label}</span><i aria-hidden="true"/></button>)}</nav>
       <div className={styles.panelBody}>
-        {panel==='layers'&&<>
-          <div className={styles.panelIntro}><span>EXPLORE BY FACILITY TYPE</span><h1>Provider<br/>network.</h1><p>Switch the live globe between clinical capacities. Every node is anonymized; the spatial pattern stays real.</p></div>
-          <div className={styles.layerList}>{(Object.keys(LAYER_LABELS) as Layer[]).map(key=><button key={key} type="button" aria-pressed={layer===key} onClick={()=>setLayer(key)}><i data-layer={key}/><span><b>{LAYER_LABELS[key]}</b><small>{LAYER_DETAIL[key]}</small></span><strong>{TOTALS[key].toLocaleString()}</strong></button>)}</div>
-        </>}
-        {panel==='regions'&&<>
-          <div className={styles.panelIntro}><span>EXPLORE BY GEOGRAPHY</span><h1>Move through<br/>the field.</h1><p>Use authored camera flights to move from the full globe into the regions where coverage is concentrated.</p></div>
-          <div className={styles.regionList}>{REGIONS.map((region,index)=><button key={region.id} type="button" data-active={activeRegion===region.id} onClick={()=>focusRegion(region)}><small>0{index+1}</small><span>{region.label}</span><i/></button>)}</div>
-        </>}
-        {panel==='coverage'&&<>
-          <div className={styles.panelIntro}><span>NETWORK COVERAGE</span><h1>Where the<br/>density lives.</h1><p>Coverage is concentrated in the United States with an international field extending across deployment corridors.</p></div>
-          <MiniBars rows={COVERAGE} total={23524}/>
-        </>}
-        {panel==='diagnostics'&&<>
-          <div className={styles.panelIntro}><span>DIAGNOSTIC CAPACITY</span><h1>See the<br/>support layer.</h1><p>Laboratory, imaging, cardiology and hearing capacity can be inspected without exposing provider identities.</p></div>
-          <MiniBars rows={DIAGNOSTIC} total={2867}/>
-          <button className={styles.applyDiagnostic} type="button" onClick={()=>{setLayer('diagnostic');setPanel('layers')}}>Show diagnostic nodes on globe <span>→</span></button>
-        </>}
+        {panel==='layers'&&<><div className={styles.panelIntro}><span>EXPLORE BY FACILITY TYPE</span><h1>Provider network.</h1><p>Switch the live globe between clinical capacities. Every node is anonymized; the spatial pattern stays real.</p></div><div className={styles.layerList}>{(Object.keys(LAYER_LABELS) as Layer[]).map(key=><button key={key} type="button" aria-pressed={layer===key} onClick={()=>setLayer(key)}><i data-layer={key}/><span><b>{LAYER_LABELS[key]}</b><small>{LAYER_DETAIL[key]}</small></span><strong>{TOTALS[key].toLocaleString()}</strong></button>)}</div></>}
+        {panel==='regions'&&<><div className={styles.panelIntro}><span>EXPLORE BY GEOGRAPHY</span><h1>Move through the field.</h1><p>Use authored camera flights to move from the full globe into the regions where coverage is concentrated.</p></div><div className={styles.regionList}>{REGIONS.map((region,index)=><button key={region.id} type="button" data-active={activeRegion===region.id} onClick={()=>focusRegion(region)}><small>0{index+1}</small><span>{region.label}</span><i/></button>)}</div></>}
+        {panel==='coverage'&&<><div className={styles.panelIntro}><span>NETWORK COVERAGE</span><h1>Where the density lives.</h1><p>Coverage is concentrated in the United States with an international field extending across deployment corridors.</p></div><MiniBars rows={COVERAGE} total={23524}/></>}
+        {panel==='diagnostics'&&<><div className={styles.panelIntro}><span>DIAGNOSTIC CAPACITY</span><h1>See the support layer.</h1><p>Laboratory, imaging, cardiology and hearing capacity can be inspected without exposing provider identities.</p></div><MiniBars rows={DIAGNOSTIC} total={2867}/><button className={styles.applyDiagnostic} type="button" onClick={()=>{setLayer('diagnostic');setPanel('layers')}}>Show diagnostic nodes on globe <span>→</span></button></>}
       </div>
       <footer className={styles.railFooter}><span><b>{selectedCount.toLocaleString()}</b> {LAYER_LABELS[layer]}</span><span>{activeRegionLabel}</span></footer>
     </aside>
 
-    <div className={styles.mapLegend} aria-label="Map layer legend">
-      <span>NETWORK LAYERS</span>
-      {(['medical','dental','diagnostic','pharmacy'] as Layer[]).map(key=><button key={key} type="button" aria-pressed={layer===key||layer==='all'} onClick={()=>setLayer(layer===key?'all':key)}><i data-layer={key}/><span>{LAYER_LABELS[key]}</span></button>)}
-    </div>
-
-    <div className={styles.mapMeta} aria-live="polite"><span>{activeRegionLabel}</span><span>{selectedCount.toLocaleString()} DIRECTORY RECORDS</span><span>CESIUM / ION TERRAIN + 3D</span></div>
+    <div className={styles.mapLegend} aria-label="Map layer legend"><span>NETWORK LAYERS</span>{(['medical','dental','diagnostic','pharmacy'] as Layer[]).map(key=><button key={key} type="button" aria-pressed={layer===key||layer==='all'} onClick={()=>setLayer(layer===key?'all':key)}><i data-layer={key}/><span>{LAYER_LABELS[key]}</span></button>)}</div>
+    <div className={styles.mapMeta} aria-live="polite"><span>{activeRegionLabel}</span><span>{selectedCount.toLocaleString()} MAPPED NODES</span><span>CESIUM / ION TERRAIN + 3D</span></div>
     <div className={styles.instructions}>DRAG TO ORBIT&nbsp;&nbsp;·&nbsp;&nbsp;SCROLL TO DIVE&nbsp;&nbsp;·&nbsp;&nbsp;CLICK A NODE TO LOCK</div>
   </main>;
 }
