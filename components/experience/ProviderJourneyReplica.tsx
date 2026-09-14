@@ -45,8 +45,8 @@ export default function ProviderJourneyReplica(){
     return()=>{window.removeEventListener('scroll',queue);window.removeEventListener('resize',queue);if(raf)cancelAnimationFrame(raf)};
   },[]);
 
-  return <main ref={root} className={styles.root}>
-    <OryzoStoryWorld sceneIndex={active}/>
+  return <main ref={root} className={styles.root} style={{'--portal-entry':portalEntry.toFixed(4)} as CSSProperties}>
+    <div className={styles.storyWorld} aria-hidden="true"><OryzoStoryWorld sceneIndex={active}/></div>
 
     <section className={styles.hero} data-oryzo-hero>
       <div className={styles.heroTag}>OCCU-MED / EST. 1979</div>
@@ -65,6 +65,7 @@ export default function ProviderJourneyReplica(){
     </section>
 
     <section id="provider-portals" className={styles.zeroArrival} data-zero-arrival>
+      <div className={styles.portalBridge} aria-hidden="true"><i/><i/><i/></div>
       <ZeroTechPortalHub portals={PORTALS} entryProgress={portalEntry}/>
     </section>
   </main>;
