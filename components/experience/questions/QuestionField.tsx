@@ -6,11 +6,11 @@ import styles from './QuestionField.module.css';
 import { configureCinematicRenderer } from '../immersive/rendererQuality';
 
 const STAGE_POSITIONS = [
-  [[-3.0,1.35,-1.0],[2.25,1.7,-2.6],[3.15,-.72,-1.5],[-1.9,-1.75,-2.25]],
-  [[-3.4,.72,-.7],[2.8,-.42,-2.7],[4.2,1.5,-4],[-3.8,-1.7,-4]],
-  [[-2.45,1.75,-1.5],[2.7,1.05,-2.7],[.25,-1.7,-.75],[-4,-1.1,-4]],
-  [[-3.0,-.95,-1.3],[.15,1.7,-2.4],[3.05,-.55,-1.1],[-.4,-2.4,-4]],
-  [[-2.65,.35,-1.1],[2.8,.35,-2.1],[-4,-2,-4],[4,-2,-4]],
+  [[-3.3,1.4,-1.0],[2.15,1.8,-2.5],[3.25,-.55,-1.5],[-2.0,-1.75,-2.15],[.2,-2.15,-3.1],[-4.1,.1,-3.5]],
+  [[-3.4,.72,-.7],[2.8,-.42,-2.7],[4.2,1.5,-4],[-3.8,-1.7,-4],[.4,1.9,-3.4],[1.0,-2.0,-3.8]],
+  [[-2.45,1.75,-1.5],[2.7,1.05,-2.7],[.25,-1.7,-.75],[-4,-1.1,-4],[3.9,-1.55,-3.5],[-.2,2.25,-3.8]],
+  [[-3.0,-.95,-1.3],[.15,1.7,-2.4],[3.05,-.55,-1.1],[-.4,-2.4,-4],[-3.9,1.25,-3.7],[3.8,1.8,-4]],
+  [[-2.65,.35,-1.1],[2.8,.35,-2.1],[-4,-2,-4],[4,-2,-4],[0,2.15,-3.8],[.2,-2.4,-3.6]],
 ] as const;
 
 const FIELD_COLOR = 0x00e05d;
@@ -27,7 +27,9 @@ function geometryFor(index:number):THREE.BufferGeometry{
   if(index===0)return new THREE.SphereGeometry(.2,22,16);
   if(index===1)return new THREE.OctahedronGeometry(.23,1);
   if(index===2)return new THREE.IcosahedronGeometry(.23,1);
-  return new THREE.TorusKnotGeometry(.16,.055,48,8,2,3);
+  if(index===3)return new THREE.TorusKnotGeometry(.16,.055,48,8,2,3);
+  if(index===4)return new THREE.TetrahedronGeometry(.25,1);
+  return new THREE.DodecahedronGeometry(.22,0);
 }
 
 export default function QuestionField({count,active,stageIndex}:{count:number;active:number;stageIndex:number}){
@@ -48,19 +50,19 @@ export default function QuestionField({count,active,stageIndex}:{count:number;ac
     const secondary=new THREE.PointLight(SECONDARY_COLOR,9,18);secondary.position.set(-4,-1,-2);scene.add(secondary);
 
     const nodes:Array<{group:THREE.Group;core:THREE.Mesh<THREE.BufferGeometry,THREE.MeshStandardMaterial>;ring:THREE.Mesh<THREE.TorusGeometry,THREE.MeshBasicMaterial>;orbit:THREE.Mesh<THREE.TorusGeometry,THREE.MeshBasicMaterial>}>=[];
-    for(let i=0;i<4;i++){
+    for(let i=0;i<6;i++){
       const p=STAGE_POSITIONS[0][i];
       const group=new THREE.Group();group.position.set(p[0],p[1],p[2]);
       const coreMat=new THREE.MeshStandardMaterial({color:0x0b232d,emissive:FIELD_COLOR,emissiveIntensity:.55,metalness:.48,roughness:.18,transparent:true,opacity:.9});
       const core=new THREE.Mesh(geometryFor(i),coreMat);group.add(core);
       const ringMat=new THREE.MeshBasicMaterial({color:FIELD_COLOR,transparent:true,opacity:.42,blending:THREE.AdditiveBlending,depthWrite:false});
-      const ring=new THREE.Mesh(new THREE.TorusGeometry(.44+i*.035,.017,8,54),ringMat);ring.rotation.x=.62+i*.13;group.add(ring);
+      const ring=new THREE.Mesh(new THREE.TorusGeometry(.44+i*.025,.017,8,54),ringMat);ring.rotation.x=.62+i*.1;group.add(ring);
       const orbitMat=new THREE.MeshBasicMaterial({color:i%2?SECONDARY_COLOR:FIELD_COLOR,transparent:true,opacity:.14,blending:THREE.AdditiveBlending,depthWrite:false});
-      const orbit=new THREE.Mesh(new THREE.TorusGeometry(.72+i*.04,.008,6,58),orbitMat);orbit.rotation.set(1.1,i*.3,.4);group.add(orbit);
+      const orbit=new THREE.Mesh(new THREE.TorusGeometry(.72+i*.03,.008,6,58),orbitMat);orbit.rotation.set(1.1,i*.25,.4);group.add(orbit);
       scene.add(group);nodes.push({group,core,ring,orbit});
     }
 
-    const lineArray=new Float32Array(36);
+    const lineArray=new Float32Array(90);
     const lineGeo=new THREE.BufferGeometry();const lineAttribute=new THREE.BufferAttribute(lineArray,3);lineGeo.setAttribute('position',lineAttribute);
     const lineMat=new THREE.LineBasicMaterial({color:FIELD_COLOR,transparent:true,opacity:.13});const lines=new THREE.LineSegments(lineGeo,lineMat);scene.add(lines);
 
@@ -76,17 +78,17 @@ export default function QuestionField({count,active,stageIndex}:{count:number;ac
     dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));const dustMat=new THREE.PointsMaterial({color:FIELD_COLOR,size:.024,transparent:true,opacity:.3,depthWrite:false});const dustField=new THREE.Points(dustGeo,dustMat);scene.add(dustField);
 
     const pointer={x:0,y:0};const onPointer=(event:PointerEvent)=>{pointer.x=(event.clientX/window.innerWidth-.5)*2;pointer.y=(event.clientY/window.innerHeight-.5)*2};window.addEventListener('pointermove',onPointer,{passive:true});
-    let raf=0;const clock=new THREE.Clock();const fieldColor=new THREE.Color(FIELD_COLOR);
+    let raf=0;const clock=new THREE.Clock();const fieldColor=new THREE.Color(FIELD_COLOR);const target=new THREE.Vector3();const scale=new THREE.Vector3();
     const loop=()=>{
-      raf=requestAnimationFrame(loop);const t=clock.getElapsedTime();const stage=stageRef.current;const activeCount=Math.max(0,Math.min(4,countRef.current));
+      raf=requestAnimationFrame(loop);const t=clock.getElapsedTime();const stage=stageRef.current;const activeCount=Math.max(0,Math.min(6,countRef.current));
       fieldLight.color.copy(fieldColor);lineMat.color.copy(fieldColor);dustMat.color.copy(fieldColor);
       corridor.children.forEach((child,i)=>{const mesh=child as THREE.Mesh<THREE.TorusGeometry,THREE.MeshBasicMaterial>;mesh.material.color.copy(fieldColor);mesh.material.opacity=.035+(i%3)*.014;mesh.rotation.z=t*(i%2?.025:-.02)+stage*.12+i*.08});
 
       nodes.forEach((node,i)=>{
-        const tuple=STAGE_POSITIONS[stage][i];const target=new THREE.Vector3(tuple[0],tuple[1],tuple[2]);const visible=i<activeCount;const isActive=visible&&i===activeRef.current;
+        const tuple=STAGE_POSITIONS[stage][i];target.set(tuple[0],tuple[1],tuple[2]);const visible=i<activeCount;const isActive=visible&&i===activeRef.current;
         if(isActive){target.x*=.86;target.y*=.82;target.z+=.72}
         node.group.position.lerp(target,.065);
-        const wanted=visible?(isActive?1.42:1):.001;node.group.scale.lerp(new THREE.Vector3(wanted,wanted,wanted),.09);node.group.visible=node.group.scale.x>.01;
+        const wanted=visible?(isActive?1.42:1):.001;scale.set(wanted,wanted,wanted);node.group.scale.lerp(scale,.09);node.group.visible=node.group.scale.x>.01;
         node.core.material.emissive.copy(fieldColor);node.core.material.emissiveIntensity+=((isActive?3.1:.6)-node.core.material.emissiveIntensity)*.08;node.core.material.opacity+=((visible?.92:0)-node.core.material.opacity)*.08;
         node.ring.material.color.copy(fieldColor);node.ring.material.opacity+=((isActive?.72:.38)-node.ring.material.opacity)*.08;node.orbit.material.opacity+=((isActive?.32:.12)-node.orbit.material.opacity)*.08;
         node.group.rotation.z=Math.sin(t*.4+i+stage*.5)*.025;node.core.rotation.x=t*(i%2?.08:-.065);node.core.rotation.y=t*(i%2?.11:-.09);node.ring.rotation.z=t*(i%2?.16:-.13)+i;node.orbit.rotation.z=-t*(i%2?.09:-.075);
