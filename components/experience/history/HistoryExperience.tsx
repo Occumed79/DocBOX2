@@ -5,17 +5,18 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import HistoryWorld from '../immersive/HistoryWorld';
 import styles from './HistoryExperience.module.css';
 
-const M=[
- ['1979','The critical discovery.','Medical evidence becomes meaningful when it is understood against the work a person must perform.','Founders copy.png'],
- ['1979','Founded in Honolulu.','Jim A. Johnson and Dr. Devonna M. Kaji connect medicine, law, and job-specific information.','Founders.png'],
- ['2000','The operating model formalizes.','Two decades of occupational-health work become a repeatable operating model.','California - Hawaii Map.png'],
- ['2003','Quality becomes a system.','Authorizations, records, corrections, and medical evaluation become one controlled workflow.','EXAM REPORT.png'],
- ['2006','The method travels.','Deployment standards and destination requirements join the connected process.','International Certification.png'],
- ['2007','Federal mission support.','The network expands while clinical providers remain focused on findings.','Diverse Workforce.png'],
- ['2017','Infrastructure becomes global.','A coordinated provider network makes consistent examinations possible at scale.','International Network.png'],
- ['2018','A new generation.','Operational leadership grows around the original job-centered principles.','Diverse Healthcare Team Portrait (1).png'],
- ['2021','Continuity.','Job relevance, clinical quality, and defensible review remain the connective tissue.','Diverse Workforce2.png'],
- ['TODAY','One connected network.','The founding question now travels through a worldwide medical and dental network.','Facilities.png'],
+type Moment=readonly [year:string,title:string,summary:string,image:string,story:string];
+const M:readonly Moment[]=[
+ ['1979','The critical discovery.','State-funded research points to a preventable pattern behind first-year workplace injuries.','Founders copy.png','Attorney Jim A. Johnson’s State of California-funded research linked a significant share of workplace injuries to employees hired with pre-existing medical conditions that increased their risk once on the job. The finding reframed placement as more than a question of whether someone was simply “healthy.”'],
+ ['1979','Founded in Honolulu.','Medicine, legal requirements, and the actual job become one placement question.','Founders.png','Occu-Med was founded in Honolulu, Hawaii, in 1979. The company’s core idea was to combine medical findings with legal requirements and job-specific demands so placement decisions reflected the work a person actually had to perform.'],
+ ['2000','A formal corporate structure.','Two decades of work are placed inside Occu-Med, Ltd.','California - Hawaii Map.png','In October 2000, Occu-Med, Ltd. was formally incorporated as a Delaware corporation, putting a corporate structure around the occupational-health practice that had been developing since 1979.'],
+ ['2003','EXAMQA becomes a training ground.','A Fresno State student joins the EXAMQA department and later moves into business-development leadership.','EXAM REPORT.png','In 2003, a Fresno State student joined Occu-Med’s EXAMQA department as an intern. By 2006 that employee had moved into business-development leadership, connecting the company’s quality-assurance operating knowledge with its next phase of growth.'],
+ ['2006','The method goes international.','Occu-Med expands its evaluation services to international companies for the first time.','International Certification.png','In 2006, Occu-Med expanded its evaluation services to international companies for the first time. The same job-centered evaluation model now had to travel across borders, provider systems, deployment requirements, and destination-specific medical standards.'],
+ ['2007','Federal mission support opens.','Federal registration creates a direct path into DoD and DoS deployment-readiness work.','Diverse Workforce.png','Occu-Med registered as a U.S. federal contractor in October 2007. That milestone opened the door to direct Department of Defense and Department of State work and helped establish the deployment-readiness business that remains central to the company’s international operations.'],
+ ['2017','Global infrastructure at scale.','By the mid-2010s, the provider network and overseas operating model are drawing outside recognition.','International Network.png','By roughly 2017, company reporting described pre-placement infrastructure across more than 36 countries. A major Camp Arifjan, Kuwait mission included thousands of evaluations and operational medical support, while Occu-Med also received a Rising Star award from Fresno State’s Institute for Family Business.'],
+ ['2018','The next generation moves into operations.','Leadership transition begins while the original job-centered methodology remains intact.','Diverse Healthcare Team Portrait (1).png','In 2018, the next generation of company leadership moved into the Director of Operations role. The transition expanded operational leadership around the same core model: job information, clinical evidence, quality assurance, and defensible medical review.'],
+ ['2021','Leadership continuity.','The next-generation transition reaches the President role.','Diverse Workforce2.png','In 2021, the next generation moved into the President role. The company continued building Network Management, Scheduling, Provider Relations, Exam QA, and medical-review infrastructure around the original placement methodology.'],
+ ['TODAY','One connected operating network.','The original 1979 question now moves through a global provider and review system.','Facilities.png','Today the same founding principle runs through the referral lifecycle: authorization, scheduling, clinical examination, record return, quality assurance, medical review, and final recommendation. The live provider atlas currently maps 23,524 usable medical, dental, diagnostic, and pharmacy coordinates.'],
 ] as const;
 
 const clamp=(value:number)=>Math.max(0,Math.min(1,value));
@@ -94,7 +95,7 @@ export default function HistoryExperience(){
       <article>
         <div className={styles.storyMeta}><span>OCCU-MED HISTORY</span><b>{current[0]}</b></div>
         <h2>{current[1]}</h2>
-        <p>{current[2]}</p>
+        <p>{current[4]}</p>
         <div className={styles.storyNav}>
           <button disabled={active===0} onClick={()=>jump(Math.max(0,active-1))}>← PREVIOUS</button>
           <button onClick={()=>setStoryOpen(false)}>BACK TO TIMELINE</button>
