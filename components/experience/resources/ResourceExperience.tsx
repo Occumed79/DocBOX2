@@ -53,7 +53,7 @@ export default function ResourceExperience(){
 
     <section className={styles.selectionWorld} aria-label="Choose provider specialty">
       <div className={styles.selectionHeader}><div><span>FEATURED SPECIALTIES</span><h2>A selection of provider paths built around the services your facility performs.</h2></div><p>Choose a specialty. The active path controls the 3D field, provider workflow, resources, and agreement service list.</p></div>
-      <SpecialtyField items={fieldItems} selectedId={selected.id} onSelect={setSelectedId}/>
+      <SpecialtyField items={fieldItems} selectedId={selected.id}/>
       <nav className={styles.specialtyList} aria-label="Provider specialties">
         {SPECIALTIES.map((item,index)=><button key={item.id} type="button" aria-pressed={item.id===selected.id} onMouseEnter={()=>setSelectedId(item.id)} onFocus={()=>setSelectedId(item.id)} onClick={()=>setSelectedId(item.id)} style={{'--item-color':item.color} as CSSProperties}><small>{item.disciplines}</small><span><b>{String(index+1).padStart(2,'0')}</b>{item.label}</span></button>)}
       </nav>
