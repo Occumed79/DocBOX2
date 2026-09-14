@@ -21,10 +21,10 @@ const SPECIALTIES: Specialty[] = [
     id: 'Occupational Medicine', label: 'Occupational Medicine', color: '#72dcff',
     description: 'Authorizations, examination packets, occupational testing, return requirements, and quality-assurance expectations.',
     protocol: [
-      { title: 'Receive the authorization', copy: 'Confirm the examinee, authorized services, requested forms, and return instructions before the visit.' },
-      { title: 'Perform only the authorized scope', copy: 'Document findings for the requested occupational-health services and contact Occu-Med before adding anything outside the authorization.' },
-      { title: 'Return the complete record set', copy: 'Send every requested form, report, tracing, result, and supporting record needed for QA and medical review.' },
-      { title: 'Invoice against the accepted fee schedule', copy: 'Use the agreed rates and billing directions associated with the referral.' },
+      { title: 'Start with the authorization', copy: 'Treat the Authorization for Examination as the definitive scope. Complete every listed component and contact Occu-Med immediately if any item cannot be performed.' },
+      { title: 'Perform only the authorized scope', copy: 'Document the requested occupational-health services clearly. Do not add services outside the written authorization without Occu-Med approval.' },
+      { title: 'Return the complete record set', copy: 'Send every requested form, report, tracing, result, and supporting record so Provider Relations and Exam QA can complete the case.' },
+      { title: 'Invoice after the authorized work is complete', copy: 'Submit a complete itemized invoice using the accepted rates. Undisputed invoices are paid NET 30 after all authorized results and the complete invoice have been received.' },
     ],
     documents: [
       { title: 'Stateside Provider Guide', meta: 'Current general provider workflow', ready: true },
@@ -36,10 +36,10 @@ const SPECIALTIES: Specialty[] = [
     id: 'Dental', label: 'Dental', color: '#b18cff',
     description: 'Dental-readiness examinations, radiographs, documentation, emergency-risk findings, and direct-pay billing guidance.',
     protocol: [
-      { title: 'Confirm the requested examination', copy: 'Review the authorization for the dental evaluation and any requested imaging before the appointment.' },
-      { title: 'Document readiness findings', copy: 'Perform the authorized clinical assessment and document findings without issuing the employer’s final deployment determination.' },
-      { title: 'Return the required forms and imaging record', copy: 'Send the completed dental documentation and requested radiographic information back to Occu-Med.' },
-      { title: 'Invoice the authorized services', copy: 'Bill only the services approved for the referral at the accepted self-pay rates.' },
+      { title: 'Confirm the authorized dental scope', copy: 'Review the Authorization for Examination before the appointment and complete only the listed evaluation and imaging components.' },
+      { title: 'Document the clinical findings', copy: 'Perform the authorized dental assessment and document the findings. The provider supplies the clinical record; Occu-Med completes the downstream medical review.' },
+      { title: 'Return all requested records', copy: 'Send the completed dental documentation and requested radiographic information so the case can move through Provider Relations and QA.' },
+      { title: 'Invoice the authorized services', copy: 'Submit a complete itemized invoice at the accepted direct-pay rates. Undisputed invoices are paid NET 30 once all authorized results and the invoice are complete.' },
     ],
     documents: [
       { title: 'Stateside Provider Guide', meta: 'Current general provider workflow', ready: true },
@@ -51,10 +51,10 @@ const SPECIALTIES: Specialty[] = [
     id: 'Laboratory / Diagnostics', label: 'Laboratory / Diagnostics', color: '#7fd4ff',
     description: 'Collection orders, requested panels, specimen handling, result transmission, and referral-specific billing.',
     protocol: [
-      { title: 'Match the order to the authorization', copy: 'Confirm the exact requested panels, collection requirements, and any destination-specific testing.' },
-      { title: 'Collect and process correctly', copy: 'Use the laboratory’s standard handling process while staying within the authorized test scope.' },
-      { title: 'Return complete results', copy: 'Transmit every ordered result and identifying case information using the referral instructions.' },
-      { title: 'Invoice the authorized testing', copy: 'Apply the agreed direct-pay rates for the completed panels and collection services.' },
+      { title: 'Match the order to the authorization', copy: 'Confirm the exact listed panels, collections, tracings, imaging, or other diagnostic components before the appointment.' },
+      { title: 'Perform only the listed testing', copy: 'Use normal clinical handling standards while staying inside the written authorization. Contact Occu-Med if a listed component cannot be completed.' },
+      { title: 'Return complete results', copy: 'Transmit every ordered result, tracing, interpretation, and supporting record required by the referral so QA can verify completeness.' },
+      { title: 'Invoice the completed authorized testing', copy: 'Submit the itemized services and accepted fees. Undisputed invoices are paid NET 30 after all authorized results and the complete invoice are received.' },
     ],
     documents: [
       { title: 'Stateside Provider Guide', meta: 'Current general provider workflow', ready: true },
@@ -66,10 +66,10 @@ const SPECIALTIES: Specialty[] = [
     id: 'Primary Care', label: 'Primary Care', color: '#ff9f8f',
     description: 'General medical evaluation, medical-history review, baseline findings, vaccination support, and referral-specific documentation.',
     protocol: [
-      { title: 'Confirm the requested visit', copy: 'Review the authorization for the exact medical examination, history review, vaccination, or supporting clinical service requested.' },
-      { title: 'Perform the authorized assessment', copy: 'Complete the requested clinical work using normal standards while staying within the written authorization.' },
-      { title: 'Return the requested documentation', copy: 'Provide the completed examination forms, findings, and supporting records identified in the referral.' },
-      { title: 'Invoice the agreed services', copy: 'Bill only the authorized services using the accepted direct-pay rates.' },
+      { title: 'Review the authorization first', copy: 'Use the Authorization for Examination as the definitive list of the medical-history, examination, vaccination, or supporting components to complete.' },
+      { title: 'Perform the authorized assessment', copy: 'Complete the requested clinical work and document findings clearly. Contact Occu-Med before adding anything outside the written scope.' },
+      { title: 'Return the requested documentation', copy: 'Provide the completed forms, findings, reports, and supporting records identified in the referral so the case can advance through QA and medical review.' },
+      { title: 'Submit the complete invoice', copy: 'Bill only the authorized services using the accepted rates. Undisputed invoices are paid NET 30 after all authorized results and a complete itemized invoice are received.' },
     ],
     documents: [
       { title: 'Stateside Provider Guide', meta: 'Current general provider workflow', ready: true },
@@ -81,10 +81,10 @@ const SPECIALTIES: Specialty[] = [
     id: 'Audiology', label: 'Audiology', color: '#8cb3ff',
     description: 'Pure-tone audiometry, hearing-conservation testing, baseline or periodic documentation, and complete result return.',
     protocol: [
-      { title: 'Confirm the requested audiogram', copy: 'Match the authorization to the required baseline, periodic, or referral-specific hearing test before the appointment.' },
-      { title: 'Perform the authorized hearing test', copy: 'Complete the requested audiometry using the facility’s normal clinical protocol and required frequencies.' },
-      { title: 'Return the tracing and report', copy: 'Provide the completed audiogram and any requested interpretation or supporting documentation to Occu-Med.' },
-      { title: 'Invoice the authorized service', copy: 'Use the accepted direct-pay fee for the completed hearing test and any separately authorized consultation.' },
+      { title: 'Confirm the requested audiogram', copy: 'Match the Authorization for Examination to the required baseline, periodic, or referral-specific hearing test before the appointment.' },
+      { title: 'Complete the authorized hearing test', copy: 'Perform the requested audiometry using the facility’s normal clinical protocol and the frequencies or documentation specified in the referral.' },
+      { title: 'Return the tracing and report', copy: 'Provide the completed audiogram and any requested interpretation or supporting documentation so Exam QA can verify the record set.' },
+      { title: 'Invoice the authorized service', copy: 'Use the accepted fee for the completed hearing test and any separately authorized service. Undisputed invoices are paid NET 30 after results and invoice are complete.' },
     ],
     documents: [
       { title: 'Stateside Provider Guide', meta: 'Current general provider workflow', ready: true },
@@ -96,10 +96,10 @@ const SPECIALTIES: Specialty[] = [
     id: 'Pharmacy / Vaccination', label: 'Pharmacy / Vaccination', color: '#e6bd73',
     description: 'Requested immunizations, administration documentation, lot information, and updated vaccination-history return.',
     protocol: [
-      { title: 'Confirm the requested vaccine', copy: 'Review the authorization for the exact immunization and any destination or deployment requirement.' },
-      { title: 'Administer the authorized dose', copy: 'Follow normal vaccine-screening and administration procedures.' },
-      { title: 'Document the administration completely', copy: 'Return the vaccine name, date, lot and manufacturer details, and any requested record update.' },
-      { title: 'Invoice the authorized vaccine and administration', copy: 'Apply the accepted direct-pay price for the vaccine and any separately authorized administration fee.' },
+      { title: 'Confirm the authorized vaccine', copy: 'Review the Authorization for Examination for the exact immunization, dose, and any deployment or destination-specific requirement.' },
+      { title: 'Administer the authorized dose', copy: 'Follow normal vaccine-screening and administration procedures while staying within the written authorization.' },
+      { title: 'Return complete administration documentation', copy: 'Provide the vaccine name, administration date, lot and manufacturer details, and any requested updated record so the case can be completed.' },
+      { title: 'Invoice the authorized vaccine and administration', copy: 'Submit the itemized authorized services at the accepted rate. Undisputed invoices are paid NET 30 after all required documentation and the complete invoice are received.' },
     ],
     documents: [
       { title: 'Stateside Provider Guide', meta: 'Current general provider workflow', ready: true },
@@ -151,6 +151,7 @@ export default function ResourceExperience() {
   }, []);
 
   const selected = useMemo(() => SPECIALTIES.find(item => item.id === selectedId) ?? SPECIALTIES[0], [selectedId]);
+  const selectedIndex = useMemo(() => Math.max(0, SPECIALTIES.findIndex(item => item.id === selected.id)), [selected.id]);
   const fieldItems = useMemo(() => SPECIALTIES.map(({id,label,color}) => ({id,label,color})), []);
   const agreementHref = `/experience/agreement?specialty=${encodeURIComponent(selected.id)}&from=resources`;
   const beginAgreement = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -178,9 +179,21 @@ export default function ResourceExperience() {
         </div>
       </section>
 
-      <section className={styles.workspace}>
-        <div className={styles.workspaceHead}><div><span>PROVIDER CONTROL ROOM / SPECIALTY PATH</span><h2>Start with what you do.</h2></div><p>Select the provider type that best matches your facility. The resource field, workflow, library, and pricing handoff reconfigure around that specialty and remain selected when you continue to the agreement portal.</p></div>
+      <section className={styles.selectionWorld} aria-label="Choose provider specialty">
+        <div className={styles.selectionHeader}>
+          <span>PROVIDER RESOURCE FIELD / 01</span>
+          <p>Choose the specialty closest to the work your facility performs. The entire workflow and agreement path follows that selection.</p>
+        </div>
+        <div className={styles.specialtyBackdrop} aria-hidden="true"><span>{selected.label}</span><span>{selected.label}</span></div>
+        <div className={styles.fieldIndex} aria-hidden="true"><b>{String(selectedIndex+1).padStart(2,'0')}</b><i/><span>{String(SPECIALTIES.length).padStart(2,'0')}</span></div>
         <SpecialtyField items={fieldItems} selectedId={selected.id} onSelect={setSelectedId}/>
+        <aside className={styles.activeSpecialty} style={{'--specialty-color':selected.color} as CSSProperties}>
+          <small>ACTIVE SPECIALTY</small><h2>{selected.label}</h2><p>{selected.description}</p>
+        </aside>
+      </section>
+
+      <section className={styles.detailSurface}>
+        <div className={styles.workspaceHead}><div><span>PROVIDER WORKFLOW / SELECTED PATH</span><h2>What happens<br/>after referral.</h2></div><p>Occu-Med sends the authorization, your clinic completes only the listed components, Provider Relations obtains the records, Exam QA checks completeness and accuracy, and the Medical Review team issues the final recommendation.</p></div>
         <div className={styles.controlGrid} style={{ '--specialty-color': selected.color } as CSSProperties}>
           <article className={styles.protocol}><span className={styles.panelLabel}>REFERRAL PROTOCOL / {selected.label.toUpperCase()}</span><h3>{selected.description}</h3><ol>{selected.protocol.map(step => <li key={step.title}><div><b>{step.title}</b>{step.copy}</div></li>)}</ol></article>
           <article className={styles.library}><span className={styles.panelLabel}>RESOURCE LIBRARY / CURRENT PATH</span><h3>Documents for {selected.label}</h3><div className={styles.docs}>{selected.documents.map(document => <div className={styles.doc} key={document.title}><div><b>{document.title}</b><small>{document.meta}</small></div>{document.ready ? <a href="/api/provider-resources/stateside-guide">Download ↓</a> : <em>Awaiting upload</em>}</div>)}</div></article>
