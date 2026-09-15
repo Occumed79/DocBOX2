@@ -6,7 +6,7 @@ import HistoryWorld from '../immersive/HistoryWorld';
 import {sampleMandolineForProgress} from '../immersive/historyMandoline';
 import {HISTORY_CATEGORIES,HISTORY_ITEMS,historyItemById,type HistoryCategory,type HistoryItem} from './historyData';
 import {applyWheelDelta,clampHistoryProgress,HISTORY_TRANSITION_MS,nearestHistoryItem,smoothHistoryStep} from './historyMath';
-import styles from './HistoryExperience.module.css';
+import styles from './HistoryExperienceNasdaq.module.css';
 
 function nodeScreenY(item:HistoryItem){
   const sample=sampleMandolineForProgress(item.position,item.lane,0);
