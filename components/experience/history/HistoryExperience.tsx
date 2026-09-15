@@ -42,6 +42,12 @@ export default function HistoryExperience(){
     ()=>selected?.related?.map(historyItemById).filter((item):item is HistoryItem=>Boolean(item))??[],
     [selected]
   );
+  const milestones=useMemo(()=>HISTORY_ITEMS.filter(item=>item.kind==='milestone'),[]);
+  const milestoneIndex=selected?.kind==='milestone'?milestones.findIndex(item=>item.id===selected.id):-1;
+  const previousMilestone=milestoneIndex>0?milestones[milestoneIndex-1]:null;
+  const nextMilestone=milestoneIndex>=0&&milestoneIndex<milestones.length-1?milestones[milestoneIndex+1]:null;
+  const bubbleReveal=clampHistoryProgress((transition-.56)/.30);
+  const milestoneReveal=clampHistoryProgress((transition-.22)/.46);
 
   useEffect(()=>{
     const animate=()=>{
@@ -84,9 +90,7 @@ export default function HistoryExperience(){
     if(transitionRaf.current)cancelAnimationFrame(transitionRaf.current);
   },[]);
 
-  const focusItem=(item:HistoryItem)=>{
-    targetRef.current=item.position;
-  };
+  const focusItem=(item:HistoryItem)=>{targetRef.current=item.position;};
 
   const openItem=(item:HistoryItem)=>{
     targetRef.current=item.position;
@@ -138,6 +142,8 @@ export default function HistoryExperience(){
 
   const pointerDown=(event:ReactPointerEvent<HTMLElement>)=>{
     if(selectedId)return;
+    const target=event.target as HTMLElement;
+    if(target.closest('button,a'))return;
     drag.current={x:event.clientX,value:targetRef.current};
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -173,7 +179,7 @@ export default function HistoryExperience(){
       transition={transition}
       mode={selected?.kind??'timeline'}
       storyScroll={storyScroll}
-      seed={selected?HISTORY_ITEMS.indexOf(selected):0}
+      seed={selected?HISTORY_ITEMS.findIndex(item=>item.id===selected.id):0}
     />
     <div className={styles.vignette}/>
 
@@ -245,27 +251,32 @@ export default function HistoryExperience(){
     >
       <section className={selected.kind==='story'?styles.bubbleHero:styles.milestoneHero}>
         {selected.kind==='story'?<>
-          <svg className={styles.relatedPaths} viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
+          <svg className={styles.relatedPaths} viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true" style={{opacity:bubbleReveal}}>
             <path d="M0,325 C190,405 280,215 430,305 S720,420 1000,292"/>
             <path d="M0,265 C150,190 265,385 438,292 S720,162 1000,240"/>
           </svg>
-          <div className={styles.bubbleTitle}><span>{selected.category}</span><h1>{selected.title}</h1></div>
-          <div className={styles.bubbleMeta}><i/><div><b>{selected.person??selected.year}</b><span>{selected.detail??selected.summary}</span></div></div>
+          <div className={styles.bubbleTitle} style={{opacity:bubbleReveal}}><span>{selected.category}</span><h1>{selected.title}</h1></div>
+          <div className={styles.bubbleMeta} style={{opacity:bubbleReveal}}><i/><div><b>{selected.person??selected.year}</b><span>{selected.detail??selected.summary}</span></div></div>
           {related.slice(0,2).map((item,index)=><button
             key={item.id}
             className={styles.relatedBubble}
             data-side={index===0?'left':'right'}
+            style={{opacity:bubbleReveal}}
             onClick={()=>openItem(item)}
           ><i/><strong>{item.title}</strong><span>{item.category}</span></button>)}
-          <div className={styles.scrollRead}>SCROLL TO READ CONTENT <i/></div>
+          <div className={styles.scrollRead} style={{opacity:bubbleReveal}}>SCROLL TO READ CONTENT <i/></div>
         </>:<>
-          <div className={styles.milestoneEyebrow}><span>{selected.year}</span><b>{selected.category}</b></div>
-          <h1>{selected.title}</h1>
-          <p>{selected.summary}</p>
-          {selected.image&&<figure className={styles.milestoneImage}>
-            <Image src={`/photos/${encodeURIComponent(selected.image)}`} alt="" fill sizes="74vw" priority/>
-          </figure>}
-          <div className={styles.scrollRead}>SCROLL TO READ CONTENT <i/></div>
+          {previousMilestone&&<button className={styles.milestonePrev} onClick={()=>openItem(previousMilestone)} aria-label={`Previous milestone ${previousMilestone.year}`}><i/><span>{previousMilestone.year}</span></button>}
+          {nextMilestone&&<button className={styles.milestoneNext} onClick={()=>openItem(nextMilestone)} aria-label={`Next milestone ${nextMilestone.year}`}><i/><span>{nextMilestone.year}</span></button>}
+          <div className={styles.milestoneStage} style={{opacity:milestoneReveal}}>
+            <div className={styles.milestoneEyebrow}><span>{selected.year}</span><b>{selected.category}</b></div>
+            <h1>{selected.title}</h1>
+            <p>{selected.summary}</p>
+            {selected.image&&<figure className={styles.milestoneImage}>
+              <Image src={`/photos/${encodeURIComponent(selected.image)}`} alt="" fill sizes="74vw" priority/>
+            </figure>}
+          </div>
+          <div className={styles.scrollRead} style={{opacity:milestoneReveal}}>SCROLL TO READ CONTENT <i/></div>
         </>}
       </section>
 
@@ -279,7 +290,7 @@ export default function HistoryExperience(){
           <div>{related.map(item=><button key={item.id} onClick={()=>openItem(item)}><i/><span>{item.year}</span><strong>{item.title}</strong><em>{item.category}</em></button>)}</div>
         </section>}
         <footer className={styles.storyFooter}>
-          <button onClick={closeStory}>BACK TO EXPERIENCE</button>
+          <button onClick={closeStory}>BACK TO TIMELINE</button>
           <a href="/experience#provider-portals">EXIT HISTORY & EVOLUTION</a>
         </footer>
       </article>
