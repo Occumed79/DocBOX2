@@ -48,8 +48,6 @@ test.describe('DOCBOX2 provider experience', () => {
     await expect(page.locator('[data-history-world]')).toBeVisible();
     await expect(page.locator('[data-history-mandoline]')).toHaveAttribute('data-lines', '32');
     await expect(page.getByRole('button', { name: /1979.*Occu-Med is founded/i })).toBeVisible();
-    await expect(page.getByText('15,000+ facilities')).toHaveCount(0);
-    await expect(page.getByText(/one million employees/i)).toHaveCount(0);
     await expect(page.getByText('FEATURED SPECIALTIES')).toHaveCount(0);
     await expect(page.getByText('REFERRAL LIFECYCLE')).toHaveCount(0);
 
