@@ -18,14 +18,14 @@ function labelTexture(label:string){
  * spread, twist, crests and valleys rather than parallel sine-wave copies. */
 function ribbonPoint(t:number,strand:number,lastX:number){
   const x=t*lastX;
-  const pinch=.14+.86*(.38+.62*Math.pow(Math.sin(t*Math.PI*3.15+.3),2));
-  const spread=1+1.1*Math.exp(-Math.pow((t-.72)/.11,2));
+  const pinch=.1+.9*(.22+.78*Math.pow(Math.sin(t*Math.PI*2.7+.42),2));
+  const spread=1+1.65*Math.exp(-Math.pow((t-.7)/.1,2))+.45*Math.exp(-Math.pow((t-.2)/.08,2));
   const u=(strand-15.5)/15.5;
-  const twist=t*Math.PI*5.2+u*.7;
-  const crest=Math.sin(t*Math.PI*2.25)*1.25+Math.sin(t*Math.PI*7.4+.6)*.34;
-  const valley=-1.15*Math.exp(-Math.pow((t-.47)/.085,2));
-  const width=2.75*pinch*spread;
-  return new THREE.Vector3(x,crest+valley+u*width*Math.cos(twist),-2.8+u*width*.62*Math.sin(twist)-Math.sin(t*Math.PI*4)*.35);
+  const twist=t*Math.PI*6.4+Math.sin(t*Math.PI*2)*.85+u*.7;
+  const crest=Math.sin(t*Math.PI*1.8)*1.45+Math.sin(t*Math.PI*6.7+.6)*.28;
+  const valley=-1.5*Math.exp(-Math.pow((t-.47)/.075,2));
+  const width=3.25*pinch*spread;
+  return new THREE.Vector3(x,crest+valley+u*width*Math.cos(twist),-3.1+u*width*.82*Math.sin(twist)-Math.sin(t*Math.PI*3.5)*.48);
 }
 
 export default function HistoryWorld({progress,milestones}:{progress:number;milestones:readonly Milestone[]}){
@@ -33,11 +33,11 @@ export default function HistoryWorld({progress,milestones}:{progress:number;mile
   useEffect(()=>{
     const el=host.current;if(!el)return;
     const scene=new THREE.Scene();scene.background=new THREE.Color(0x06152d);scene.fog=new THREE.FogExp2(0x07142c,.012);
-    const camera=new THREE.PerspectiveCamera(44,el.clientWidth/el.clientHeight,.1,260);camera.position.set(0,1,12);
+    const camera=new THREE.PerspectiveCamera(48,el.clientWidth/el.clientHeight,.1,260);camera.position.set(0,1,14);
     const renderer=tryCreateCinematicRenderer({antialias:true,alpha:false,powerPreference:'high-performance'},{exposure:1.15});if(!renderer){el.dataset.webgl='unavailable';return}
     renderer.setSize(el.clientWidth,el.clientHeight);el.appendChild(renderer.domElement);
     const dispose:Array<THREE.BufferGeometry|THREE.Material|THREE.Texture>=[],markers:Marker[]=[];
-    const spacing=15,lastX=(milestones.length-1)*spacing;
+    const spacing=12.5,lastX=(milestones.length-1)*spacing;
 
     // 32 individually shaped, translucent strands form one volumetric mandoline.
     for(let s=0;s<32;s++){
@@ -70,8 +70,8 @@ export default function HistoryWorld({progress,milestones}:{progress:number;mile
     let raf=0,smooth=value.current;const clock=new THREE.Clock(),look=new THREE.Vector3();
     const draw=()=>{raf=requestAnimationFrame(draw);const time=clock.getElapsedTime();smooth+=(clamp(value.current)-smooth)*.045;const x=smooth*lastX;
       // Slow damping plus a curved flight path makes scrolling feel like mass moving through space.
-      camera.position.x+=(x-3-camera.position.x)*.038;camera.position.y+=(Math.sin(smooth*Math.PI*3.2)*1.05-camera.position.y)*.025;camera.position.z+=(10.8+Math.cos(smooth*Math.PI*2.2)*1.25-camera.position.z)*.026;
-      look.set(x+4,Math.sin(smooth*Math.PI*2.8)*.5,-2.1);camera.lookAt(look);camera.rotation.z=Math.sin(smooth*Math.PI*4)*.018;
+      camera.position.x+=(x-4.5-camera.position.x)*.028;camera.position.y+=(Math.sin(smooth*Math.PI*3.2)*1.15-camera.position.y)*.021;camera.position.z+=(13.2+Math.cos(smooth*Math.PI*2.2)*1.3-camera.position.z)*.022;
+      look.set(x+6.2,Math.sin(smooth*Math.PI*2.8)*.55,-2.4);camera.lookAt(look);camera.rotation.z=Math.sin(smooth*Math.PI*4)*.022;
       markers.forEach((m,i)=>{const d=Math.abs(i-smooth*(milestones.length-1)),near=clamp(1-d/2.5);m.year.material.opacity=(m.major?.28:.12)+near*(m.major?.65:.48);m.group.position.y=ribbonPoint(i/(milestones.length-1),16,lastX).y+Math.sin(time*.35+i)*.08;m.orbits.rotation.y+=.003+(i%3)*.0008;m.orbits.rotation.z=Math.sin(time*.18+i)*.2;m.core.scale.setScalar(1+near*.8)});
       blue.position.set(x-13,5,5);violet.position.set(x,0,2);teal.position.set(x+15,-3,1);renderer.render(scene,camera)};draw();
     const resize=()=>{camera.aspect=el.clientWidth/Math.max(1,el.clientHeight);camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(el.clientWidth,el.clientHeight)};addEventListener('resize',resize);resize();
