@@ -19,7 +19,7 @@ export const STORY:readonly StoryScene[]=[
 ];
 
 export const PORTALS=[
-{id:'history',href:'/experience/history',number:'01',title:'Company history',note:'From Honolulu to a global medical network',tone:'gold'},
+{id:'history',href:'/experience/history',number:'01',title:'History & Evolution',note:'1979 to today · people, moments and milestones',tone:'gold'},
 {id:'network',href:'/experience/network',number:'02',title:'Explore the network',note:'23,524 anonymized mapped facilities',tone:'cyan'},
 {id:'resources',href:'/experience/resources',number:'03',title:'Provider resources',note:'Guidance organized around your specialty',tone:'violet'},
 {id:'questions',href:'/experience/questions',number:'04',title:'Provider Q&A',note:'Clear answers before the first referral',tone:'blue'},

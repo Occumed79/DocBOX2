@@ -1,113 +1,308 @@
 'use client';
 
 import Image from 'next/image';
-import {useEffect,useMemo,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState,type CSSProperties,type PointerEvent as ReactPointerEvent} from 'react';
 import HistoryWorld from '../immersive/HistoryWorld';
-import styles from './HistoryExperience.module.css';
+import {sampleMandolineForProgress} from '../immersive/historyMandoline';
+import {HISTORY_CATEGORIES,HISTORY_ITEMS,historyItemById,type HistoryCategory,type HistoryItem} from './historyData';
+import {applyWheelDelta,clampHistoryProgress,HISTORY_TRANSITION_MS,nearestHistoryItem,smoothHistoryStep} from './historyMath';
+import styles from './HistoryExperienceNasdaq.module.css';
 
-type Moment=readonly [year:string,title:string,summary:string,image:string,story:string];
-const M:readonly Moment[]=[
- ['1979','The critical discovery.','State-funded research points to a preventable pattern behind first-year workplace injuries.','Founders copy.png','Attorney Jim A. Johnson’s State of California-funded research linked a significant share of workplace injuries to employees hired with pre-existing medical conditions that increased their risk once on the job. The finding reframed placement as more than a question of whether someone was simply “healthy.”'],
- ['1979','Founded in Honolulu.','Medicine, legal requirements, and the actual job become one placement question.','Founders.png','Occu-Med was founded in Honolulu, Hawaii, in 1979. The company’s core idea was to combine medical findings with legal requirements and job-specific demands so placement decisions reflected the work a person actually had to perform.'],
- ['2000','A formal corporate structure.','Two decades of work are placed inside Occu-Med, Ltd.','California - Hawaii Map.png','In October 2000, Occu-Med, Ltd. was formally incorporated as a Delaware corporation, putting a corporate structure around the occupational-health practice that had been developing since 1979.'],
- ['2003','EXAMQA becomes a training ground.','A Fresno State student joins the EXAMQA department and later moves into business-development leadership.','EXAM REPORT.png','In 2003, a Fresno State student joined Occu-Med’s EXAMQA department as an intern. By 2006 that employee had moved into business-development leadership, connecting the company’s quality-assurance operating knowledge with its next phase of growth.'],
- ['2006','The method goes international.','Occu-Med expands its evaluation services to international companies for the first time.','International Certification.png','In 2006, Occu-Med expanded its evaluation services to international companies for the first time. The same job-centered evaluation model now had to travel across borders, provider systems, deployment requirements, and destination-specific medical standards.'],
- ['2007','Federal mission support opens.','Federal registration creates a direct path into DoD and DoS deployment-readiness work.','Diverse Workforce.png','Occu-Med registered as a U.S. federal contractor in October 2007. That milestone opened the door to direct Department of Defense and Department of State work and helped establish the deployment-readiness business that remains central to the company’s international operations.'],
- ['2017','Global infrastructure at scale.','By the mid-2010s, the provider network and overseas operating model are drawing outside recognition.','International Network.png','By roughly 2017, company reporting described pre-placement infrastructure across more than 36 countries. A major Camp Arifjan, Kuwait mission included thousands of evaluations and operational medical support, while Occu-Med also received a Rising Star award from Fresno State’s Institute for Family Business.'],
- ['2018','The next generation moves into operations.','Leadership transition begins while the original job-centered methodology remains intact.','Diverse Healthcare Team Portrait (1).png','In 2018, the next generation of company leadership moved into the Director of Operations role. The transition expanded operational leadership around the same core model: job information, clinical evidence, quality assurance, and defensible medical review.'],
- ['2021','Leadership continuity.','The next-generation transition reaches the President role.','Diverse Workforce2.png','In 2021, the next generation moved into the President role. The company continued building Network Management, Scheduling, Provider Relations, Exam QA, and medical-review infrastructure around the original placement methodology.'],
- ['TODAY','One connected operating network.','The original 1979 question now moves through a global provider and review system.','Facilities.png','Today the same founding principle runs through the referral lifecycle: authorization, scheduling, clinical examination, record return, quality assurance, medical review, and final recommendation. The live provider atlas currently maps 23,524 usable medical, dental, diagnostic, and pharmacy coordinates.'],
-] as const;
-
-const clamp=(value:number)=>Math.max(0,Math.min(1,value));
+function nodeScreenY(item:HistoryItem){
+  const sample=sampleMandolineForProgress(item.position,item.lane,0);
+  return Math.max(28,Math.min(78,52-sample.y*5.1));
+}
 
 export default function HistoryExperience(){
   const root=useRef<HTMLElement>(null);
-  const target=useRef(0),rendered=useRef(0),frame=useRef(0);
-  const[progress,setProgress]=useState(0);
-  const[storyOpen,setStoryOpen]=useState(false);
-  const[searchOpen,setSearchOpen]=useState(false);
-  const[query,setQuery]=useState('');
+  const drag=useRef<{x:number;value:number}|null>(null);
+  const progressRef=useRef(0);
+  const targetRef=useRef(0);
+  const rafRef=useRef(0);
+  const transitionRaf=useRef(0);
+  const transitionStart=useRef(0);
+  const storyScroller=useRef<HTMLDivElement>(null);
+
+  const [progress,setProgress]=useState(0);
+  const [hovered,setHovered]=useState<string|null>(null);
+  const [selectedId,setSelectedId]=useState<string|null>(null);
+  const [transition,setTransition]=useState(0);
+  const [storyScroll,setStoryScroll]=useState(0);
+  const [filterOpen,setFilterOpen]=useState(false);
+  const [filter,setFilter]=useState<'ALL'|HistoryCategory>('ALL');
+  const [sound,setSound]=useState(false);
+  const [accessible,setAccessible]=useState(false);
+
+  const selected=useMemo(()=>historyItemById(selectedId),[selectedId]);
+  const filteredItems=useMemo(
+    ()=>filter==='ALL'?HISTORY_ITEMS:HISTORY_ITEMS.filter(item=>item.category===filter),
+    [filter]
+  );
+  const related=useMemo(
+    ()=>selected?.related?.map(historyItemById).filter((item):item is HistoryItem=>Boolean(item))??[],
+    [selected]
+  );
+  const milestones=useMemo(()=>HISTORY_ITEMS.filter(item=>item.kind==='milestone'),[]);
+  const milestoneIndex=selected?.kind==='milestone'?milestones.findIndex(item=>item.id===selected.id):-1;
+  const previousMilestone=milestoneIndex>0?milestones[milestoneIndex-1]:null;
+  const nextMilestone=milestoneIndex>=0&&milestoneIndex<milestones.length-1?milestones[milestoneIndex+1]:null;
+  const bubbleReveal=clampHistoryProgress((transition-.56)/.30);
+  const milestoneReveal=clampHistoryProgress((transition-.22)/.46);
 
   useEffect(()=>{
-    const measure=()=>{
-      const el=root.current;if(!el)return;
-      const travel=Math.max(1,el.offsetHeight-innerHeight);
-      const documentTop=scrollY+el.getBoundingClientRect().top;
-      target.current=clamp((scrollY-documentTop)/travel);
-    };
     const animate=()=>{
-      frame.current=0;
-      const delta=target.current-rendered.current;
-      if(Math.abs(delta)<.00012){rendered.current=target.current;setProgress(target.current);return}
-      rendered.current+=delta*.14;setProgress(rendered.current);frame.current=requestAnimationFrame(animate);
+      const difference=targetRef.current-progressRef.current;
+      progressRef.current+=difference*.03;
+      if(Math.abs(difference)<.00008)progressRef.current=targetRef.current;
+      setProgress(progressRef.current);
+      rafRef.current=requestAnimationFrame(animate);
     };
-    const queue=()=>{measure();if(!frame.current)frame.current=requestAnimationFrame(animate)};
-    measure();rendered.current=target.current;setProgress(target.current);
-    addEventListener('scroll',queue,{passive:true});addEventListener('resize',queue);
-    return()=>{removeEventListener('scroll',queue);removeEventListener('resize',queue);if(frame.current)cancelAnimationFrame(frame.current)};
+    rafRef.current=requestAnimationFrame(animate);
+    return()=>cancelAnimationFrame(rafRef.current);
   },[]);
 
-  const active=Math.min(M.length-1,Math.max(0,Math.round(progress*(M.length-1))));
-  const jump=(i:number)=>{
-    const el=root.current;if(!el)return;
-    setSearchOpen(false);setStoryOpen(false);
-    const documentTop=scrollY+el.getBoundingClientRect().top;
-    const travel=Math.max(1,el.offsetHeight-innerHeight);
-    scrollTo({top:documentTop+(i/(M.length-1))*travel,behavior:'smooth'});
-  };
-  const matches=useMemo(()=>{
-    const q=query.trim().toLowerCase();
-    if(!q)return M.map((item,index)=>({item,index}));
-    return M.map((item,index)=>({item,index})).filter(({item})=>item.join(' ').toLowerCase().includes(q));
-  },[query]);
-  const milestones=M.map(item=>({year:item[0],image:item[3]}));
-  const current=M[active];
+  useEffect(()=>{
+    const node=root.current;
+    if(!node||selectedId)return;
+    const onWheel=(event:WheelEvent)=>{
+      event.preventDefault();
+      targetRef.current=applyWheelDelta(targetRef.current,event.deltaY);
+    };
+    const onKey=(event:KeyboardEvent)=>{
+      if(event.key==='ArrowRight'||event.key==='PageDown'){
+        event.preventDefault();targetRef.current=clampHistoryProgress(targetRef.current+.035);
+      }
+      if(event.key==='ArrowLeft'||event.key==='PageUp'){
+        event.preventDefault();targetRef.current=clampHistoryProgress(targetRef.current-.035);
+      }
+      if(event.key==='Home'){event.preventDefault();targetRef.current=0;}
+      if(event.key==='End'){event.preventDefault();targetRef.current=1;}
+    };
+    node.addEventListener('wheel',onWheel,{passive:false});
+    window.addEventListener('keydown',onKey);
+    return()=>{
+      node.removeEventListener('wheel',onWheel);
+      window.removeEventListener('keydown',onKey);
+    };
+  },[selectedId]);
 
-  return <main ref={root} className={styles.root} data-story-open={storyOpen||undefined}>
-    <HistoryWorld progress={progress} milestones={milestones}/>
+  useEffect(()=>()=>{
+    if(transitionRaf.current)cancelAnimationFrame(transitionRaf.current);
+  },[]);
+
+  const focusItem=(item:HistoryItem)=>{targetRef.current=item.position;};
+
+  const openItem=(item:HistoryItem)=>{
+    targetRef.current=item.position;
+    setHovered(null);
+    setFilterOpen(false);
+
+    if(selected?.kind==='story'&&item.kind==='story'){
+      setSelectedId(item.id);
+      setStoryScroll(0);
+      setTransition(1);
+      requestAnimationFrame(()=>storyScroller.current?.scrollTo({top:0,behavior:'smooth'}));
+      return;
+    }
+
+    setSelectedId(item.id);
+    setStoryScroll(0);
+    setTransition(0);
+    requestAnimationFrame(()=>storyScroller.current?.scrollTo({top:0}));
+    transitionStart.current=performance.now();
+    const tick=(now:number)=>{
+      const t=clampHistoryProgress((now-transitionStart.current)/HISTORY_TRANSITION_MS);
+      setTransition(smoothHistoryStep(t));
+      if(t<1)transitionRaf.current=requestAnimationFrame(tick);
+    };
+    transitionRaf.current=requestAnimationFrame(tick);
+  };
+
+  const closeStory=()=>{
+    if(transitionRaf.current)cancelAnimationFrame(transitionRaf.current);
+    const started=performance.now();
+    const from=transition;
+    const tick=(now:number)=>{
+      const t=clampHistoryProgress((now-started)/850);
+      setTransition(from*(1-smoothHistoryStep(t)));
+      if(t<1)transitionRaf.current=requestAnimationFrame(tick);
+      else{
+        setSelectedId(null);
+        setStoryScroll(0);
+      }
+    };
+    transitionRaf.current=requestAnimationFrame(tick);
+  };
+
+  const onStoryScroll=()=>{
+    const element=storyScroller.current;
+    if(!element)return;
+    setStoryScroll(clampHistoryProgress(element.scrollTop/Math.max(1,element.clientHeight)));
+  };
+
+  const pointerDown=(event:ReactPointerEvent<HTMLElement>)=>{
+    if(selectedId)return;
+    const target=event.target as HTMLElement;
+    if(target.closest('button,a'))return;
+    drag.current={x:event.clientX,value:targetRef.current};
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const pointerMove=(event:ReactPointerEvent<HTMLElement>)=>{
+    if(!drag.current||selectedId)return;
+    targetRef.current=clampHistoryProgress(
+      drag.current.value-(event.clientX-drag.current.x)/Math.max(500,window.innerWidth)*.92
+    );
+  };
+
+  const pointerUp=()=>{drag.current=null;};
+
+  const selectFilter=(category:'ALL'|HistoryCategory)=>{
+    setFilter(category);
+    setFilterOpen(false);
+    const candidates=category==='ALL'?HISTORY_ITEMS:HISTORY_ITEMS.filter(item=>item.category===category);
+    const nearest=nearestHistoryItem(candidates,progressRef.current);
+    if(nearest)targetRef.current=nearest.position;
+  };
+
+  return <main
+    ref={root}
+    className={styles.root}
+    style={{'--history-progress':progress} as CSSProperties}
+    onPointerDown={pointerDown}
+    onPointerMove={pointerMove}
+    onPointerUp={pointerUp}
+    onPointerCancel={pointerUp}
+  >
+    <HistoryWorld
+      progress={progress}
+      transition={transition}
+      mode={selected?.kind??'timeline'}
+      storyScroll={storyScroll}
+      seed={selected?HISTORY_ITEMS.findIndex(item=>item.id===selected.id):0}
+    />
+    <div className={styles.vignette}/>
 
     <header className={styles.header}>
-      <a className={styles.brand} href="/experience#provider-portals">OCCU-MED</a>
-      <span className={styles.range}>HISTORY&nbsp;&nbsp; / &nbsp;&nbsp;1979 — TODAY</span>
-      <div className={styles.tools}>
-        <button onClick={()=>setSearchOpen(true)}>SEARCH</button>
-        <a href="/experience#provider-portals">EXIT</a>
-      </div>
+      <a className={styles.brand} href="/experience#provider-portals"><span>OCCU-MED</span><i/></a>
+      <button className={styles.backTop} onClick={selected?closeStory:()=>window.location.assign('/experience#provider-portals')}>
+        {selected?'BACK TO EXPERIENCE':'HISTORY & EVOLUTION'}
+      </button>
+      <button className={styles.sound} aria-pressed={sound} onClick={()=>setSound(value=>!value)}>
+        {sound?'SOUND ON':'SOUND OFF'}
+      </button>
     </header>
 
-    <section className={styles.activeStory} key={active} aria-live="polite">
-      <span>{String(active+1).padStart(2,'0')} / {String(M.length).padStart(2,'0')}</span>
-      <h1>{current[1]}</h1>
-      <p>{current[2]}</p>
-      <button onClick={()=>setStoryOpen(true)}>OPEN STORY <b>↗</b></button>
-    </section>
-
-    <div className={styles.exploreCue} aria-hidden="true"><span>SCROLL TO EXPLORE</span><i/></div>
-
-    <nav className={styles.timeline} aria-label="Occu-Med history timeline">
-      <div className={styles.timelineTrack}><i style={{transform:`scaleX(${progress})`}}/></div>
-      {M.map((item,i)=><button key={`${item[0]}-${i}`} onClick={()=>jump(i)} aria-current={i===active?'step':undefined} style={{left:`${(i/(M.length-1))*100}%`}}><i/><span>{item[0]}</span></button>)}
-    </nav>
-
-    {storyOpen&&<section className={styles.storyPanel} aria-modal="true" role="dialog" aria-label={`${current[0]} ${current[1]}`}>
-      <div className={styles.storyMedia}><Image src={`/photos/${encodeURIComponent(current[3])}`} alt="" fill sizes="55vw" priority/></div>
-      <article>
-        <div className={styles.storyMeta}><span>OCCU-MED HISTORY</span><b>{current[0]}</b></div>
-        <h2>{current[1]}</h2>
-        <p>{current[4]}</p>
-        <div className={styles.storyNav}>
-          <button disabled={active===0} onClick={()=>jump(Math.max(0,active-1))}>← PREVIOUS</button>
-          <button onClick={()=>setStoryOpen(false)}>BACK TO TIMELINE</button>
-          <button disabled={active===M.length-1} onClick={()=>jump(Math.min(M.length-1,active+1))}>NEXT →</button>
+    {!selected&&<>
+      <div className={styles.filterWrap} data-open={filterOpen||undefined}>
+        <button className={styles.filterCurrent} aria-expanded={filterOpen} onClick={()=>setFilterOpen(value=>!value)}>
+          <span>{filter==='ALL'?'FILTER':filter}</span><i/>
+        </button>
+        <div className={styles.filterList}>
+          {HISTORY_CATEGORIES.map((category,index)=><button
+            key={category}
+            style={{'--delay':`${index*.06}s`} as CSSProperties}
+            data-active={filter===category||undefined}
+            onClick={()=>selectFilter(category)}
+          >{category}</button>)}
         </div>
-      </article>
-    </section>}
+      </div>
 
-    {searchOpen&&<section className={styles.searchPanel} aria-modal="true" role="dialog" aria-label="Search Occu-Med history">
-      <header><b>SEARCH THE TIMELINE</b><button onClick={()=>setSearchOpen(false)}>CLOSE ×</button></header>
-      <input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="TYPE A YEAR OR MOMENT" aria-label="Search history"/>
-      <div className={styles.results}>{matches.map(({item,index})=><button key={`${item[0]}-${index}`} onClick={()=>jump(index)}><span>{item[0]}</span><strong>{item[1]}</strong><b>→</b></button>)}</div>
+      <nav className={styles.timelineOverlay} aria-label="Occu-Med history timeline">
+        {filteredItems.map(item=>{
+          const x=50+(item.position-progress)*128;
+          const y=nodeScreenY(item);
+          const visible=x>-18&&x<118;
+          const isHover=hovered===item.id;
+          return <button
+            key={item.id}
+            className={item.kind==='milestone'?styles.milestoneNode:styles.storyNode}
+            data-history-node
+            data-category={item.category}
+            data-kind={item.kind}
+            data-hover={isHover||undefined}
+            onMouseEnter={()=>setHovered(item.id)}
+            onMouseLeave={()=>setHovered(null)}
+            onFocus={()=>{setHovered(item.id);focusItem(item);}}
+            onBlur={()=>setHovered(null)}
+            onClick={event=>{event.stopPropagation();openItem(item);}}
+            style={{left:`${x}%`,top:`${y}%`,opacity:visible?1:0,pointerEvents:visible?'auto':'none'} as CSSProperties}
+          >
+            <i className={styles.nodeCore}/>
+            {item.kind==='milestone'&&<>
+              <i className={styles.nodeRing}/><i className={styles.nodeRing2}/><i className={styles.nodeRing3}/><i className={styles.nodeRing4}/>
+            </>}
+            <span className={styles.nodeLabel}><b>{item.year}</b><strong>{item.title}</strong><em>{item.category}</em></span>
+          </button>;
+        })}
+      </nav>
+
+      <div className={styles.navigationHint}><span>DRAG OR SCROLL TO EXPLORE</span><i/></div>
+      <div className={styles.progressYears}><span>1979</span><i><b style={{transform:`scaleX(${progress})`}}/></i><span>TODAY</span></div>
+      <button className={styles.accessibleToggle} onClick={()=>setAccessible(true)}>MILESTONES / STORIES</button>
+    </>}
+
+    {selected&&<div
+      ref={storyScroller}
+      className={styles.storyScroller}
+      onScroll={onStoryScroll}
+      data-kind={selected.kind}
+      data-story-mode={selected.kind==='story'?'bubble':'milestone'}
+    >
+      <section className={selected.kind==='story'?styles.bubbleHero:styles.milestoneHero}>
+        {selected.kind==='story'?<>
+          <svg className={styles.relatedPaths} viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true" style={{opacity:bubbleReveal}}>
+            <path d="M0,325 C190,405 280,215 430,305 S720,420 1000,292"/>
+            <path d="M0,265 C150,190 265,385 438,292 S720,162 1000,240"/>
+          </svg>
+          <div className={styles.bubbleTitle} style={{opacity:bubbleReveal}}><span>{selected.category}</span><h1>{selected.title}</h1></div>
+          <div className={styles.bubbleMeta} style={{opacity:bubbleReveal}}><i/><div><b>{selected.person??selected.year}</b><span>{selected.detail??selected.summary}</span></div></div>
+          {related.slice(0,2).map((item,index)=><button
+            key={item.id}
+            className={styles.relatedBubble}
+            data-side={index===0?'left':'right'}
+            style={{opacity:bubbleReveal}}
+            onClick={()=>openItem(item)}
+          ><i/><strong>{item.title}</strong><span>{item.category}</span></button>)}
+          <div className={styles.scrollRead} style={{opacity:bubbleReveal}}>SCROLL TO READ CONTENT <i/></div>
+        </>:<>
+          {previousMilestone&&<button className={styles.milestonePrev} onClick={()=>openItem(previousMilestone)} aria-label={`Previous milestone ${previousMilestone.year}`}><i/><span>{previousMilestone.year}</span></button>}
+          {nextMilestone&&<button className={styles.milestoneNext} onClick={()=>openItem(nextMilestone)} aria-label={`Next milestone ${nextMilestone.year}`}><i/><span>{nextMilestone.year}</span></button>}
+          <div className={styles.milestoneStage} style={{opacity:milestoneReveal}}>
+            <div className={styles.milestoneEyebrow}><span>{selected.year}</span><b>{selected.category}</b></div>
+            <h1>{selected.title}</h1>
+            <p>{selected.summary}</p>
+            {selected.image&&<figure className={styles.milestoneImage}>
+              <Image src={`/photos/${encodeURIComponent(selected.image)}`} alt="" fill sizes="74vw" priority/>
+            </figure>}
+          </div>
+          <div className={styles.scrollRead} style={{opacity:milestoneReveal}}>SCROLL TO READ CONTENT <i/></div>
+        </>}
+      </section>
+
+      <article className={styles.storyContent}>
+        <div className={styles.storyContentGrid}>
+          <aside><span>{selected.kind==='story'?'COMPANY STORY':'MILESTONE'}</span><b>{selected.year}</b><em>{selected.category}</em></aside>
+          <div><h2>{selected.title}</h2><p>{selected.body}</p></div>
+        </div>
+        {related.length>0&&<section className={styles.relatedMemories}>
+          <h3>Related memories</h3>
+          <div>{related.map(item=><button key={item.id} onClick={()=>openItem(item)}><i/><span>{item.year}</span><strong>{item.title}</strong><em>{item.category}</em></button>)}</div>
+        </section>}
+        <footer className={styles.storyFooter}>
+          <button onClick={closeStory}>BACK TO TIMELINE</button>
+          <a href="/experience#provider-portals">EXIT HISTORY & EVOLUTION</a>
+        </footer>
+      </article>
+    </div>}
+
+    {accessible&&<section className={styles.accessiblePanel} role="dialog" aria-modal="true" aria-label="History milestones and company stories">
+      <header><div><span>OCCU-MED</span><h2>History & Evolution</h2></div><button onClick={()=>setAccessible(false)}>CLOSE ×</button></header>
+      <div className={styles.accessibleTabs}><b>MILESTONES</b><span>COMPANY STORIES</span></div>
+      <div className={styles.accessibleRows}>{HISTORY_ITEMS.map(item=><button
+        key={item.id}
+        onClick={()=>{setAccessible(false);focusItem(item);openItem(item);}}
+      ><span>{item.kind==='milestone'?item.year:'STORY'}</span><strong>{item.title}</strong><em>{item.category}</em><b>→</b></button>)}</div>
     </section>}
   </main>;
 }

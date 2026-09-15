@@ -23,7 +23,6 @@ test.describe('DOCBOX2 provider experience', () => {
     await expect(firstScene.getByRole('heading', { name: 'The job changed the question.' })).toBeVisible();
     await expect(firstScene.getByText(/California-funded research/i)).toBeVisible();
 
-    // Other destination grammars must not leak into the story.
     await expect(page.getByText('REFERRAL LIFECYCLE')).toHaveCount(0);
     await expect(page.getByText('FEATURED SPECIALTIES')).toHaveCount(0);
 
@@ -32,7 +31,7 @@ test.describe('DOCBOX2 provider experience', () => {
     const portalNav = page.getByRole('navigation', { name: 'Provider world portals' });
     await expect(portalNav).toBeVisible();
     await expect(portalNav.getByRole('link')).toHaveCount(5);
-    await expect(portalNav.getByRole('link', { name: /Company history/i })).toBeVisible();
+    await expect(portalNav.getByRole('link', { name: /History & Evolution/i })).toBeVisible();
     await expect(portalNav.getByRole('link', { name: /Explore the network/i })).toBeVisible();
     await expect(portalNav.getByRole('link', { name: /Provider resources/i })).toBeVisible();
     await expect(portalNav.getByRole('link', { name: /Provider Q&A/i })).toBeVisible();
@@ -40,29 +39,37 @@ test.describe('DOCBOX2 provider experience', () => {
     expect(errors).toEqual([]);
   });
 
-  test('history is an isolated Nasdaq-style chronology with search and story detail', async ({ page }) => {
+  test('history uses the Nasdaq-style spatial timeline and distinct story modes', async ({ page }) => {
     const errors = await collectPageErrors(page);
     await page.goto('/experience/history');
 
     const timeline = page.getByRole('navigation', { name: 'Occu-Med history timeline' });
     await expect(timeline).toBeVisible();
-    await expect(timeline.getByRole('button')).toHaveCount(10);
-    await expect(page.getByText('1979', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('TODAY', { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('[data-history-world]')).toBeVisible();
+    await expect(page.locator('[data-history-mandoline]')).toHaveAttribute('data-lines', '32');
+    await expect(page.getByRole('button', { name: /1979.*Occu-Med is founded/i })).toBeVisible();
     await expect(page.getByText('FEATURED SPECIALTIES')).toHaveCount(0);
     await expect(page.getByText('REFERRAL LIFECYCLE')).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'SEARCH' }).click();
-    const search = page.getByRole('textbox', { name: 'Search history' });
-    await expect(search).toBeVisible();
-    await search.fill('federal');
-    await expect(page.getByRole('button', { name: /2007.*Federal mission support opens/i })).toBeVisible();
-    await page.getByRole('button', { name: 'CLOSE ×' }).click();
+    await page.getByRole('button', { name: /The Critical Discovery/i }).click();
+    await expect(page.locator('[data-story-mode="bubble"]')).toBeVisible();
+    await expect(page.getByText('SCROLL TO READ CONTENT')).toBeVisible();
+    await page.getByRole('button', { name: 'BACK TO EXPERIENCE' }).click();
 
-    await page.getByRole('button', { name: /OPEN STORY/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'BACK TO TIMELINE' })).toBeVisible();
+    await page.getByRole('button', { name: /1979.*Occu-Med is founded/i }).click();
+    await expect(page.locator('[data-story-mode="milestone"]')).toBeVisible();
+    await expect(page.locator('[data-story-mode="bubble"]')).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  test('history filter changes visible nodes and re-targets the timeline', async ({ page }) => {
+    const errors = await collectPageErrors(page);
+    await page.goto('/experience/history');
+
+    await page.getByRole('button', { name: /FILTER/i }).click();
+    await page.getByRole('button', { name: 'FOUNDATION' }).click();
+    await expect(page.locator('[data-history-node][data-category="FOUNDATION"]')).not.toHaveCount(0);
+    await expect(page.locator('[data-history-node]:not([data-category="FOUNDATION"])')).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 
