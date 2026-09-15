@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import {useEffect,useMemo,useRef,useState,type CSSProperties} from 'react';
 import HistoryWorld from '../immersive/HistoryWorld';
+import MemoryBubbleScene from './MemoryBubbleScene';
 import styles from './HistoryExperience.module.css';
 
 type Moment=readonly [year:string,title:string,summary:string,image:string,story:string,major?:boolean];
@@ -97,7 +98,7 @@ export default function HistoryExperience(){
     </nav>
 
     {storyOpen&&<section className={`${styles.storyPanel} ${current[5]?styles.milestonePanel:styles.memoryPanel}`} aria-modal="true" role="dialog" aria-label={`${current[0]} ${current[1]}`} onScroll={e=>setDetailProgress(Math.min(1,e.currentTarget.scrollTop/Math.max(1,innerHeight*.72)))} style={{'--detail':detailProgress} as CSSProperties}>
-      {!current[5]&&<div className={styles.bubbleStage} aria-hidden="true"><div className={styles.memoryBubble}><Image src={`/photos/${encodeURIComponent(current[3])}`} alt="" fill sizes="48vw" priority/><i/></div><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M49 48 C32 32 24 30 15 22 M52 51 C68 40 77 31 88 29 M48 54 C34 69 25 75 18 85"/></svg>{[active-1,active+1,active+2].map((n,j)=>{const i=(n+M.length)%M.length;return <button tabIndex={-1} key={i} className={styles.satellite} style={{'--sat':j} as CSSProperties}><span>{M[i][0]}</span>{M[i][1]}</button>})}</div>}
+      {!current[5]&&<div className={styles.bubbleStage} aria-hidden="true"><MemoryBubbleScene/><div className={styles.memoryBubble}><Image src={`/photos/${encodeURIComponent(current[3])}`} alt="" fill sizes="48vw" priority/><i/></div><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M49 48 C32 32 24 30 15 22 M52 51 C68 40 77 31 88 29 M48 54 C34 69 25 75 18 85"/></svg>{[active-1,active+1,active+2].map((n,j)=>{const i=(n+M.length)%M.length;return <button tabIndex={-1} key={i} className={styles.satellite} style={{'--sat':j} as CSSProperties}><span>{M[i][0]}</span>{M[i][1]}</button>})}<div className={styles.memoryControls}><button onClick={()=>setStoryOpen(false)}>← BACK TO EXPERIENCE</button><span>SCROLL TO READ CONTENT <i/></span></div><div className={styles.memoryTitle}><span>{current[0]}</span><h2>{current[1]}</h2></div></div>}
       <div className={styles.storyMedia}><Image src={`/photos/${encodeURIComponent(current[3])}`} alt="" fill sizes="55vw" priority/></div>
       <article className={styles.editorial}>
         <div className={styles.storyMeta}><span>OCCU-MED HISTORY</span><b>{current[0]}</b></div>
