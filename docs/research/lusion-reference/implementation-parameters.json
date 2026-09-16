@@ -1,0 +1,196 @@
+{
+  "reference": {
+    "site": "Lusion / about hero",
+    "renderer": {
+      "threeRevision": 158,
+      "webglVersion": 2,
+      "powerPreference": "high-performance",
+      "alpha": false,
+      "antialias": false,
+      "depth": true,
+      "stencil": false,
+      "preserveDrawingBuffer": false
+    }
+  },
+  "camera": {
+    "sampleCount": 200,
+    "primarySampleRange": [0, 149],
+    "secondarySampleRange": [150, 199],
+    "baseFovDegrees": 60,
+    "maxDollyZoomFovOffsetDegrees": -10,
+    "positionBounds": {
+      "x": [-19.1331158, 0],
+      "y": [5.46889019, 50],
+      "z": [-75.1132812, -5]
+    },
+    "interpolation": {
+      "position": "linear",
+      "orientation": "quaternion-slerp"
+    }
+  },
+  "slowMotion": {
+    "freezeRatioEasePerFrame": 0.1,
+    "worldSpeedAtFullHold": 0.1,
+    "worldDeltaSystems": [
+      "moving-light",
+      "light-field",
+      "hero-particles",
+      "rocks",
+      "astronaut-person",
+      "fog",
+      "halo",
+      "hero-clock"
+    ],
+    "normalDeltaSystemsObserved": [
+      "terrain-lines-hud",
+      "faces",
+      "letters",
+      "supporting-ui"
+    ]
+  },
+  "light": {
+    "position": [0, 8, 0],
+    "scatterSegment": {
+      "from": [0, 18, 0],
+      "to": [0, 0, 0],
+      "divider": [1.1, 5.5]
+    }
+  },
+  "lightField": {
+    "gridCount": [64, 64, 64],
+    "baseVolumeWidth": 8,
+    "temporalBlend": true,
+    "storage": "2d-slice-atlas"
+  },
+  "particles": {
+    "count": 24576,
+    "simulation": "gpu-feedback-textures",
+    "motion": [
+      "curl-noise",
+      "light-centered-orbit-drift",
+      "life-respawn"
+    ]
+  },
+  "rocks": {
+    "logicalPieceCount": 16,
+    "animationFrameCount": 120,
+    "sourceFps": 60,
+    "desktopInstanceCount": 64,
+    "mobileInstanceCount": 48,
+    "meshFamilies": 4,
+    "rendering": "instanced"
+  },
+  "person": {
+    "vertices": 2666,
+    "indices": 11952,
+    "triangles": 3984,
+    "boneCount": 54,
+    "boneInfluencesPerVertex": 2,
+    "idleAnimation": {
+      "sampleCount": 4590,
+      "frameCount": 85,
+      "effectiveFpsApprox": 30,
+      "loopDurationSecondsApprox": 2.83
+    }
+  },
+  "terrain": {
+    "vertices": 13872,
+    "indices": 80238,
+    "triangles": 26746,
+    "packedPositionBounds": {
+      "x": {
+        "from": -37.4282227,
+        "delta": 90.8383599
+      },
+      "y": {
+        "from": -1.01878357,
+        "delta": 20.46981237
+      },
+      "z": {
+        "from": -26.8102531,
+        "delta": 92.206913
+      }
+    }
+  },
+  "terrainLines": {
+    "sourcePointCount": 11832,
+    "groupCount": 41,
+    "generatedCrossSectionSegments": 3,
+    "rendering": "procedural-tube-ribbon"
+  },
+  "backgroundBox": {
+    "vertices": 8,
+    "indices": 30,
+    "triangles": 10,
+    "packedPositionBounds": {
+      "x": {
+        "from": -187.141113,
+        "delta": 454.191833
+      },
+      "y": {
+        "from": -1.01878357,
+        "delta": 999.99998457
+      },
+      "z": {
+        "from": -200,
+        "delta": 265.3966599
+      }
+    }
+  },
+  "logoText": {
+    "vertices": 1400,
+    "indices": 6270,
+    "triangles": 2090
+  },
+  "letterPlacements": {
+    "count": 196
+  },
+  "screenPaint": {
+    "mainResolutionScale": 0.25,
+    "lowResolutionScale": 0.125,
+    "pushStrength": 25,
+    "capturedDissipation": [
+      0.9750000238418579,
+      0.949999988079071,
+      0.800000011920929
+    ],
+    "capturedCurlScale": 0.019999999552965164,
+    "capturedCurlStrength": 3,
+    "capturedCanvas": [1232, 1328],
+    "capturedPaintTexture": [308, 332],
+    "colorPass": {
+      "amount": 3,
+      "rgbShift": 0.5,
+      "multiplier": 5,
+      "colorMultiplier": 10,
+      "shade": 1.25
+    },
+    "behavior": [
+      "pointer-segment-injection",
+      "velocity-feedback",
+      "curl-advection",
+      "channel-specific-decay",
+      "gradient-texture-color-reveal",
+      "stronger-edge-response"
+    ]
+  },
+  "postProcessing": {
+    "fftConvolutionBloom": true,
+    "screenPaintDistortion": true,
+    "halo": true,
+    "rgbSeparation": true,
+    "blueNoiseDither": true,
+    "reusesGpuResourcesAcrossFrames": true
+  },
+  "docboxTargetHierarchy": [
+    "astronaut-and-terrain",
+    "floating-portal-constellation",
+    "active-portal-light-shaft",
+    "instanced-rising-debris",
+    "gpu-particle-field",
+    "selective-hold-to-slow",
+    "camera-spline-and-fov-choreography",
+    "screenpaint-energy-field",
+    "fog-halo-bloom-composite"
+  ]
+}
