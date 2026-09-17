@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - scripts/archive_lusion_reference.py
+      - scripts/archive_lusion_browser.mjs
       - .github/workflows/archive-lusion-reference.yml
 
 permissions:
@@ -27,24 +27,44 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.12'
+          node-version: '22'
 
-      - name: Install crawler dependencies
-        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
 
-      - name: Archive Lusion site and runtime assets
-        env:
-          LUSION_MAX_URLS: '6000'
-          LUSION_MAX_TOTAL_BYTES: '786432000'
-          LUSION_MAX_FILE_BYTES: '99614720'
-          LUSION_REQUEST_TIMEOUT: '15'
-          LUSION_WORKERS: '24'
-        run: python scripts/archive_lusion_reference.py
+      - name: Capture browser-verified Lusion resources
+        run: node scripts/archive_lusion_browser.mjs
 
-      - name: Record archive in repository
+      - name: Validate archive is real
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s docs/research/lusion-reference/raw-site/archive-manifest.json
+          test -s docs/research/lusion-reference/raw-site/resource-urls.txt
+          test -d docs/research/lusion-reference/raw-site/network
+          COUNT=$(find docs/research/lusion-reference/raw-site/network -type f | wc -l | tr -d ' ')
+          echo "Captured network files: $COUNT"
+          test "$COUNT" -gt 20
+          node - <<'NODE'
+          const fs = require('fs');
+          const m = JSON.parse(fs.readFileSync('docs/research/lusion-reference/raw-site/archive-manifest.json','utf8'));
+          if (!m.resourceCount || m.resourceCount < 20) throw new Error(`Too few resources: ${m.resourceCount}`);
+          const fallbackSizes = new Map();
+          for (const r of m.resources) fallbackSizes.set(r.sha256, (fallbackSizes.get(r.sha256)||0)+1);
+          const maxDup = Math.max(...fallbackSizes.values());
+          console.log('Resource count:', m.resourceCount, 'Max duplicate hash count:', maxDup);
+          if (maxDup > Math.max(25, Math.floor(m.resourceCount * 0.20))) {
+            throw new Error(`Archive appears contaminated by repeated fallback responses: ${maxDup}/${m.resourceCount}`);
+          }
+          console.log('Known asset validation:', m.knownAssetValidation);
+          NODE
+
+      - name: Record verified archive in repository
         shell: bash
         run: |
           set -euo pipefail
@@ -53,9 +73,9 @@ jobs:
           git add -f docs/research/lusion-reference/raw-site
 
           if git diff --cached --quiet; then
-            echo 'Archive produced no repository changes.'
+            echo 'Verified archive produced no repository changes.'
             exit 0
           fi
 
-          git commit -m 'Archive raw Lusion reference site assets'
+          git commit -m 'Replace Lusion archive with browser-verified capture'
           git push origin HEAD:main
