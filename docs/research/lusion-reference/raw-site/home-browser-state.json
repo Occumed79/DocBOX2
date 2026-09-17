@@ -1,0 +1,953 @@
+{
+  "url": "https://lusion.co/",
+  "title": "Lusion - Award Winning 3D and Interactive Web Studio",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+  "viewport": {
+    "width": 1440,
+    "height": 1000,
+    "devicePixelRatio": 1
+  },
+  "resources": [
+    {
+      "name": "https://www.googletagmanager.com/gtag/js?id=G-W2XC5XK9QJ",
+      "initiatorType": "script",
+      "duration": 99.40000000000146,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.co/_astro/about.CNa9RfUh.css",
+      "initiatorType": "link",
+      "duration": 23.80000000000291,
+      "transferSize": 14493,
+      "encodedBodySize": 14193,
+      "decodedBodySize": 90367
+    },
+    {
+      "name": "https://lusion.co/_astro/hoisted.CUO_IjfL.js",
+      "initiatorType": "script",
+      "duration": 95.80000000000291,
+      "transferSize": 305399,
+      "encodedBodySize": 305099,
+      "decodedBodySize": 1251728
+    },
+    {
+      "name": "https://lusion.co/assets/images/icons/arrow-right.svg",
+      "initiatorType": "css",
+      "duration": 60.700000000004366,
+      "transferSize": 1001,
+      "encodedBodySize": 701,
+      "decodedBodySize": 701
+    },
+    {
+      "name": "https://lusion.co/assets/images/icons/arrow-down.svg",
+      "initiatorType": "css",
+      "duration": 59.5,
+      "transferSize": 612,
+      "encodedBodySize": 312,
+      "decodedBodySize": 312
+    },
+    {
+      "name": "https://lusion.co/assets/fonts/Aeonik-Regular.woff2",
+      "initiatorType": "css",
+      "duration": 74.40000000000146,
+      "transferSize": 31464,
+      "encodedBodySize": 31164,
+      "decodedBodySize": 31164
+    },
+    {
+      "name": "https://lusion.co/assets/fonts/Aeonik-Medium.woff2",
+      "initiatorType": "css",
+      "duration": 73.79999999999563,
+      "transferSize": 44932,
+      "encodedBodySize": 44632,
+      "decodedBodySize": 44632
+    },
+    {
+      "name": "https://www.google-analytics.com/g/collect?v=2&tid=G-W2XC5XK9QJ&gtm=45je69f3v9165630968za200zd9165630968&_p=1789613592765&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=2052219895.1789613593&frm=0&ngs=1&pscdl=noapi&rcb=16&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B153.0.8010.12%7CNot_A%2520Brand%3B8.0.0.0%7CChromium%3B153.0.8010.12&uam=&uamb=0&uap=Linux&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938466~115938468~118897920~118897930~120213116~120385423~120469145~120469153&sid=1789613592&sct=1&seg=0&dl=https%3A%2F%2Flusion.co%2F&dt=Lusion%20-%20Award%20Winning%203D%20and%20Interactive%20Web%20Studio&en=page_view&_fv=1&_nsi=1&_ss=1&_ee=1&tfd=399",
+      "initiatorType": "fetch",
+      "duration": 53,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://vimeo.com/api/oembed.json?url=https%3A%2F%2Fvimeo.com%2F761102167&id=761102167&width=100%25&height=100%25&responsive=true&title=false&controls=false&byline=false&end_screen=%5Bobject%20Object%5D",
+      "initiatorType": "xmlhttprequest",
+      "duration": 67.79999999999563,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/generic.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 212.5,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/cinematic_0.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 223.29999999999563,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/cinematic_2.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 223.3000000000029,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/cinematic_3.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 230,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/generic_end.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 262.6000000000058,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/oryzo_ai/home.webp",
+      "initiatorType": "img",
+      "duration": 222.70000000000437,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/oryzo_ai/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 222.90000000000146,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/atlas_motion/home.webp",
+      "initiatorType": "img",
+      "duration": 232.8000000000029,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/atlas_motion/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 233,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/devin_ai/home.webp",
+      "initiatorType": "img",
+      "duration": 236.10000000000582,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/devin_ai/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 235.79999999999563,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/of_the_oak/home.webp",
+      "initiatorType": "img",
+      "duration": 239.39999999999418,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/of_the_oak/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 247.09999999999854,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/everswap/home.webp",
+      "initiatorType": "img",
+      "duration": 247.29999999999563,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/everswap/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 247.29999999999563,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/porsche_dream_machine/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 250.29999999999563,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/porsche_dream_machine/home.webp",
+      "initiatorType": "img",
+      "duration": 251.6999999999971,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/synthetic_human/home.webp",
+      "initiatorType": "img",
+      "duration": 251.6999999999971,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/synthetic_human/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 252,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/spatial_fusion/home.webp",
+      "initiatorType": "img",
+      "duration": 253.70000000000437,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/spatial_fusion/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 253.90000000000146,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/spaace/home.webp",
+      "initiatorType": "img",
+      "duration": 254,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/spaace/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 254.09999999999854,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/ddd_2024/home.webp",
+      "initiatorType": "img",
+      "duration": 254.20000000000437,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/ddd_2024/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 254.3000000000029,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/choo_choo_world/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 256.20000000000437,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/choo_choo_world/home.webp",
+      "initiatorType": "img",
+      "duration": 259.20000000000437,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/soda_experience/home.webp",
+      "initiatorType": "img",
+      "duration": 259.3000000000029,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/projects/soda_experience/home_depth.webp",
+      "initiatorType": "img",
+      "duration": 259.3000000000029,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/smaa-search.png",
+      "initiatorType": "img",
+      "duration": 259.29999999999563,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/smaa-area.png",
+      "initiatorType": "img",
+      "duration": 259.5,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/LDR_RGB1_0.png",
+      "initiatorType": "img",
+      "duration": 264,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/reel/desktop.mp4",
+      "initiatorType": "video",
+      "duration": 196.59999999999854,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://player.vimeo.com/video/761102167?title=0&byline=0&controls=0&app_id=122963",
+      "initiatorType": "iframe",
+      "duration": 394.09999999999854,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.co/assets/fonts/Aeonik-RegularItalic.woff2",
+      "initiatorType": "css",
+      "duration": 28.700000000004366,
+      "transferSize": 32812,
+      "encodedBodySize": 32512,
+      "decodedBodySize": 32512
+    },
+    {
+      "name": "https://lusion.co/assets/fonts/IBMPlexMono-Regular.woff2",
+      "initiatorType": "css",
+      "duration": 21.69999999999709,
+      "transferSize": 39288,
+      "encodedBodySize": 38988,
+      "decodedBodySize": 38988
+    },
+    {
+      "name": "https://lusion.co/assets/fonts/IBMPlexMono-Medium.woff2",
+      "initiatorType": "css",
+      "duration": 22.69999999999709,
+      "transferSize": 40388,
+      "encodedBodySize": 40088,
+      "decodedBodySize": 40088
+    },
+    {
+      "name": "https://lusion.dev/assets/models/home/cross.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 83.90000000000146,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/home/matcap.exr",
+      "initiatorType": "fetch",
+      "duration": 86.89999999999418,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/reel/desktop.mp4",
+      "initiatorType": "video",
+      "duration": 35.30000000000291,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/lines/line_reel.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 82.5,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.co/assets/fonts/LusionMono.woff2",
+      "initiatorType": "css",
+      "duration": 19.900000000001455,
+      "transferSize": 1900,
+      "encodedBodySize": 1600,
+      "decodedBodySize": 1600
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/reel/desktop.mp4",
+      "initiatorType": "video",
+      "duration": 147.3000000000029,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/face.png",
+      "initiatorType": "img",
+      "duration": 46.799999999995634,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/astronaut_helmet_arm.webp",
+      "initiatorType": "img",
+      "duration": 61.900000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/astronaut_helmet_base.webp",
+      "initiatorType": "img",
+      "duration": 106.79999999999563,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/astronaut_helmet_nor.webp",
+      "initiatorType": "img",
+      "duration": 57.19999999999709,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/astronaut_helmet.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 75.39999999999418,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/astronaut_helmet_glass.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 74.69999999999709,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/astronaut_glove_shoes_arm.webp",
+      "initiatorType": "img",
+      "duration": 93.5,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/astronaut_glove_shoes_base.webp",
+      "initiatorType": "img",
+      "duration": 49,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/astronaut_glove_shoes_nor.webp",
+      "initiatorType": "img",
+      "duration": 47.900000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/astronaut_glove_shoes.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 39.69999999999709,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/astronaut_wearpack_arm.webp",
+      "initiatorType": "img",
+      "duration": 39.39999999999418,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/astronaut_wearpack_base.webp",
+      "initiatorType": "img",
+      "duration": 39.30000000000291,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/astronaut/astronaut_wearpack_nor.webp",
+      "initiatorType": "img",
+      "duration": 46.599999999998545,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/astronaut_wearpack.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 39.400000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/astronaut_in_animation.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 39.5,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/astronaut_out_animation.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 39.400000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/earth.webp",
+      "initiatorType": "img",
+      "duration": 46.400000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/white_matcap.jpg",
+      "initiatorType": "img",
+      "duration": 47.69999999999709,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/astronaut_animations.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 43.80000000000291,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/grid_structure_ld.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 34,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/grid_base_ld.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 36.099999999998545,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/grid_structure_hd.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 37,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/grid_base_hd.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 62.299999999995634,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/grids/greeble_arm.webp",
+      "initiatorType": "img",
+      "duration": 35.700000000004366,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/grids/greeble_base.webp",
+      "initiatorType": "img",
+      "duration": 40.400000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/grids/greeble_nor.webp",
+      "initiatorType": "img",
+      "duration": 54.10000000000582,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/white_block.webp",
+      "initiatorType": "img",
+      "duration": 44.80000000000291,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/tunnel_block_base.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 36.299999999995634,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/tunnel_block_wall.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 41.700000000004366,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/earth_landscape.jpg",
+      "initiatorType": "img",
+      "duration": 88.79999999999563,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/diamond.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 35.80000000000291,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/earth_card.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 41.400000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/tunnels/stickers.png",
+      "initiatorType": "img",
+      "duration": 44.099999999998545,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/broken_glass.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 41.400000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/tunnels/broken_glass_animation.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 43.80000000000291,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/models/lines/line_goal.buf",
+      "initiatorType": "xmlhttprequest",
+      "duration": 36.599999999998545,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/flip_texture.png",
+      "initiatorType": "img",
+      "duration": 37.5,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/hover_0.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 48.599999999998545,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/click_0.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 55.900000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/focus_0.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 44.599999999998545,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/glass_broken.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 38.900000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/page_0.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 35.900000000001455,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/page_1.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 43.299999999995634,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/focus_1.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 53.5,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/focus_2.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 52.30000000000291,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/click_1.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 83,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/hover_1.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 41.599999999998545,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/hover_2.ogg",
+      "initiatorType": "xmlhttprequest",
+      "duration": 52.799999999995634,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures//tunnels/tablet.png",
+      "initiatorType": "img",
+      "duration": 44.5,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures//tunnels/desktop.png",
+      "initiatorType": "img",
+      "duration": 57.5,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://www.google-analytics.com/g/collect?v=2&tid=G-W2XC5XK9QJ&gtm=45je69f3v9165630968za200zd9165630968&_p=1789613592765&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&cid=2052219895.1789613593&frm=0&ngs=1&pscdl=noapi&rcb=16&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B153.0.8010.12%7CNot_A%2520Brand%3B8.0.0.0%7CChromium%3B153.0.8010.12&uam=&uamb=0&uap=Linux&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115938466~115938468~118897920~118897930~120213116~120385423~120469145~120469153&sid=1789613592&sct=1&seg=0&dl=https%3A%2F%2Flusion.co%2F&dt=Lusion%20-%20Award%20Winning%203D%20and%20Interactive%20Web%20Studio&en=scroll&epn.percent_scrolled=90&_et=120&tfd=7002",
+      "initiatorType": "fetch",
+      "duration": 21.89999999999418,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/generic.ogg",
+      "initiatorType": "audio",
+      "duration": 2.8000000000029104,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/cinematic_0.ogg",
+      "initiatorType": "audio",
+      "duration": 4.19999999999709,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/cinematic_2.ogg",
+      "initiatorType": "audio",
+      "duration": 3.599999999991269,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/cinematic_3.ogg",
+      "initiatorType": "audio",
+      "duration": 3.6999999999970896,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/audios/generic_end.ogg",
+      "initiatorType": "audio",
+      "duration": 3.3999999999941792,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    },
+    {
+      "name": "https://lusion.dev/assets/textures/reel/desktop.mp4",
+      "initiatorType": "video",
+      "duration": 960.1999999999825,
+      "transferSize": 0,
+      "encodedBodySize": 0,
+      "decodedBodySize": 0
+    }
+  ],
+  "scripts": [
+    "https://www.googletagmanager.com/gtag/js?id=G-W2XC5XK9QJ",
+    "https://lusion.co/_astro/hoisted.CUO_IjfL.js"
+  ],
+  "stylesheets": [
+    "https://lusion.co/_astro/about.CNa9RfUh.css"
+  ],
+  "images": [],
+  "canvases": [
+    {
+      "index": 0,
+      "width": 1440,
+      "height": 1000,
+      "clientWidth": 1440,
+      "clientHeight": 1000,
+      "webgl": {
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+        "shadingLanguageVersion": "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.0 Chromium)",
+        "vendor": "WebKit",
+        "renderer": "WebKit WebGL",
+        "maxTextureSize": 8192,
+        "extensions": [
+          "EXT_clip_control",
+          "EXT_color_buffer_float",
+          "EXT_color_buffer_half_float",
+          "EXT_conservative_depth",
+          "EXT_depth_clamp",
+          "EXT_float_blend",
+          "EXT_polygon_offset_clamp",
+          "EXT_texture_compression_bptc",
+          "EXT_texture_compression_rgtc",
+          "EXT_texture_filter_anisotropic",
+          "EXT_texture_mirror_clamp_to_edge",
+          "NV_shader_noperspective_interpolation",
+          "OES_draw_buffers_indexed",
+          "OES_sample_variables",
+          "OES_shader_multisample_interpolation",
+          "OES_texture_float_linear",
+          "OVR_multiview2",
+          "WEBGL_clip_cull_distance",
+          "WEBGL_compressed_texture_astc",
+          "WEBGL_compressed_texture_etc",
+          "WEBGL_compressed_texture_etc1",
+          "WEBGL_compressed_texture_s3tc",
+          "WEBGL_compressed_texture_s3tc_srgb",
+          "WEBGL_debug_renderer_info",
+          "WEBGL_debug_shaders",
+          "WEBGL_lose_context",
+          "WEBGL_multi_draw",
+          "WEBGL_polygon_mode",
+          "WEBGL_stencil_texturing"
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "width": 45,
+      "height": 45,
+      "clientWidth": 45,
+      "clientHeight": 45
+    },
+    {
+      "index": 2,
+      "width": 1442,
+      "height": 1002,
+      "clientWidth": 0,
+      "clientHeight": 0
+    }
+  ]
+}
