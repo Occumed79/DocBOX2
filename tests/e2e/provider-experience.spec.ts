@@ -7,7 +7,7 @@ async function collectPageErrors(page: import('@playwright/test').Page) {
 }
 
 test.describe('DOCBOX2 provider experience', () => {
-  test('story uses the source-authored Oryzo-style sequence and hands off to exactly five Zero Tech portals', async ({ page }) => {
+  test('story hands off to one astronaut base scene with exactly five interactive portal overlays', async ({ page }) => {
     const errors = await collectPageErrors(page);
     await page.goto('/experience');
 
@@ -29,6 +29,11 @@ test.describe('DOCBOX2 provider experience', () => {
 
     const portals = page.locator('#provider-portals');
     await portals.scrollIntoViewIfNeeded();
+    await expect(portals).toHaveAttribute('data-scene-role', 'astronaut-portal-hub');
+    await expect(portals.locator('[data-astronaut-base]')).toHaveCount(1);
+    await expect(portals.locator('[data-central-light]')).toHaveCount(1);
+    await expect(portals.locator('[data-portal-overlay]')).toHaveCount(1);
+
     const portalNav = page.getByRole('navigation', { name: 'Provider world portals' });
     await expect(portalNav).toBeVisible();
     await expect(portalNav.getByRole('link')).toHaveCount(5);
