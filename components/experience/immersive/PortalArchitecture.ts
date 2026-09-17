@@ -48,7 +48,7 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
   const platformRing=new THREE.Mesh(new THREE.TorusGeometry(3.55,.035,10,128),cyan);platformRing.rotation.x=Math.PI/2;platformRing.position.y=-2.84;group.add(platformRing);
   const innerRing=new THREE.Mesh(new THREE.TorusGeometry(2.35,.018,8,120),cyanSoft);innerRing.rotation.x=Math.PI/2;innerRing.position.y=-2.82;group.add(innerRing);
 
-  const travelerRoot=new THREE.Group();travelerRoot.position.z=.62;group.add(travelerRoot);
+  const travelerRoot=new THREE.Group();travelerRoot.position.z=.62;travelerRoot.rotation.set(-.035,Math.PI,0);group.add(travelerRoot);
   const fallback=buildFallbackTraveler();fallback.position.y=-.38;travelerRoot.add(fallback);
   let mixer:THREE.AnimationMixer|null=null;
   let lastTime=0;
@@ -122,7 +122,7 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
       monoliths.forEach((pylon,i)=>{pylon.position.y=Math.sin(time*.22+i)*.035-1.15});
       ceiling.rotation.y=Math.sin(time*.08)*.015+pointerX*.006;distant.rotation.y=Math.sin(time*.035)*.01;foreground.position.z=Math.sin(time*.08)*.12;
       suspended.forEach((panel,i)=>{panel.position.y+=Math.sin(time*.28+i)*.0008;panel.rotation.z=Math.sin(time*.18+i)*.025});
-      travelerRoot.rotation.y=Math.sin(time*.28)*.045+pointerX*.022;travelerRoot.position.y=Math.sin(time*.7)*.025;
+      travelerRoot.rotation.y=Math.PI+Math.sin(time*.28)*.045+pointerX*.022;travelerRoot.rotation.x=-.035+Math.sin(time*.22)*.008;travelerRoot.position.y=Math.sin(time*.7)*.025;
       if(fallback.visible){fallback.rotation.z=Math.sin(time*.45)*.012;fallback.rotation.x=Math.sin(time*.32)*.008}
     }
   };
