@@ -64,7 +64,7 @@ export default function ProviderJourneyReplica(){
       </section>)}
     </section>
 
-    <section id="provider-portals" className={styles.zeroArrival} data-zero-arrival>
+    <section id="provider-portals" className={styles.zeroArrival} data-zero-arrival data-scene-role="astronaut-portal-hub">
       <div className={styles.portalBridge} aria-hidden="true"><i/><i/><i/></div>
       <ZeroTechPortalHub portals={PORTALS} entryProgress={portalEntry}/>
     </section>
