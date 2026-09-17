@@ -12,11 +12,11 @@ type NodeRecord={group:THREE.Group;ring:THREE.Mesh;outer:THREE.Mesh;inner:THREE.
 
 const CYAN=0x0df6ff;
 const POS=[
-  [0,3.18,-2.25],
-  [3.78,.92,-1.72],
-  [2.52,-2.0,-1.42],
-  [-2.52,-2.0,-1.42],
-  [-3.78,.92,-1.72],
+  [0,4.35,-3.05],
+  [3.75,2.5,-2.75],
+  [3.05,-.25,-2.15],
+  [-3.05,-.25,-2.15],
+  [-3.75,2.5,-2.75],
 ] as const;
 const clamp=(v:number,min=0,max=1)=>Math.max(min,Math.min(max,v));
 const easeInOut=(t:number)=>{const x=clamp(t);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
@@ -52,8 +52,8 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
 
   useEffect(()=>{
     const host=mount.current;if(!host)return;
-    const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x000000,.029);
-    const camera=new THREE.PerspectiveCamera(47,host.clientWidth/host.clientHeight,.1,120);camera.position.set(0,.72,17.6);
+    const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x010405,.036);
+    const camera=new THREE.PerspectiveCamera(45,host.clientWidth/host.clientHeight,.1,120);camera.position.set(0,.65,18.8);
     const renderer=tryCreateCinematicRenderer({antialias:true,powerPreference:'high-performance'},{exposure:1.08});
     if(!renderer){
       setWebglAvailable(false);
@@ -62,10 +62,10 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
     }
     renderer.setClearColor(0x000000,1);renderer.setSize(host.clientWidth,host.clientHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));host.appendChild(renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0xffffff,0x000000,.72));
-    const key=new THREE.DirectionalLight(0xffffff,3.3);key.position.set(5,8,7);scene.add(key);
-    const rim=new THREE.PointLight(CYAN,62,26);rim.position.set(-4,2,-1);scene.add(rim);
-    const front=new THREE.PointLight(CYAN,25,17);front.position.set(2,-1,6);scene.add(front);
+    scene.add(new THREE.HemisphereLight(0xa9d4d4,0x000000,.34));
+    const key=new THREE.DirectionalLight(0xeaffff,2.1);key.position.set(0,9,-2);scene.add(key);
+    const rim=new THREE.PointLight(CYAN,48,24);rim.position.set(-2,3,-2);scene.add(rim);
+    const front=new THREE.PointLight(0xe9ffff,13,13);front.position.set(1,-1,5);scene.add(front);
 
     const floor=new THREE.Mesh(new THREE.PlaneGeometry(42,42),new THREE.MeshStandardMaterial({color:0x010303,roughness:.9,metalness:.06}));floor.rotation.x=-Math.PI/2;floor.position.y=-3.12;scene.add(floor);
     const grid=new THREE.GridHelper(42,42,CYAN,0x061a1c);grid.position.y=-3.1;scene.add(grid);
@@ -75,6 +75,7 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
     const starsGeo=new THREE.BufferGeometry();const starsArray=new Float32Array(3000);for(let i=0;i<starsArray.length;i+=3){starsArray[i]=(Math.random()-.5)*46;starsArray[i+1]=(Math.random()-.5)*26;starsArray[i+2]=5-Math.random()*54}starsGeo.setAttribute('position',new THREE.BufferAttribute(starsArray,3));
     const stars=new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xbdfcff,size:.025,transparent:true,opacity:.52,depthWrite:false}));scene.add(stars);
 
+    const portalLayer=new THREE.Group();portalLayer.name='interactive-portal-layer';scene.add(portalLayer);
     const nodes:NodeRecord[]=portals.map((portal,index)=>{
       const [x,y,z]=POS[index]??[0,0,-2];const base=new THREE.Vector3(x,y,z);const group=new THREE.Group();group.position.copy(base);
       const ringMat=new THREE.MeshStandardMaterial({color:CYAN,emissive:CYAN,emissiveIntensity:2.6,metalness:.8,roughness:.1});
@@ -82,7 +83,7 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
       const outer=new THREE.Mesh(new THREE.TorusGeometry(1.34,.016,7,96),new THREE.MeshBasicMaterial({color:CYAN,transparent:true,opacity:.38,blending:THREE.AdditiveBlending}));outer.rotation.z=.36;group.add(outer);
       const shader=new THREE.ShaderMaterial({vertexShader:VERT,fragmentShader:FRAG,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,uniforms:{uTime:{value:0},uHover:{value:0}}});
       const inner=new THREE.Mesh(new THREE.CircleGeometry(.94,72),shader);inner.position.z=.018;group.add(inner);
-      ring.userData.index=index;inner.userData.index=index;scene.add(group);return{group,ring,outer,inner,shader,base,portal};
+      ring.userData.index=index;inner.userData.index=index;portalLayer.add(group);return{group,ring,outer,inner,shader,base,portal};
     });
 
     const interactive=nodes.flatMap(n=>[n.ring,n.inner]);const pointer=new THREE.Vector2(9,9),ray=new THREE.Raycaster();
@@ -119,8 +120,9 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
         node.ring.rotation.z=Math.sin(t*.5+index)*.055;node.outer.rotation.z=.36+t*(index%2?.045:-.045);node.inner.rotation.z=t*(index%2?.036:-.032);
       });
 
-      stars.rotation.y=t*.0028;halo.rotation.z=t*.022;architecture.update(t,pointer.x);
+      stars.rotation.y=t*.0028;halo.rotation.z=t*.022;
       const focused=focus>=0?nodes[focus]:undefined;const focusX=focused?.group.position.x??0;
+      architecture.update(t,pointer.x,focusX);
       architecture.group.position.x+=((-focusX*.075)-architecture.group.position.x)*.035;architecture.group.position.z+=(((1-entry)*-3.6)-architecture.group.position.z)*.05;architecture.group.rotation.y+=((focused?-focusX*.016:0)-architecture.group.rotation.y)*.035;
       const s=.84+entry*.16;architecture.group.scale.lerp(new THREE.Vector3(s,s,s),.05);rim.position.x+=((-4-focusX*.07)-rim.position.x)*.03;front.position.x+=((2+focusX*.14)-front.position.x)*.03;
 
@@ -129,7 +131,7 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
         if(elapsed<.58){const p=easeInOut(elapsed/.58);camera.position.lerpVectors(travelFrom,approach,p);camera.fov=47-p*9;camera.updateProjectionMatrix();camera.lookAt(portalCenter)}
         else {const p=easeInOut((elapsed-.58)/.42);camera.position.lerpVectors(approach,through,p);camera.fov=38-p*20;camera.updateProjectionMatrix();camera.lookAt(portalCenter.clone().add(new THREE.Vector3(0,0,-5)))}
       }else{
-        const targetX=focused?focused.group.position.x*.24:pointer.x*.38;const targetY=focused?focused.group.position.y*.15:.56+pointer.y*.16;const z=17.6-entry*3.8-(focused?.65:0);
+        const targetX=focused?focused.group.position.x*.2:pointer.x*.3;const targetY=focused?focused.group.position.y*.1:.52+pointer.y*.12;const z=18.8-entry*3.4-(focused?.55:0);
         camera.position.x+=(targetX*.18-camera.position.x)*.028;camera.position.y+=(targetY-camera.position.y)*.028;camera.position.z+=(z-camera.position.z)*.043;look.x+=(targetX-look.x)*.035;look.y+=(targetY*.28-look.y)*.035;look.z+=(-.75-look.z)*.035;camera.fov+=((focused?43:47)-camera.fov)*.04;camera.updateProjectionMatrix();camera.lookAt(look);
       }
 

@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export type PortalArchitecture = {
   group: THREE.Group;
-  update: (time:number,pointerX:number) => void;
+  update: (time:number,pointerX:number,focusX?:number) => void;
 };
 
 const ASTRONAUT_URL='https://modelviewer.dev/shared-assets/models/Astronaut.glb';
@@ -39,6 +39,7 @@ function buildFallbackTraveler(){
 
 export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
   const group=new THREE.Group();
+  group.name='base-world';
   const dark=new THREE.MeshStandardMaterial({color:0x040606,metalness:.62,roughness:.34});
   const dark2=new THREE.MeshStandardMaterial({color:0x090d0e,metalness:.5,roughness:.4});
   const cyan=new THREE.MeshBasicMaterial({color:ZERO_CYAN,transparent:true,opacity:.34,blending:THREE.AdditiveBlending});
@@ -48,8 +49,8 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
   const platformRing=new THREE.Mesh(new THREE.TorusGeometry(3.55,.035,10,128),cyan);platformRing.rotation.x=Math.PI/2;platformRing.position.y=-2.84;group.add(platformRing);
   const innerRing=new THREE.Mesh(new THREE.TorusGeometry(2.35,.018,8,120),cyanSoft);innerRing.rotation.x=Math.PI/2;innerRing.position.y=-2.82;group.add(innerRing);
 
-  const travelerRoot=new THREE.Group();travelerRoot.position.z=.62;group.add(travelerRoot);
-  const fallback=buildFallbackTraveler();fallback.position.y=-.38;travelerRoot.add(fallback);
+  const travelerRoot=new THREE.Group();travelerRoot.name='astronaut';travelerRoot.position.set(0,-.08,1.55);travelerRoot.rotation.set(-.13,Math.PI,0);group.add(travelerRoot);
+  const fallback=buildFallbackTraveler();fallback.position.y=-1.42;fallback.scale.setScalar(.56);travelerRoot.add(fallback);
   let mixer:THREE.AnimationMixer|null=null;
   let lastTime=0;
 
@@ -67,12 +68,31 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
       if(Array.isArray(material))material.forEach(apply);else if(material)apply(material);
     });
 
-    const box=new THREE.Box3().setFromObject(model);const size=box.getSize(new THREE.Vector3());const targetHeight=4.75;const scale=targetHeight/Math.max(size.y,.001);model.scale.setScalar(scale);
+    const box=new THREE.Box3().setFromObject(model);const size=box.getSize(new THREE.Vector3());const targetHeight=2.72;const scale=targetHeight/Math.max(size.y,.001);model.scale.setScalar(scale);
     const scaledBox=new THREE.Box3().setFromObject(model);const scaledCenter=scaledBox.getCenter(new THREE.Vector3());const scaledSize=scaledBox.getSize(new THREE.Vector3());
     model.position.x-=scaledCenter.x;model.position.z-=scaledCenter.z;model.position.y+=-2.82-(scaledCenter.y-scaledSize.y*.5);model.rotation.y=Math.PI*.03;
     fallback.visible=false;travelerRoot.add(model);
     if(gltf.animations.length){mixer=new THREE.AnimationMixer(model);mixer.clipAction(gltf.animations[0]).play()}
   },undefined,()=>{fallback.visible=true});
+
+  // Permanent light volume: portals react to it, but do not own or replace it.
+  const lightField=new THREE.Group();lightField.name='central-light-field';lightField.position.set(0,1.45,-3.9);group.add(lightField);
+  const shaftMaterial=new THREE.MeshBasicMaterial({color:0xbffcff,transparent:true,opacity:.065,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
+  const shaftCoreMaterial=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.19,depthWrite:false,blending:THREE.AdditiveBlending});
+  const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.18,1.72,10.8,40,1,true),shaftMaterial);lightField.add(shaft);
+  const shaftCore=new THREE.Mesh(new THREE.CylinderGeometry(.022,.16,11.8,18,1,true),shaftCoreMaterial);lightField.add(shaftCore);
+  const crownMaterial=new THREE.MeshBasicMaterial({color:ZERO_CYAN,transparent:true,opacity:.045,depthWrite:false,blending:THREE.AdditiveBlending});
+  const crown=new THREE.Mesh(new THREE.SphereGeometry(1.85,36,20),crownMaterial);crown.position.y=3.9;crown.scale.y=1.8;lightField.add(crown);
+  const groundGlow=new THREE.Mesh(new THREE.CircleGeometry(3.4,72),new THREE.MeshBasicMaterial({color:ZERO_CYAN,transparent:true,opacity:.12,depthWrite:false,blending:THREE.AdditiveBlending}));groundGlow.rotation.x=-Math.PI/2;groundGlow.position.y=-4.37;lightField.add(groundGlow);
+
+  const dustPositions=new Float32Array(1800*3);
+  for(let i=0;i<1800;i++){const radius=Math.pow(Math.random(),1.7)*3.15;const angle=Math.random()*Math.PI*2;dustPositions[i*3]=Math.cos(angle)*radius;dustPositions[i*3+1]=(Math.random()-.5)*11;dustPositions[i*3+2]=Math.sin(angle)*radius*.72}
+  const dustGeometry=new THREE.BufferGeometry();dustGeometry.setAttribute('position',new THREE.BufferAttribute(dustPositions,3));
+  const dust=new THREE.Points(dustGeometry,new THREE.PointsMaterial({color:0xd9ffff,size:.028,transparent:true,opacity:.58,depthWrite:false,blending:THREE.AdditiveBlending}));lightField.add(dust);
+
+  const debris=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.11,0),new THREE.MeshStandardMaterial({color:0x1b2525,roughness:.82,metalness:.08,emissive:0x03282a,emissiveIntensity:.45}),52);debris.name='rising-debris';
+  const debrisSeeds:Array<[number,number,number,number,number]>=[];const dummy=new THREE.Object3D();
+  for(let i=0;i<52;i++){debrisSeeds.push([Math.random()*Math.PI*2,.65+Math.random()*2.9,Math.random()*10.5,Math.random()*1.7+.3,.35+Math.random()*1.45])}lightField.add(debris);
 
   const monoliths:THREE.Group[]=[];
   for(let i=0;i<12;i++){
@@ -115,14 +135,17 @@ export function addPortalArchitecture(scene:THREE.Scene):PortalArchitecture {
 
   return {
     group,
-    update(time,pointerX){
+    update(time,pointerX,focusX=0){
       const delta=lastTime?Math.min(.05,Math.max(0,time-lastTime)):0;lastTime=time;mixer?.update(delta);
       platformRing.rotation.z=time*.035;innerRing.rotation.z=-time*.024;
       arches.forEach((arch,i)=>{arch.rotation.y=i*.09+Math.sin(time*.16+i)*.025});
       monoliths.forEach((pylon,i)=>{pylon.position.y=Math.sin(time*.22+i)*.035-1.15});
       ceiling.rotation.y=Math.sin(time*.08)*.015+pointerX*.006;distant.rotation.y=Math.sin(time*.035)*.01;foreground.position.z=Math.sin(time*.08)*.12;
       suspended.forEach((panel,i)=>{panel.position.y+=Math.sin(time*.28+i)*.0008;panel.rotation.z=Math.sin(time*.18+i)*.025});
-      travelerRoot.rotation.y=Math.sin(time*.28)*.045+pointerX*.022;travelerRoot.position.y=Math.sin(time*.7)*.025;
+      shaft.scale.x=shaft.scale.z=1+Math.sin(time*.42)*.055;shaftCore.scale.x=shaftCore.scale.z=.9+Math.sin(time*.73)*.16;crownMaterial.opacity=.04+Math.sin(time*.36)*.012;
+      dust.rotation.y=time*.028;dust.position.y=((time*.16)%1)*.7-.35;groundGlow.rotation.z=time*.025;
+      debrisSeeds.forEach(([angle,radius,height,speed,size],i)=>{const y=((height+time*speed)%10.5)-5.25;const orbit=angle+time*(.035+.012*(i%3));dummy.position.set(Math.cos(orbit)*radius,y,Math.sin(orbit)*radius*.72);dummy.rotation.set(time*.13+i,time*.09+i*.7,time*.07);dummy.scale.setScalar(size);dummy.updateMatrix();debris.setMatrixAt(i,dummy.matrix)});debris.instanceMatrix.needsUpdate=true;
+      travelerRoot.rotation.y=Math.PI+Math.sin(time*.28)*.025+pointerX*.008+focusX*.006;travelerRoot.rotation.x=-.13+Math.sin(time*.32)*.008;travelerRoot.position.y=-.08+Math.sin(time*.7)*.018;
       if(fallback.visible){fallback.rotation.z=Math.sin(time*.45)*.012;fallback.rotation.x=Math.sin(time*.32)*.008}
     }
   };
