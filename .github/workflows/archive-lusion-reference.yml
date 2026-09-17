@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: archive-lusion-reference
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   archive:
@@ -40,7 +40,8 @@ jobs:
           LUSION_MAX_URLS: '6000'
           LUSION_MAX_TOTAL_BYTES: '786432000'
           LUSION_MAX_FILE_BYTES: '99614720'
-          LUSION_REQUEST_TIMEOUT: '30'
+          LUSION_REQUEST_TIMEOUT: '15'
+          LUSION_WORKERS: '24'
         run: python scripts/archive_lusion_reference.py
 
       - name: Record archive in repository
