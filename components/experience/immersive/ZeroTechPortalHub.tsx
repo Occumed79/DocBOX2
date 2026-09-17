@@ -9,6 +9,7 @@ import styles from './ZeroTechPortalHub.module.css';
 
 type Portal={id:string;href:string;number:string;title:string;note:string;tone:string};
 type NodeRecord={group:THREE.Group;ring:THREE.Mesh;outer:THREE.Mesh;inner:THREE.Mesh;shader:THREE.ShaderMaterial;base:THREE.Vector3;portal:Portal};
+type CentralLightRig={group:THREE.Group;update:(time:number,entry:number)=>void};
 
 const CYAN=0x0df6ff;
 const POS=[
@@ -38,6 +39,74 @@ void main(){
  float alpha=core*(.055+.12*spiral+.06*pulse)+edge*(.18+.34*uHover)+noise*.016*core;
  gl_FragColor=vec4(c,alpha*(.82+.65*uHover));
 }`;
+
+function addCentralLight(scene:THREE.Scene):CentralLightRig{
+  const group=new THREE.Group();
+  group.position.z=-4.8;
+
+  const makeBeam=(radiusTop:number,radiusBottom:number,height:number,opacity:number)=>{
+    const material=new THREE.MeshBasicMaterial({color:0xb9fdff,transparent:true,opacity,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
+    const beam=new THREE.Mesh(new THREE.CylinderGeometry(radiusTop,radiusBottom,height,48,1,true),material);
+    beam.position.y=5.8;
+    group.add(beam);
+    return beam;
+  };
+
+  const outer=makeBeam(.42,4.8,18,.035);
+  const middle=makeBeam(.16,2.35,17.5,.075);
+  const inner=makeBeam(.055,.72,17,.16);
+
+  const coreMaterial=new THREE.MeshBasicMaterial({color:0xeaffff,transparent:true,opacity:.92,depthWrite:false,blending:THREE.AdditiveBlending});
+  const core=new THREE.Mesh(new THREE.SphereGeometry(.58,32,22),coreMaterial);
+  core.position.y=8;
+  group.add(core);
+
+  const auraMaterial=new THREE.MeshBasicMaterial({color:CYAN,transparent:true,opacity:.12,depthWrite:false,blending:THREE.AdditiveBlending});
+  const aura=new THREE.Mesh(new THREE.SphereGeometry(2.5,32,22),auraMaterial);
+  aura.position.y=8;
+  group.add(aura);
+
+  const poolMaterial=new THREE.MeshBasicMaterial({color:CYAN,transparent:true,opacity:.11,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
+  const pool=new THREE.Mesh(new THREE.CircleGeometry(5.4,96),poolMaterial);
+  pool.rotation.x=-Math.PI/2;
+  pool.position.y=-3.035;
+  group.add(pool);
+
+  const poolRing=new THREE.Mesh(new THREE.RingGeometry(2.2,5.9,120),new THREE.MeshBasicMaterial({color:0xc9feff,transparent:true,opacity:.055,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));
+  poolRing.rotation.x=-Math.PI/2;
+  poolRing.position.y=-3.025;
+  group.add(poolRing);
+
+  const light=new THREE.PointLight(0xb8fdff,92,34,1.6);
+  light.position.set(0,7.7,0);
+  group.add(light);
+  const groundLight=new THREE.PointLight(CYAN,34,18,1.8);
+  groundLight.position.set(0,-1.4,.5);
+  group.add(groundLight);
+
+  scene.add(group);
+  return {
+    group,
+    update(time,entry){
+      const pulse=.96+Math.sin(time*.58)*.035;
+      core.scale.setScalar(pulse);
+      aura.scale.setScalar(.96+Math.sin(time*.24)*.06);
+      pool.scale.setScalar(.92+entry*.08+Math.sin(time*.19)*.012);
+      poolRing.rotation.z=time*.017;
+      outer.rotation.y=time*.006;
+      middle.rotation.y=-time*.01;
+      inner.rotation.y=time*.014;
+      const reveal=.28+entry*.72;
+      (outer.material as THREE.MeshBasicMaterial).opacity=.035*reveal;
+      (middle.material as THREE.MeshBasicMaterial).opacity=.075*reveal;
+      (inner.material as THREE.MeshBasicMaterial).opacity=.16*reveal;
+      coreMaterial.opacity=.62+.30*entry;
+      auraMaterial.opacity=.055+.065*entry;
+      light.intensity=56+36*entry+Math.sin(time*.58)*4;
+      groundLight.intensity=18+16*entry;
+    }
+  };
+}
 
 export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:readonly Portal[];entryProgress?:number}){
   const mount=useRef<HTMLDivElement>(null);
@@ -70,11 +139,14 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
     const floor=new THREE.Mesh(new THREE.PlaneGeometry(42,42),new THREE.MeshStandardMaterial({color:0x010303,roughness:.9,metalness:.06}));floor.rotation.x=-Math.PI/2;floor.position.y=-3.12;scene.add(floor);
     const grid=new THREE.GridHelper(42,42,CYAN,0x061a1c);grid.position.y=-3.1;scene.add(grid);
     const halo=new THREE.Mesh(new THREE.RingGeometry(1.2,4.4,110),new THREE.MeshBasicMaterial({color:CYAN,transparent:true,opacity:.07,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));halo.rotation.x=-Math.PI/2;halo.position.y=-3.06;scene.add(halo);
+
     const architecture=addPortalArchitecture(scene);
+    const centralLight=addCentralLight(scene);
 
     const starsGeo=new THREE.BufferGeometry();const starsArray=new Float32Array(3000);for(let i=0;i<starsArray.length;i+=3){starsArray[i]=(Math.random()-.5)*46;starsArray[i+1]=(Math.random()-.5)*26;starsArray[i+2]=5-Math.random()*54}starsGeo.setAttribute('position',new THREE.BufferAttribute(starsArray,3));
     const stars=new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xbdfcff,size:.025,transparent:true,opacity:.52,depthWrite:false}));scene.add(stars);
 
+    const portalLayer=new THREE.Group();portalLayer.name='portal-interaction-layer';scene.add(portalLayer);
     const nodes:NodeRecord[]=portals.map((portal,index)=>{
       const [x,y,z]=POS[index]??[0,0,-2];const base=new THREE.Vector3(x,y,z);const group=new THREE.Group();group.position.copy(base);
       const ringMat=new THREE.MeshStandardMaterial({color:CYAN,emissive:CYAN,emissiveIntensity:2.6,metalness:.8,roughness:.1});
@@ -82,7 +154,7 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
       const outer=new THREE.Mesh(new THREE.TorusGeometry(1.34,.016,7,96),new THREE.MeshBasicMaterial({color:CYAN,transparent:true,opacity:.38,blending:THREE.AdditiveBlending}));outer.rotation.z=.36;group.add(outer);
       const shader=new THREE.ShaderMaterial({vertexShader:VERT,fragmentShader:FRAG,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,uniforms:{uTime:{value:0},uHover:{value:0}}});
       const inner=new THREE.Mesh(new THREE.CircleGeometry(.94,72),shader);inner.position.z=.018;group.add(inner);
-      ring.userData.index=index;inner.userData.index=index;scene.add(group);return{group,ring,outer,inner,shader,base,portal};
+      ring.userData.index=index;inner.userData.index=index;portalLayer.add(group);return{group,ring,outer,inner,shader,base,portal};
     });
 
     const interactive=nodes.flatMap(n=>[n.ring,n.inner]);const pointer=new THREE.Vector2(9,9),ray=new THREE.Raycaster();
@@ -119,7 +191,8 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
         node.ring.rotation.z=Math.sin(t*.5+index)*.055;node.outer.rotation.z=.36+t*(index%2?.045:-.045);node.inner.rotation.z=t*(index%2?.036:-.032);
       });
 
-      stars.rotation.y=t*.0028;halo.rotation.z=t*.022;architecture.update(t,pointer.x);
+      stars.rotation.y=t*.0028;halo.rotation.z=t*.022;architecture.update(t,pointer.x);centralLight.update(t,entry);
+      portalLayer.position.z+=(0-portalLayer.position.z)*.05;
       const focused=focus>=0?nodes[focus]:undefined;const focusX=focused?.group.position.x??0;
       architecture.group.position.x+=((-focusX*.075)-architecture.group.position.x)*.035;architecture.group.position.z+=(((1-entry)*-3.6)-architecture.group.position.z)*.05;architecture.group.rotation.y+=((focused?-focusX*.016:0)-architecture.group.rotation.y)*.035;
       const s=.84+entry*.16;architecture.group.scale.lerp(new THREE.Vector3(s,s,s),.05);rim.position.x+=((-4-focusX*.07)-rim.position.x)*.03;front.position.x+=((2+focusX*.14)-front.position.x)*.03;
@@ -141,11 +214,14 @@ export default function ZeroTechPortalHub({portals,entryProgress=1}:{portals:rea
 
   const enter=(event:ReactMouseEvent<HTMLAnchorElement>,index:number)=>{event.preventDefault();travelRef.current(index)};
   const fallbackPositions=[['50%','25%'],['70%','42%'],['64%','66%'],['36%','66%'],['30%','42%']] as const;
-  return <nav className={styles.root} data-travelling={travelling?true:undefined} data-webgl={webglAvailable?'available':'unavailable'} aria-label="Provider world portals">
+  return <section className={styles.root} data-travelling={travelling?true:undefined} data-webgl={webglAvailable?'available':'unavailable'}>
     <div className={styles.wordmark} aria-hidden="true"><span>PROVIDER</span><span>WORLD</span></div>
     <div className={styles.kicker}><span>OCCU-MED / PROVIDER WORLD</span><b>CHOOSE A PATH</b></div>
-    <div ref={mount} className={styles.canvas}/>
-    <div className={styles.labels}>{portals.map((portal,index)=><a key={portal.id} href={portal.href} data-active={active===index} data-muted={active>=0&&active!==index} onClick={e=>enter(e,index)} onFocus={()=>{focusRef.current=index;setActive(index)}} onBlur={()=>{focusRef.current=-1;setActive(-1)}} style={webglAvailable?{left:labels[index]?.x,top:labels[index]?.y,opacity:labels[index]?.visible?1:0}:{left:fallbackPositions[index]?.[0]??'50%',top:fallbackPositions[index]?.[1]??'50%',opacity:1}}><small>{portal.number}</small><strong>{portal.title}</strong></a>)}</div>
+    <div ref={mount} className={styles.canvas} data-astronaut-base/>
+    <div className={styles.centralLightMarker} data-central-light aria-hidden="true"/>
+    <nav className={styles.portalOverlay} data-portal-overlay aria-label="Provider world portals">
+      <div className={styles.labels}>{portals.map((portal,index)=><a key={portal.id} href={portal.href} data-active={active===index} data-muted={active>=0&&active!==index} onClick={e=>enter(e,index)} onFocus={()=>{focusRef.current=index;setActive(index)}} onBlur={()=>{focusRef.current=-1;setActive(-1)}} style={webglAvailable?{left:labels[index]?.x,top:labels[index]?.y,opacity:labels[index]?.visible?1:0}:{left:fallbackPositions[index]?.[0]??'50%',top:fallbackPositions[index]?.[1]??'50%',opacity:1}}><small>{portal.number}</small><strong>{portal.title}</strong></a>)}</div>
+    </nav>
     <p className={styles.hint}>{webglAvailable?'MOVE TO FOCUS · SELECT TO ENTER':'SELECT A PATH TO ENTER'}</p>
-  </nav>;
+  </section>;
 }
