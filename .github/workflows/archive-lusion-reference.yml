@@ -1,0 +1,60 @@
+name: Archive Lusion reference assets
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - scripts/archive_lusion_reference.py
+      - .github/workflows/archive-lusion-reference.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: archive-lusion-reference
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install crawler dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Archive Lusion site and runtime assets
+        env:
+          LUSION_MAX_URLS: '6000'
+          LUSION_MAX_TOTAL_BYTES: '786432000'
+          LUSION_MAX_FILE_BYTES: '99614720'
+          LUSION_REQUEST_TIMEOUT: '30'
+        run: python scripts/archive_lusion_reference.py
+
+      - name: Record archive in repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f docs/research/lusion-reference/raw-site
+
+          if git diff --cached --quiet; then
+            echo 'Archive produced no repository changes.'
+            exit 0
+          fi
+
+          git commit -m 'Archive raw Lusion reference site assets'
+          git push origin HEAD:main
