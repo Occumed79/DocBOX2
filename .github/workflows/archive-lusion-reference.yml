@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - scripts/archive_lusion_browser.mjs
+      - scripts/archive_lusion_browser_fast.mjs
       - .github/workflows/archive-lusion-reference.yml
 
 permissions:
@@ -19,7 +19,7 @@ concurrency:
 jobs:
   archive:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
 
     steps:
       - name: Check out repository
@@ -38,7 +38,7 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Capture browser-verified Lusion resources
-        run: node scripts/archive_lusion_browser.mjs
+        run: node scripts/archive_lusion_browser_fast.mjs
 
       - name: Validate archive is real
         shell: bash
@@ -54,14 +54,12 @@ jobs:
           const fs = require('fs');
           const m = JSON.parse(fs.readFileSync('docs/research/lusion-reference/raw-site/archive-manifest.json','utf8'));
           if (!m.resourceCount || m.resourceCount < 20) throw new Error(`Too few resources: ${m.resourceCount}`);
-          const fallbackSizes = new Map();
-          for (const r of m.resources) fallbackSizes.set(r.sha256, (fallbackSizes.get(r.sha256)||0)+1);
-          const maxDup = Math.max(...fallbackSizes.values());
+          const duplicates = new Map();
+          for (const r of m.resources) duplicates.set(r.sha256, (duplicates.get(r.sha256)||0)+1);
+          const maxDup = Math.max(...duplicates.values());
           console.log('Resource count:', m.resourceCount, 'Max duplicate hash count:', maxDup);
-          if (maxDup > Math.max(25, Math.floor(m.resourceCount * 0.20))) {
-            throw new Error(`Archive appears contaminated by repeated fallback responses: ${maxDup}/${m.resourceCount}`);
-          }
-          console.log('Known asset validation:', m.knownAssetValidation);
+          if (maxDup > Math.max(20, Math.floor(m.resourceCount * 0.20))) throw new Error(`Repeated fallback responses detected: ${maxDup}/${m.resourceCount}`);
+          console.log(JSON.stringify(m.knownAssetValidation, null, 2));
           NODE
 
       - name: Record verified archive in repository
@@ -71,11 +69,9 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -f docs/research/lusion-reference/raw-site
-
           if git diff --cached --quiet; then
             echo 'Verified archive produced no repository changes.'
             exit 0
           fi
-
-          git commit -m 'Replace Lusion archive with browser-verified capture'
+          git commit -m 'Replace Lusion archive with verified browser capture'
           git push origin HEAD:main
